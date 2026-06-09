@@ -8,3 +8,10 @@ path = [".github/**", ".gitignore", "LICENSE.md", ".pre-commit-config.yaml", "**
 precedence = "aggregate"
 SPDX-FileCopyrightText = "(c) NOI Techpark <digital@noi.bz.it>"
 SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "src/third-party/slim-select.md"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2017 Brian Voelker"
+SPDX-License-Identifier = "MIT"
+SPDX-FileComment = "slim-select third-party dependency (https://github.com/brianvoe/slim-select)"

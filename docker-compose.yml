@@ -9,7 +9,7 @@ services:
     volumes:
       - ./:/code
     working_dir: /code
-    command: sh -c "test -d node_modules || npm install; npm run start"
+    command: sh -c "test -d node_modules || npm install; npm run build"
     ports:
       - "${APP_PORT}:8998"
     tty: true
@@ -64,8 +64,11 @@ services:
     container_name: wcstore-cli
     image: ghcr.io/noi-techpark/it.bz.opendatahub.webcomponents/it.bz.opendatahub.webcomponents-local-wcs-cli:latest
     env_file: .env
-    command: ./wait-for -t 0 api:${API_SERVER_PORT} -- python webcompstore-cli.py --push ${WC_VERSION}
+    command: python webcompstore-cli.py --push ${WC_VERSION}
     depends_on:
-      - api
+      api:
+        condition: service_started
+      app:
+        condition: service_completed_successfully
     volumes:
       - ./:/webcomponent

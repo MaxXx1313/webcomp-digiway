@@ -1,0 +1,104 @@
+{
+  "title": "Air quality",
+  "shortName": "noi-digiway",
+  "description": "Consolidated web-component to show Open Data Hub data imported within the Digiway project",
+  "descriptionAbstract": "Consolidated web-component to show Open Data Hub data imported within the Digiway project",
+  "license": "AGPL-3.0-or-later",
+  "repositoryUrl": "https://github.com/noi-techpark/webcomp-digiway.git",
+  "copyrightHolders": [
+    {
+      "name": "NOI",
+      "email": "info@noi.bz.it",
+      "organization": "NOI S.p.A",
+      "organizationUrl": "https://noi.bz.it"
+    }
+  ],
+  "authors": [
+    {
+      "name": "NOI",
+      "email": "digital@noi.bz.it",
+      "organization": "NOI S.p.A",
+      "organizationUrl": "https://noi.bz.it"
+    },
+    {
+      "name": "Solhea",
+      "email": "info@solhea.com",
+      "organization": "Solhea S.R.L.",
+      "organizationUrl": "https://solhea.com"
+    }
+  ],
+  "image": "wcs-logo.png",
+  "searchTags": [],
+  "dist": {
+    "basePath": "dist/bundle/noi-digiway",
+    "files": [
+      "noi-digiway.js",
+      "logo.svg",
+      "i18n_en.json",
+      "i18n_it.json",
+      "i18n_de.json"
+    ],
+    "scripts": [
+      {
+        "file": "noi-digiway.js",
+        "parameter": "type='module'"
+      }
+    ]
+  },
+  "configuration": {
+    "tagName": "noi-digiway",
+    "options": [
+      {
+        "key": "layout",
+        "type": "select",
+        "label": "Layout appearance",
+        "required": false,
+        "options": {
+          "values": [
+            "desktop",
+            "tablet",
+            "mobile",
+            "auto"
+          ],
+          "default": "auto"
+        }
+      },
+      {
+        "key": "language",
+        "type": "select",
+        "label": "Two letter key for the language to be used, if omitted the widget will use the browser language. Fallback is `en`",
+        "required": false,
+        "options": {
+          "values": [
+            "de",
+            "en",
+            "it"
+          ],
+          "default": "en"
+        }
+      },
+      {
+        "key": "centermap",
+        "type": "text",
+        "label": "Map center (latitude, longitude, zoomlevel)",
+        "required": false,
+        "options": {
+          "default": "46.5,11.35,10"
+        }
+      },
+      {
+        "key": "base-map",
+        "type": "select",
+        "label": "Initial map base",
+        "required": false,
+        "options": {
+          "values": [
+            "osm",
+            "tirol"
+          ],
+          "default": "tirol"
+        }
+      }
+    ]
+  }
+}

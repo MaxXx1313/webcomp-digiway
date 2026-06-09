@@ -1,0 +1,80 @@
+/*
+ * SPDX-FileCopyrightText: 2025 NOI Techpark <digital@noi.bz.it>
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
+:host {
+  display: block;
+  position: relative;
+
+  --select-background-color: var(--color-background);
+  --select-background-hover-color: var(--color-background-hover);
+  --select-outline-color: #5E9ED6;
+
+  --select-font-color: var(--color-text);
+  --select-font-active-color: var(--color-primary);
+  --select-border-color: var(--color-border);
+}
+
+.ss-main:focus-visible {
+  outline: 1px solid var(--select-outline-color);
+}
+
+/* select - main field */
+.ss-main {
+  padding: 8px 15px;
+  border: 2px solid var(--select-border-color);
+  border-radius: 4px;
+  align-items: center;
+  min-height: 44px;
+  --ss-font-color: var(--select-font-color);
+  --ss-bg-color: var(--select-background-color);
+}
+
+.ss-main.ss-dir-below {
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.ss-main:hover {
+  background-color: var(--select-background-hover-color);
+}
+
+/* select - dropdown */
+.ss-content {
+  padding: 0;
+  border: 2px solid var(--select-border-color);
+  border-radius: 4px;
+  background: var(--select-background-color);
+
+  /*top: 0 !important;*/
+  /*left: 0 !important;*/
+
+  --ss-border-radius: 4px;
+  --ss-primary-color: var(--select-background-hover-color); /* active color */
+  --ss-spacing-m: 8px;
+  --ss-spacing-l: 15px;
+
+  --ss-font-color: var(--select-font-color);
+  --ss-bg-color: var(--select-font-active-color);
+}
+
+.ss-content .ss-list .ss-option:hover:not(.ss-disabled) {
+  border-left: 0;
+}
+
+.ss-main .ss-values .ss-single,
+.ss-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5ch;
+}
+
+.select-ref {
+  padding-top: 4px;
+  /*position: relative;*/
+  position: absolute;
+  left: 0;
+  right: 0;
+}

@@ -5,11 +5,12 @@ on:
   pull_request:
 
 env:
-  NODE_VERSION: 14.x
+  NODE_VERSION: 22.x
+
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v2
       - name: REUSE Compliance Check
@@ -20,10 +21,10 @@ jobs:
           node-version: ${{env.NODE_VERSION}}
       - uses: noi-techpark/github-actions/webcomp-test@v2
         with:
-          origin-test-directory: packages
+          origin-test-directory: dist/bundle
 
   deploy-test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: github.ref == 'refs/heads/main'
     needs: test
     concurrency: deploy-test
@@ -46,7 +47,7 @@ jobs:
           version-tag: ${{github.sha}}
 
   deploy-prod:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: startsWith(github.ref, 'refs/tags/v')
     needs: test
     concurrency: deploy-prod
@@ -67,4 +68,4 @@ jobs:
         with:
           keycloak-secret: ${{secrets.WCSTORE_CLI_KEYCLOAK_SECRET_PROD}}
           version-tag: ${{github.ref_name}}
-          production: 'true'
+          production: "true"

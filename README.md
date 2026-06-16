@@ -10,37 +10,31 @@ SPDX-License-Identifier: CC0-1.0
 [![REUSE status](https://api.reuse.software/badge/github.com/noi-techpark/webcomp-digiway)](https://api.reuse.software/info/github.com/noi-techpark/webcomp-digiway)
 [![CI/CD](https://github.com/noi-techpark/webcomp-digiway/actions/workflows/main.yml/badge.svg)](https://github.com/noi-techpark/webcomp-digiway/actions/workflows/main.yml)
 
-This project is a rewrite taken from the repository webcomp-generic-map (thanks
-to pmoser). It is a webcomponent to display data imported during the Digiway Project from the [Open Data
-Hub](https://opendatahub.com).
-
-The Open Data Hub Team wants to generate reusable and independent visualization
-components to display data from the Open Data Hub easily. Using these
-webcomponents, a developer can easily integrate the functionality of the single
-components into any website.
-
-Map that displays Data from Opendatahub ODHActivityPoi Endpoint
+This project is a rewrite taken from the repository webcomp-generic-map. It is a webcomponent to display data imported
+during the Digiway Project from the [Open Data Hub](https://opendatahub.com).
 
 Do you want to see it in action? Go to our [web component
-store](https://webcomponents.opendatahub.com/webcomponent/8282479b-dc13-5012-939f-7a0196348dca)!
+store](https://webcomponents.opendatahub.com/?term=digiway)!
 
-- [Generic Map to show Open Data Hub Digiway data](#generic-map-to-show-open-data-hub-digiway-data)
+- [Generic Map to show Open Data Hub Digiway data](#generic-map-to-show-open-data-hub-data-imported-withhin-the-digiway-project)
   - [Usage](#usage)
     - [Attributes](#attributes)
-      - [types](#types)
       - [language](#language)
-      - [centermap](#centermap)
+      - [layout](#layout)
+    - [CSS varialbles](#css-variables)
   - [Getting started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Source code](#source-code)
     - [Dependencies](#dependencies)
     - [Build](#build)
+  - [Tests and linting](#tests-and-linting)
   - [Deployment](#deployment)
-  - [Docker environment](#docker-environment)
+  - [Run with docker](#run-with-docker)
     - [Installation](#installation)
-    - [Dependenices](#dependenices)
-    - [Start and stop the containers](#start-and-stop-the-containers)
-    - [Running commands inside the container](#running-commands-inside-the-container)
+    - [Start the docker containers](#start-the-docker-containers)
+    - [Publish a new version of your webcomponent](#publish-a-new-version-of-your-webcomponent)
+    - [Stop the docker containers](#stop-the-docker-containers)
+    - [Delete your webcomponents from the store](#delete-your-webcomponents-from-the-store)
   - [Information](#information)
     - [Support](#support)
     - [Contributing](#contributing)
@@ -50,29 +44,119 @@ store](https://webcomponents.opendatahub.com/webcomponent/8282479b-dc13-5012-939
 
 ## Usage
 
-Include the Javascript file `dist/map_widget.min.js` in your HTML and define the web component like this:
+Include the web-component JS wile located in `/dist/bundle/noi-digiway/` folder
 
 ```html
-<map-widget language="de" centermap=""></map-widget>
+<script type="module" src="./noi-digiway.js"></script>
 ```
+
+Define the web component like this:
+
+```html
+  <noi-digiway></noi-digiway>
+```
+
+You may adjust the size of the component with regular CSS properties.
 
 ### Attributes
 
 #### language
 
-Type: string
-Options: "de,it,en"
+Language.
 
-#### source
+Type
+: string
 
-Type: string
-Options: "civis.geoserver.hikingtrails,civis.geoserver.mountainbikeroutes,civis.geoserver.intermunicipalcyclingroutes,civis.geoserver.cyclewaystyrol"
+Default
+: browser language or 'en' if the language is not supported
+
+Options
+: "de", "en", "it"
+
+#### layout
+
+Layout appearance.
+We support three layouts: desktop, tablet and mobile.
+
+Type
+: string
+
+Default
+: 'auto', which means the layout will dynamically adjust to screen size
+
+Options
+: "desktop", "tablet", "mobile", "auto"
 
 #### centermap
 
-Type: string
-Options: "latitude,longitude,zoomlevel"
+Map center.
 Pass latitude, longitude and zoomlevel separated by "," if map should be centered an a specific gps point
+
+Type
+: string
+
+Default
+: '46.5,11.35,10'
+
+#### base-map
+
+Base map used in the component
+We support two maps: Open Street Map ('osm') and Tirol ('tirol').
+
+Type
+: string
+
+Default
+: 'tirol'
+
+Options
+: "osm", "tirol"
+
+### CSS variables
+
+This is regular CSS styles for the component, but specific adjustment is supported.
+
+| Name                       | Description                                  |
+| -------------------------- | -------------------------------------------- |
+| `--color-background`       | Background color                             |
+| `--color-background-hover` | Background color on hover                    |
+| `--color-border`           | Border color                                 |
+| `--color-primary`          | Primary color                                |
+| `--color-secondary`        | Secondary color                              |
+| `--color-text`             | Text color                                   |
+| `--map-filter`             | 'filter' property for the map                |
+| `--sidebar-width`          | Sidebar with (for desktop and tablet layout) |
+
+Shadow Parts:
+
+| Part                 | Description      |
+| -------------------- | ---------------- |
+| `"legend"`           | Legend           |
+| `"legend-container"` | Legend container |
+| `"map"`              | Map              |
+| `"popup"`            | Map popup dialog |
+| `"sidebar"`          | Sidebar          |
+
+
+Here is an example of dark mode styles:
+
+```css
+
+noi-digiway.dark {
+  --color-primary: #0084e6;
+  --color-secondary: #da1d6d;
+
+  --color-text: #EEE;
+  --color-background: #333;
+  --color-background-hover: #454545;
+
+  --map-filter: brightness(0.7) contrast(1.5);
+}
+
+noi-digiway.dark::part(popup) {
+  color: #FFFFFF;
+}
+```
 
 ## Getting started
 
@@ -83,23 +167,23 @@ on your local machine for development and testing purposes.
 
 To build the project, the following prerequisites must be met:
 
-- Node 12 / NPM 8.1.2
-- Node 14 / NPM 6.14.18
+- Node 22 / NPM 10
 
-For a ready to use Docker environment with all prerequisites already installed and prepared, you can check out the [Docker environment](#docker-environment) section.
+For a ready to use Docker environment with all prerequisites already installed and prepared, you can check out
+the [Docker environment](#docker-environment) section.
 
 ### Source code
 
 Get a copy of the repository:
 
 ```bash
-git clone https://github.com/noi-techpark/webcomp-digiway
+git clone https://github.com/noi-techpark/webcomp-digiway.git
 ```
 
 Change directory:
 
 ```bash
-cd  webcomp-digiway/
+cd webcomp-digiway/
 ```
 
 ### Dependencies
@@ -110,19 +194,24 @@ Download all dependencies:
 npm install
 ```
 
-### Environment
-
-Copy .env.example to .env and set all needed Environment Variables.
-
 ### Build
 
 Build and start the project:
 
 ```bash
-npm run watch
+npm run start
 ```
 
-The application will be served and can be accessed at [http://localhost:8080](http://localhost:8080).
+The application will be served and can be accessed at [http://localhost:8998](http://localhost:8998).
+
+## Tests and linting
+
+The tests and the linting can be executed with the following commands:
+
+```bash
+npm run test
+npm run lint
+```
 
 ## Deployment
 
@@ -132,51 +221,51 @@ To create the distributable files, execute the following command:
 npm run build
 ```
 
-## Docker environment
+## Run with docker
 
-For the project a Docker environment is already prepared and ready to use with all necessary prerequisites.
+If you want to test the webcomponent on a local instance of
+the [webcomponent store](https://webcomponents.opendatahub.com/) to make sure that it will run correctly also on the real store.
+You can also access the webcomponent running in a simple separated docker container outside of the store.
 
-These Docker containers are the same as used by the continuous integration servers.
+If you have already developed your webcomponent and now want to test it on a local instance of the store, just copy
+`.env.example`, `docker-compose.yml`, `wcs-manifest.json` and `infrastructure/docker` into your root folder. Adjust your
+`package.json` and `wcs-manifest.json` files as described on the top of this readme. Then follow the instructions below.
+
+For accessing the webcomponent in a separated docker in the browser you will need a server (e.g. webpack dev-server)
+that is hosting a page which includes the webcomponent tag, as well as the script defining it. This page needs to be
+hosted on port 8998 as specified in your docker-compose file.
 
 ### Installation
 
 Install [Docker](https://docs.docker.com/install/) (with Docker Compose) locally on your machine.
 
-### Dependenices
+### Start the docker containers
 
-First, install all dependencies:
+- Create a .env file: <br>
+  `cp .env.example .env`
+- [Optional] Adjust port numbers in .env if they have conflicts with services already running on your machine
+- Start the store with: <br>
+  `docker-compose up -d`
+- Wait until the containers are running. You can check the current state with: <br>
+  `docker-compose logs --tail 500 -f`
+- Access the store in your browser on: <br>
+  `localhost:8999`
+- Access webcomponent running in separated docker in your browser on: <br>
+  `localhost:8998`
 
-```bash
-docker-compose run --rm app /bin/bash -c "npm install"
-```
+### Publish a new version of your webcomponent
 
-### Start and stop the containers
+- Increase version number WC_VERSION in your .env file
+- Then run: `docker-compose up wcstore-cli`
 
-Before start working you have to start the Docker containers:
+### Stop the docker containers
 
-```
-docker-compose up --build --detach
-```
+- `docker-compose stop`
 
-After finished working you can stop the Docker containers:
+### Delete your webcomponents from the store
 
-```
-docker-compose stop
-```
-
-### Running commands inside the container
-
-When the containers are running, you can execute any command inside the environment. Just replace the dots `...` in the following example with the command you wish to execute:
-
-```bash
-docker-compose run --rm app /bin/bash -c "..."
-```
-
-Some examples are:
-
-```bash
-docker-compose run --rm app /bin/bash -c "npm run build"
-```
+- `[sudo] rm -f workspace`
+- `docker-compose rm -f -v postgres`
 
 ## Information
 
@@ -186,25 +275,39 @@ For support, please contact [help@opendatahub.com](mailto:help@opendatahub.com).
 
 ### Contributing
 
-If you'd like to contribute, please follow the Contributor Guidelines that can be found at [https://github.com/noi-techpark/odh-docs/wiki/Contributor-Guidelines%3A-Getting-started](https://github.com/noi-techpark/odh-docs/wiki/Contributor-Guidelines%3A-Getting-started).
+If you'd like to contribute, please follow the following instructions:
+
+- Fork the repository.
+- Checkout a topic branch from the `main` branch.
+- Make sure the tests are passing.
+- Create a pull request against the `main` branch.
+
+A more detailed description have a look at our [Getting Started
+Guide](https://github.com/noi-techpark/odh-docs/wiki/Contributor-Guidelines:-Getting-started).
 
 ### Documentation
 
-More documentation can be found at [https://opendatahub.readthedocs.io/en/latest/index.html](https://opendatahub.readthedocs.io/en/latest/index.html).
+More documentation can be found at [https://docs.opendatahub.com](https://docs.opendatahub.com).
 
 ### Boilerplate
 
-The project uses this boilerplate: [https://github.com/noi-techpark/webcomp-boilerplate](https://github.com/noi-techpark/webcomp-boilerplate).
+The project uses this
+boilerplate: [https://github.com/noi-techpark/webcomp-boilerplate](https://github.com/noi-techpark/webcomp-boilerplate).
 
 ### License
 
-The code in this project is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 license. See the [LICENSE.md](LICENSE.md) file for more information.
+The code in this project is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 license. See
+the [LICENSE.md](LICENSE.md) file for more information.
 
 ### REUSE
 
-This project is [REUSE](https://reuse.software) compliant, more information about the usage of REUSE in NOI Techpark repositories can be found [here](https://github.com/noi-techpark/odh-docs/wiki/Guidelines-for-developers-and-licenses#guidelines-for-contributors-and-new-developers).
+This project is [REUSE](https://reuse.software) compliant, more information about the usage of REUSE in NOI Techpark
+repositories can be
+found [here](https://github.com/noi-techpark/odh-docs/wiki/Guidelines-for-developers-and-licenses#guidelines-for-contributors-and-new-developers).
 
-Since the CI for this project checks for REUSE compliance you might find it useful to use a pre-commit hook checking for REUSE compliance locally. The [pre-commit-config](.pre-commit-config.yaml) file in the repository root is already configured to check for REUSE compliance with help of the [pre-commit](https://pre-commit.com) tool.
+Since the CI for this project checks for REUSE compliance you might find it useful to use a pre-commit hook checking for
+REUSE compliance locally. The [pre-commit-config](.pre-commit-config.yaml) file in the repository root is already
+configured to check for REUSE compliance with help of the [pre-commit](https://pre-commit.com) tool.
 
 Install the tool by running:
 
@@ -217,3 +320,4 @@ Then install the pre-commit hook via the config file by running:
 ```bash
 pre-commit install
 ```
+

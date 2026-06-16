@@ -1,0 +1,16 @@
+{
+  "sidebar.base-map": "Mappa di base",
+  "sidebar.data-layers": "Livelli dati",
+  "base-map.tirol": "Tirol",
+  "base-map.osm": "Open Street Map",
+  "map.route-closures": "Chiusure stradali",
+  "map.risk-exposure": "Esposizione al rischio",
+  "route-closures.start-time": "Orario di inizio",
+  "route-closures.end-time": "Orario di fine",
+  "risk-exposure.low": "ridotta",
+  "risk-exposure.medium": "moderata",
+  "risk-exposure.high": "elevata",
+  "risk-exposure.veryhigh": "molto elevata",
+  "risk-exposure.extreme": "zona di precipizio",
+  "": ""
+}

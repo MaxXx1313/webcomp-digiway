@@ -1,0 +1,48 @@
+/*
+ * SPDX-FileCopyrightText: 2025 NOI Techpark <digital@noi.bz.it>
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
+:host {
+  display: grid;
+  align-items: center;
+  grid-template-columns: 1fr 24px;
+
+  padding: 8px 15px;
+  border: 2px solid var(--checkbox-border-color);
+  border-radius: 4px;
+
+  color: var(--checkbox-font-color);
+  cursor: pointer;
+  user-select: none;
+
+  background-color: var(--checkbox-background-color);
+
+
+  --checkbox-background-color: var(--color-background);
+  --checkbox-background-hover-color: var(--color-background-hover);
+  --checkbox-outline-color: #5E9ED6;
+
+  --checkbox-font-color: var(--color-text);
+  --checkbox-font-active-color: var(--color-text);
+  --checkbox-border-color: var(--color-border);
+}
+
+
+:host(:hover) {
+  background-color: var(--checkbox-background-hover-color);
+}
+
+:host(:focus-visible) {
+  outline: 1px solid var(--checkbox-outline-color);
+}
+:host([checked]) {
+  color: var(--checkbox-font-active-color);
+}
+
+.checkbox-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

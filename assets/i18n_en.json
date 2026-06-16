@@ -1,0 +1,16 @@
+{
+  "sidebar.base-map": "Base map",
+  "sidebar.data-layers": "Data Layers",
+  "base-map.tirol": "Tirol",
+  "base-map.osm": "Open Street Map",
+  "map.route-closures": "Route Closures",
+  "map.risk-exposure": "Risk Exposure",
+  "route-closures.start-time": "Start Time",
+  "route-closures.end-time": "End Time",
+  "risk-exposure.low": "minor",
+  "risk-exposure.medium": "moderate",
+  "risk-exposure.high": "high",
+  "risk-exposure.veryhigh": "very high",
+  "risk-exposure.extreme": "immediate drop-off zone",
+  "": ""
+}

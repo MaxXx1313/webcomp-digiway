@@ -1,0 +1,16 @@
+{
+  "sidebar.base-map": "Basiskarte",
+  "sidebar.data-layers": "Datenebenen",
+  "base-map.tirol": "Tirol",
+  "base-map.osm": "Open Street Map",
+  "map.route-closures": "Streckensperrungen",
+  "map.risk-exposure": "Risikoexposition",
+  "route-closures.start-time": "Startzeit",
+  "route-closures.end-time": "Endzeit",
+  "risk-exposure.low": "gering",
+  "risk-exposure.medium": "mäßig",
+  "risk-exposure.high": "hoch",
+  "risk-exposure.veryhigh": "sehr hoch",
+  "risk-exposure.extreme": "unmittelbarer absturzbereich",
+  "": ""
+}

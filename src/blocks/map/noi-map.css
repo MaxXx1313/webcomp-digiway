@@ -1,0 +1,31 @@
+/*
+ * SPDX-FileCopyrightText: 2025 NOI Techpark <digital@noi.bz.it>
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
+/* ':host' selector is not effective */
+noi-map {
+  display: block;
+  contain: content;
+  box-sizing: border-box;
+}
+
+.maplibregl-canvas-container {
+  filter: var(--map-filter, none);
+}
+
+/* COMMON for all popups */
+.maplibregl-popup .maplibregl-popup-content {
+  padding: 0;
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
+.maplibregl-popup .maplibregl-popup-close-button {
+  height: 32px;
+  width: 32px;
+  font-size: 32px;
+  padding: 0;
+  color: var(--color-text);
+}

@@ -1,0 +1,347 @@
+/*
+ * SPDX-FileCopyrightText: 2025 NOI Techpark <digital@noi.bz.it>
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
+:host {
+
+  /**
+   * @prop --color-primary: Primary color
+   */
+  --color-primary: rgba(0, 104, 180, 1);
+
+  /**
+   * @prop --color-secondary: Secondary color
+   */
+  --color-secondary: rgba(143, 20, 72, 1);
+
+  /**
+   * @prop --color-border: Border color
+   */
+  --color-border: rgba(101, 120, 128, 1);
+
+  /**
+   * @prop --color-text: Text color
+   */
+  --color-text: #333333;
+
+  /**
+   * @prop --color-background: Background color
+   */
+  --color-background: #FFFFFF;
+
+  /**
+   * @prop --color-background-hover: Background color on hover
+   */
+  --color-background-hover: #f4f4f4;
+
+  /**
+   * @prop --sidebar-width: Sidebar with (for desktop and tablet layout)
+   */
+  --sidebar-width: 300px;
+
+  /**
+   * @prop --map-filter: 'filter' property for the map
+   */
+  --map-filter: none;
+}
+
+:host {
+  height: 100%;
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  font-family: inherit;
+  position: relative;
+  overflow: hidden;
+
+  background: var(--color-background);
+}
+
+noi-map {
+  height: 100%;
+  /*width: 100%;*/
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+
+  /* TODO: use better approach with width */
+  width: calc(100% - var(--sidebar-width, 300px));
+  margin-left: var(--sidebar-width, 300px);
+}
+
+:host(.layout--tablet) noi-map,
+:host(.layout--mobile) noi-map {
+  width: 100%;
+  margin-left: 0px;
+}
+
+/* sidebar */
+.sidebar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--sidebar-width, 300px);
+  z-index: 1;
+  background-color: var(--color-background);
+  display: flex;
+  flex-direction: column;
+
+  transition: transform ease-out 180ms;
+}
+
+:host(.layout--mobile) .sidebar {
+  width: 100%;
+}
+
+:host(.layout--mobile) .sidebar,
+:host(.layout--tablet) .sidebar {
+  transform: translateX(-100%);
+}
+
+:host(.layout--mobile) .sidebar.open,
+:host(.layout--tablet) .sidebar.open {
+  transform: translateX(0%);
+}
+
+.sidebar-collapsed {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+}
+
+:host(.layout--desktop) .sidebar-collapsed {
+  display: none;
+}
+
+.sidebar-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(51, 51, 51, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity ease-out 180ms;
+}
+
+:host(.layout--mobile) .sidebar-backdrop.open,
+:host(.layout--tablet) .sidebar-backdrop.open {
+  opacity: 1;
+  pointer-events: inherit;
+}
+
+
+/* menu */
+.logo {
+  display: block;
+  margin: 16px auto;
+}
+
+.menu-button {
+  padding: 4px;
+  margin: 0;
+  /*border: none;*/
+  background: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  overflow: hidden;
+  user-select: none;
+  font-size: inherit;
+
+  color: var(--color-primary, inherit);
+  background: var(--color-background);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 2px solid var(--color-border);
+  border-radius: 4px;
+}
+
+.menu-button:hover {
+  background-color: var(--color-background-hover);
+}
+
+
+.menu-button-wrapper {
+  padding: 10px;
+}
+
+
+.menu-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5ch;
+  color: var(--color-secondary);
+
+  font-size: 0.8em;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.p-top {
+  margin-top: 18px;
+}
+
+.p-bottom {
+  margin-bottom: 18px;
+}
+
+.p-bottom-small {
+  margin-bottom: 8px;
+}
+
+.menu-content {
+  padding: 0 12px;
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.checkbox-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5ch;
+}
+
+.checkbox-content__icon {
+  min-height: 1.5em;
+  min-width: 1.5em;
+  line-height: 0;
+}
+
+/* weather widget */
+.weather {
+  padding: 16px 0;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  color: var(--color-text);
+}
+
+.weather__icon {
+  flex: 0 0 24px;
+}
+
+.weather__temperature {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.weather__location {
+  color: var(--color-secondary);
+  font-size: 13px;
+}
+
+.weather__humidity {
+  font-size: 13px;
+}
+
+
+/* legend */
+.legend-container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  pointer-events: none;
+
+  overflow-x: auto;
+}
+
+.legend {
+  padding: 6px 8px;
+  border-radius: 4px;
+
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--color-text);
+  background: var(--color-background);
+  pointer-events: initial;
+}
+
+:host(.layout--desktop) .legend-container {
+  padding-left: var(--sidebar-width, 300px); /* left panel width */
+}
+
+.legend__icon {
+  display: flex;
+}
+
+.legend__item {
+  padding: 2px;
+  text-align: center;
+  /*border: 1px solid var(--color-border);*/
+
+  display: flex;
+  align-items: center;
+  gap: 0.5ch;
+
+  white-space: nowrap;
+  line-height: 1em;
+}
+
+.legend__item::before {
+  content: ' ';
+  display: block;
+  height: 8px;
+  width: 8px;
+  border-radius: 50%;
+  background: var(--risk-item-color, none);
+  filter: var(--map-filter, none);
+}
+
+.legend__item--debug {
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.legend__item--debug::before {
+  display: none;
+}
+
+.risk-level--low {
+  --risk-item-color: #81c873;
+}
+
+.risk-level--medium {
+  --risk-item-color: #ffff73;
+}
+
+.risk-level--high {
+  --risk-item-color: #ffc073;
+}
+
+.risk-level--veryhigh {
+  --risk-item-color: #fa7373;
+}
+
+.risk-level--extreme {
+  --risk-item-color: #fe34ae;
+}
+
+

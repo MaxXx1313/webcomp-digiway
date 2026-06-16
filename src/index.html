@@ -1,0 +1,164 @@
+<!--
+SPDX-FileCopyrightText: NOI Techpark <digital@noi.bz.it>
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
+<!-- Example of how you implement a webcomponent in a website -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>Hello World!</title>
+</head>
+
+<body>
+
+<h1>Web Component - Boilerplate & Helloworld</h1>
+
+Code Snippet:
+<pre style="overflow: auto"><code>
+    &lt;script type="module" src="./app.esm.js"&gt;&lt;/script&gt;
+    &lt;script nomodule src="./app.js"&gt;&lt;/script&gt;
+
+    &lt;noi-digiway&gt;&lt;/noi-digiway&gt;
+  </code></pre>
+
+
+Output:
+<script type="module" src="./noi-digiway.esm.js"></script>
+<script nomodule src="./noi-digiway.js"></script>
+
+<!-- Set the attribute "title" and refer to it as property in JS -->
+<div style="display: flex; justify-content: center">
+  <noi-digiway id="digiway" style="height: 600px"></noi-digiway>
+</div>
+
+<div>
+  <div class="btn-group">
+    <div class="btn-group__name">Size</div>
+    <button onclick="digiway.style.width = '500px'">mobile</button>
+    <button onclick="digiway.style.width = '890px'">tablet</button>
+    <button onclick="digiway.style.width = '100%'">full</button>
+    <button onclick="digiway.style.width = '968px'; digiway.style.height = '800px'">preview</button>
+  </div>
+
+
+  <div class="btn-group">
+    <div class="btn-group__name">layout</div>
+    <button onclick="digiway.layout = 'mobile'"> mobile</button>
+    <button onclick="digiway.layout = 'tablet'"> tablet</button>
+    <button onclick="digiway.layout = 'desktop'"> desktop</button>
+    <button onclick="digiway.layout = 'auto'"> auto</button>
+  </div>
+
+  <div class="btn-group">
+    <div class="btn-group__name">language</div>
+    <button onclick="digiway.language = 'en'">lang: en</button>
+    <button onclick="digiway.language = 'it'">lang: it</button>
+    <button onclick="digiway.language = 'de'">lang: de</button>
+    <button onclick="digiway.language = 'xx'">lang: xx (missing)</button>
+    <button onclick="digiway.language = null">lang: auto</button>
+  </div>
+
+  <div class="btn-group">
+    <div class="btn-group__name">base map</div>
+    <button onclick="digiway.baseMap = 'tyrol'">tirol</button>
+    <button onclick="digiway.baseMap = 'osm'">osm</button>
+  </div>
+
+  <div class="btn-group">
+    <div class="btn-group__name">styles</div>
+    <button onclick="digiway.classList.remove('dark')">default</button>
+    <button onclick="digiway.classList.add('dark')">dark mode</button>
+  </div>
+
+  <script>
+    function changeFontSize(change) {
+      const currentSize = parseInt(digiway.style.fontSize || '16px', 10);
+      digiway.style.fontSize = (currentSize + change) + 'px';
+    }
+  </script>
+  <div class="btn-group">
+    <div class="btn-group__name">centermap</div>
+    <button onclick="digiway.centermap = '46.5,11.35, 10'">default</button>
+    <button onclick="digiway.centermap = '47.5,12.35'">center sample</button>
+    <button onclick="digiway.centermap = ',,8'">zoom 8</button>
+    <button onclick="digiway.centermap = ',,10'">zoom 10</button>
+  </div>
+  <div class="btn-group">
+    <div class="btn-group__name">actions</div>
+    <button onclick="changeFontSize(-1)">font -</button>
+    <button onclick="changeFontSize(1)">font +</button>
+  </div>
+
+</div>
+
+
+<!-- Roboto font -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet">
+
+<style>
+  noi-digiway {
+    font-family: "Roboto", serif;
+    outline: 1px solid red;
+  }
+
+  noi-digiway.dark {
+    font-family: cursive;
+    outline: 1px solid red;
+
+    /**
+     * @prop --color-primary: Primary color
+     */
+    --color-primary: #0084e6;
+    --color-secondary: #da1d6d;
+
+    --color-text: #EEE;
+    --color-background: #333;
+    --color-background-hover: #454545;
+
+    --map-filter: brightness(0.7) contrast(1.5);
+  }
+
+  noi-digiway.dark::part(popup) {
+    color: #FFFFFF;
+  }
+</style>
+
+
+<style>
+  .btn-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5ch;
+    position: relative;
+
+    padding: 4px;
+    padding-bottom: 3ch;
+    margin: 2px;
+    border: 1px solid gray;
+    border-radius: 4px;
+  }
+
+  .btn-group .btn-group__name {
+    padding: 4px;
+    padding-right: 1ch;
+
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    text-transform: lowercase;
+  }
+</style>
+</body>
+
+</html>

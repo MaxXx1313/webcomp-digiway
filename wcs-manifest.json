@@ -1,10 +1,10 @@
 {
-  "title": "Digiway Pois & Routes",
-  "description": "Map that displays Pois & Routes imported withhin the Digiway project",
-  "descriptionAbstract": "Map that displays Activities & Pois imported withhin the Digiway projec",
+  "title": "Air quality",
+  "shortName": "noi-digiway",
+  "description": "Consolidated web-component to show Open Data Hub data imported within the Digiway project",
+  "descriptionAbstract": "Consolidated web-component to show Open Data Hub data imported within the Digiway project",
   "license": "AGPL-3.0-or-later",
   "repositoryUrl": "https://github.com/noi-techpark/webcomp-digiway.git",
-  "shortName": "digiway-data-map",
   "copyrightHolders": [
     {
       "name": "NOI",
@@ -15,82 +15,88 @@
   ],
   "authors": [
     {
-      "name": "Rudi Thoeni",
-      "email": "r.thoeni@noi.bz.it",
+      "name": "NOI",
+      "email": "digital@noi.bz.it",
       "organization": "NOI S.p.A",
       "organizationUrl": "https://noi.bz.it"
+    },
+    {
+      "name": "Solhea",
+      "email": "info@solhea.com",
+      "organization": "Solhea S.R.L.",
+      "organizationUrl": "https://solhea.com"
     }
   ],
   "image": "wcs-logo.png",
-  "searchTags": ["map"],
+  "searchTags": [],
   "dist": {
-    "basePath": "dist",
-    "files": ["map_widget.min.js"]
+    "basePath": "dist/bundle/noi-digiway",
+    "files": [
+      "noi-digiway.js",
+      "logo.svg",
+      "i18n_en.json",
+      "i18n_it.json",
+      "i18n_de.json"
+    ],
+    "scripts": [
+      {
+        "file": "noi-digiway.js",
+        "parameter": "type='module'"
+      }
+    ]
   },
   "configuration": {
-    "tagName": "map-widget",
+    "tagName": "noi-digiway",
     "options": [
       {
-        "key": "source",
-        "type": "multiselect",
-        "label": "Select which dataset to display",
+        "key": "layout",
+        "type": "select",
+        "label": "Layout appearance",
         "required": false,
         "options": {
           "values": [
-            "civis.geoserver.hikingtrails",
-            "civis.geoserver.mountainbikeroutes",
-            "civis.geoserver.intermunicipalcyclingroutes",
-            "civis.geoserver.cyclewaystyrol",
-            "dservices3.arcgis.com.radrouten_tirol",
-            "dservices3.arcgis.com.hikintrail_e5",
-            "dservices3.arcgis.com.accessibletrails_austria",
-            "siat.provincia.tn.it.mtb_percorsi_v",
-            "siat.provincia.tn.it.elementi_cicloviari_v",
-            "siat.provincia.tn.it.sentieri_della_sat",
-            "mobility.peoplecounter",
-            "digiway.zoho",
-            "tirol.mapservices.eu",
-            "tourism.weather"
+            "desktop",
+            "tablet",
+            "mobile",
+            "auto"
           ],
-          "default": "civis.geoserver.intermunicipalcyclingroutes"
-        }
-      },
-      {
-        "key": "pagesize",
-        "type": "number",
-        "label": "Indicates how many elements should be loaded",
-        "required": false,
-        "options": {
-          "default": 1000
+          "default": "auto"
         }
       },
       {
         "key": "language",
         "type": "select",
-        "label": "Two letter key for the language to be used, if omitted the widget will use the lang attribute of the closest parent element. Fallback and Default is `en`",
+        "label": "Two letter key for the language to be used, if omitted the widget will use the browser language. Fallback is `en`",
         "required": false,
         "options": {
-          "values": ["de", "it", "en"],
-          "default": "de"
+          "values": [
+            "de",
+            "en",
+            "it"
+          ],
+          "default": "en"
         }
       },
       {
         "key": "centermap",
         "type": "text",
-        "label": "centermap: ex. 46.7728692,10.7916716,14",
+        "label": "Map center (latitude, longitude, zoomlevel)",
         "required": false,
         "options": {
-          "default": ""
+          "default": "46.5,11.35,10"
         }
       },
       {
-        "key": "forecastday",
+        "key": "base-map",
         "type": "select",
-        "label": "Weather forecast day (0=today, 1=tomorrow, etc.)",
+        "label": "Initial map base",
         "required": false,
         "options": {
-          "values": ["0", "1", "2", "3", "4"],
-          "default": "0"
+          "values": [
+            "osm",
+            "tirol"
+          ],
+          "default": "tirol"
         }
       }
     ]

@@ -96,13 +96,11 @@ export class NoiDigiwayComponent implements StencilComponent {
     {value: 'layer-cycling-trento', text: 'map.layer.cycling-trento', forceGrayscale: false},
   ];
 
-  // private contentLayers: SelectOption[] = [
-  //   {value: 'layer-3', text: 'Context Data', icon: 'context'},
-  //   {value: 'layer-4', text: 'Weather predictions', icon: 'weather-alert'},
-  //   {value: 'layer-5', text: 'Real-time weather data', icon: 'weather-time'},
-  //   {value: 'layer-6', text: 'Points of interest', icon: 'pointer-alert'},
-  //   {value: 'layer-7', text: 'Gastronomy locations', icon: 'fork-spoon'},
-  // ];
+  private mountainDataLayers: DataLayerOption[] = [
+    {value: 'layer-mountain-bolzano', text: 'map.layer.mountain-bolzano', forceGrayscale: false},
+    {value: 'layer-mountain-trento', text: 'map.layer.mountain-trento', forceGrayscale: false},
+  ];
+
 
   @State()
   mapMode: MapSourceOption = this.modes[0];
@@ -196,13 +194,18 @@ export class NoiDigiwayComponent implements StencilComponent {
       this._setLayerLoading(layer, false);
 
       // TODO: deactivate nested layers
+      let layersNested = [];
       if (layer === 'layer-cycling') {
-        const layersNested = this.cyclingDataLayers.map(dl => dl.value);
+        layersNested = this.cyclingDataLayers.map(dl => dl.value);
+      }
 
-        this.layersActive = this.layersActive.filter(l => !layersNested.includes(l));
-        for (const l of layersNested) {
-          this._setLayerLoading(l, false);
-        }
+      if (layer === 'layer-mountain') {
+        layersNested = this.mountainDataLayers.map(dl => dl.value);
+      }
+
+      this.layersActive = this.layersActive.filter(l => !layersNested.includes(l));
+      for (const l of layersNested) {
+        this._setLayerLoading(l, false);
       }
     }
 
@@ -338,6 +341,27 @@ export class NoiDigiwayComponent implements StencilComponent {
             </noi-checkbox>
 
             {this.cyclingDataLayers.map(layer =>
+              <noi-checkbox loading={this.layersLoading.includes(layer.value)}
+                            checked={this.layersActive.includes(layer.value)}
+                            onCheckedChange={(event) => this.activateLayer(layer.value, event.detail.checked)}>
+                <div class="checkbox-content">
+                  <span>{this.languageService.translate(layer.text)}</span>
+                </div>
+              </noi-checkbox>
+            )}
+          </noi-checkbox-group>
+
+          <noi-checkbox-group class="p-bottom-small" open={this.layersActive.includes('layer-mountain')}>
+            <noi-checkbox slot="main"
+                          checked={this.layersActive.includes('layer-mountain')}
+                          onCheckedChange={(event) => this.activateLayer('layer-mountain', event.detail.checked)}>
+              <div class="checkbox-content">
+                <noi-icon name="pointer-alert"></noi-icon>
+                <span>{this.languageService.translate('map.layer.mountain')}</span>
+              </div>
+            </noi-checkbox>
+
+            {this.mountainDataLayers.map(layer =>
               <noi-checkbox loading={this.layersLoading.includes(layer.value)}
                             checked={this.layersActive.includes(layer.value)}
                             onCheckedChange={(event) => this.activateLayer(layer.value, event.detail.checked)}>

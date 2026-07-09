@@ -5,6 +5,7 @@
  */
 
 :host {
+  box-sizing: border-box;
   display: block;
   --checkbox-border-color: var(--color-border);
 }
@@ -16,6 +17,7 @@
 
 .checkbox-group noi-checkbox {
   border: none;
+  min-height: 40px;
 }
 
 .checkbox-group-main {

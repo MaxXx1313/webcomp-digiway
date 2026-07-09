@@ -205,7 +205,7 @@ noi-map {
   padding: 0 12px;
   flex: 1;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: scroll;
   display: flex;
   flex-direction: column;
 }

@@ -277,7 +277,7 @@ export class NoiDigiwayComponent implements StencilComponent {
             </noi-checkbox>
           )}
 
-          <noi-checkbox-group class="p-bottom-small">
+          <noi-checkbox-group class="p-bottom-small" open={this.layersActive.includes('layer-poi')}>
             <noi-checkbox slot="main"
                           loading={this.layersLoading.includes('layer-poi')}
                           checked={this.layersActive.includes('layer-poi')}

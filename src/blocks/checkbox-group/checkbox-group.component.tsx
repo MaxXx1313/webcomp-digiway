@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { Component, h, Host } from "@stencil/core";
+import { Component, h, Host, Prop } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
 
 /**
@@ -15,11 +15,16 @@ import { StencilComponent } from "../../utils/StencilComponent";
 })
 export class CheckboxGroupComponent implements StencilComponent {
 
+  /**
+   * @default false
+   */
+  @Prop({mutable: true})
+  open = false;
 
   render() {
 
     return <Host>
-      <div class="checkbox-group">
+      <div class={'checkbox-group ' + (this.open ? 'open' : 'closed')}>
         <div class="checkbox-group-main">
           <slot name="main"/>
         </div>

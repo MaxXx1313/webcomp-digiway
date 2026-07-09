@@ -36,6 +36,10 @@ export namespace Components {
      * (INTERNAL) render a checkbox group
      */
     interface NoiCheckboxGroup {
+        /**
+          * @default false
+         */
+        "open": boolean;
     }
     /**
      * Consolidated web-component to show Open Data Hub data imported within the Digiway project
@@ -353,6 +357,10 @@ declare namespace LocalJSX {
      * (INTERNAL) render a checkbox group
      */
     interface NoiCheckboxGroup {
+        /**
+          * @default false
+         */
+        "open"?: boolean;
     }
     /**
      * Consolidated web-component to show Open Data Hub data imported within the Digiway project
@@ -470,6 +478,9 @@ declare namespace LocalJSX {
         "checked": boolean;
         "loading": boolean;
     }
+    interface NoiCheckboxGroupAttributes {
+        "open": boolean;
+    }
     interface NoiDigiwayAttributes {
         "layout": ViewLayout;
         "baseMap": 'osm' | 'tirol';
@@ -495,7 +506,7 @@ declare namespace LocalJSX {
 
     interface IntrinsicElements {
         "noi-checkbox": Omit<NoiCheckbox, keyof NoiCheckboxAttributes> & { [K in keyof NoiCheckbox & keyof NoiCheckboxAttributes]?: NoiCheckbox[K] } & { [K in keyof NoiCheckbox & keyof NoiCheckboxAttributes as `attr:${K}`]?: NoiCheckboxAttributes[K] } & { [K in keyof NoiCheckbox & keyof NoiCheckboxAttributes as `prop:${K}`]?: NoiCheckbox[K] };
-        "noi-checkbox-group": NoiCheckboxGroup;
+        "noi-checkbox-group": Omit<NoiCheckboxGroup, keyof NoiCheckboxGroupAttributes> & { [K in keyof NoiCheckboxGroup & keyof NoiCheckboxGroupAttributes]?: NoiCheckboxGroup[K] } & { [K in keyof NoiCheckboxGroup & keyof NoiCheckboxGroupAttributes as `attr:${K}`]?: NoiCheckboxGroupAttributes[K] } & { [K in keyof NoiCheckboxGroup & keyof NoiCheckboxGroupAttributes as `prop:${K}`]?: NoiCheckboxGroup[K] };
         "noi-digiway": Omit<NoiDigiway, keyof NoiDigiwayAttributes> & { [K in keyof NoiDigiway & keyof NoiDigiwayAttributes]?: NoiDigiway[K] } & { [K in keyof NoiDigiway & keyof NoiDigiwayAttributes as `attr:${K}`]?: NoiDigiwayAttributes[K] } & { [K in keyof NoiDigiway & keyof NoiDigiwayAttributes as `prop:${K}`]?: NoiDigiway[K] };
         "noi-icon": Omit<NoiIcon, keyof NoiIconAttributes> & { [K in keyof NoiIcon & keyof NoiIconAttributes]?: NoiIcon[K] } & { [K in keyof NoiIcon & keyof NoiIconAttributes as `attr:${K}`]?: NoiIconAttributes[K] } & { [K in keyof NoiIcon & keyof NoiIconAttributes as `prop:${K}`]?: NoiIcon[K] };
         "noi-map": Omit<NoiMap, keyof NoiMapAttributes> & { [K in keyof NoiMap & keyof NoiMapAttributes]?: NoiMap[K] } & { [K in keyof NoiMap & keyof NoiMapAttributes as `attr:${K}`]?: NoiMapAttributes[K] } & { [K in keyof NoiMap & keyof NoiMapAttributes as `prop:${K}`]?: NoiMap[K] };

@@ -20,6 +20,10 @@
 
 .checkbox-group-main {
   border: 2px solid var(--checkbox-border-color);
+  border-radius: 4px;
+}
+
+.checkbox-group.open .checkbox-group-main {
   border-radius: 4px 4px 0 0;
 }
 
@@ -27,4 +31,9 @@
   border: 2px solid var(--checkbox-border-color);
   border-top: 0;
   border-radius: 0 0 4px 4px;
+  display: none;
+}
+
+.checkbox-group.open .checkbox-group-inner {
+  display: block;
 }

@@ -6,9 +6,9 @@ import { Component, Event, EventEmitter, h } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
 import { LanguageDataService } from "../../data/language/language-data-service";
 import { sanitizeText } from "../../utils/html";
+import { LayerConfig } from "../map-layer-base-odh/noi-map-layer-base-odh.component";
 
 
-const additional = '?source=dservices3.arcgis.com&tagfilter=radrouten_tirol';
 
 /**
  * (INTERNAL) render map layer
@@ -28,12 +28,16 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
 
   private languageService = LanguageDataService.getInstance();
 
+  private config: LayerConfig = {
+    sourceLayer: "spatialdata",
+    additional: '?source=dservices3.arcgis.com&tagfilter=radrouten_tirol',
+  }
+
   constructor() {
   }
 
   render(): any {
-    return (<noi-map-layer-base-odh sourceLayer="spatialdata"
-                                    additional={additional}
+    return (<noi-map-layer-base-odh config={this.config}
                                     onLayerLoading={(e) => this.layerLoading.emit(e.detail)}
     ></noi-map-layer-base-odh>)
   }

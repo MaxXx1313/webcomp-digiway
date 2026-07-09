@@ -8,12 +8,12 @@ import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { ViewLayout } from "./utils/breakpoints";
 import { IconName } from "./blocks/icon/icon.component";
 import { Map } from "maplibre-gl";
-import { PopupDefinition } from "./blocks/map-layer-base-odh/noi-map-layer-base-odh.component";
+import { LayerConfig, PopupDefinition } from "./blocks/map-layer-base-odh/noi-map-layer-base-odh.component";
 import { SelectOption } from "./blocks/select/select.component";
 export { ViewLayout } from "./utils/breakpoints";
 export { IconName } from "./blocks/icon/icon.component";
 export { Map } from "maplibre-gl";
-export { PopupDefinition } from "./blocks/map-layer-base-odh/noi-map-layer-base-odh.component";
+export { LayerConfig, PopupDefinition } from "./blocks/map-layer-base-odh/noi-map-layer-base-odh.component";
 export { SelectOption } from "./blocks/select/select.component";
 export namespace Components {
     /**
@@ -115,15 +115,8 @@ export namespace Components {
      * (INTERNAL) render map layer
      */
     interface NoiMapLayerBaseOdh {
-        /**
-          * @default ''
-         */
-        "additional": string;
+        "config": LayerConfig;
         "popupStructure"?: ((feature: any, featureType: string) => PopupDefinition | string);
-        /**
-          * @default ''
-         */
-        "sourceLayer": string;
     }
     /**
      * (INTERNAL) render map layer
@@ -512,19 +505,12 @@ declare namespace LocalJSX {
      * (INTERNAL) render map layer
      */
     interface NoiMapLayerBaseOdh {
-        /**
-          * @default ''
-         */
-        "additional"?: string;
+        "config": LayerConfig;
         /**
           * Emitted when layer data is loading
          */
         "onLayerLoading"?: (event: NoiMapLayerBaseOdhCustomEvent<boolean>) => void;
         "popupStructure"?: ((feature: any, featureType: string) => PopupDefinition | string);
-        /**
-          * @default ''
-         */
-        "sourceLayer"?: string;
     }
     /**
      * (INTERNAL) render map layer
@@ -597,10 +583,6 @@ declare namespace LocalJSX {
     interface NoiMapBaseTirolAttributes {
         "variant": 'color' | 'grayscale';
     }
-    interface NoiMapLayerBaseOdhAttributes {
-        "sourceLayer": string;
-        "additional": string;
-    }
     interface NoiSelectAttributes {
         "disabled": boolean;
         "value": string;
@@ -615,7 +597,7 @@ declare namespace LocalJSX {
         "noi-map-base-osm": Omit<NoiMapBaseOsm, keyof NoiMapBaseOsmAttributes> & { [K in keyof NoiMapBaseOsm & keyof NoiMapBaseOsmAttributes]?: NoiMapBaseOsm[K] } & { [K in keyof NoiMapBaseOsm & keyof NoiMapBaseOsmAttributes as `attr:${K}`]?: NoiMapBaseOsmAttributes[K] } & { [K in keyof NoiMapBaseOsm & keyof NoiMapBaseOsmAttributes as `prop:${K}`]?: NoiMapBaseOsm[K] };
         "noi-map-base-tirol": Omit<NoiMapBaseTirol, keyof NoiMapBaseTirolAttributes> & { [K in keyof NoiMapBaseTirol & keyof NoiMapBaseTirolAttributes]?: NoiMapBaseTirol[K] } & { [K in keyof NoiMapBaseTirol & keyof NoiMapBaseTirolAttributes as `attr:${K}`]?: NoiMapBaseTirolAttributes[K] } & { [K in keyof NoiMapBaseTirol & keyof NoiMapBaseTirolAttributes as `prop:${K}`]?: NoiMapBaseTirol[K] };
         "noi-map-layer-announcements": NoiMapLayerAnnouncements;
-        "noi-map-layer-base-odh": Omit<NoiMapLayerBaseOdh, keyof NoiMapLayerBaseOdhAttributes> & { [K in keyof NoiMapLayerBaseOdh & keyof NoiMapLayerBaseOdhAttributes]?: NoiMapLayerBaseOdh[K] } & { [K in keyof NoiMapLayerBaseOdh & keyof NoiMapLayerBaseOdhAttributes as `attr:${K}`]?: NoiMapLayerBaseOdhAttributes[K] } & { [K in keyof NoiMapLayerBaseOdh & keyof NoiMapLayerBaseOdhAttributes as `prop:${K}`]?: NoiMapLayerBaseOdh[K] };
+        "noi-map-layer-base-odh": NoiMapLayerBaseOdh;
         "noi-map-layer-cycling-roads": NoiMapLayerCyclingRoads;
         "noi-map-layer-risk-exposure": NoiMapLayerRiskExposure;
         "noi-select": Omit<NoiSelect, keyof NoiSelectAttributes> & { [K in keyof NoiSelect & keyof NoiSelectAttributes]?: NoiSelect[K] } & { [K in keyof NoiSelect & keyof NoiSelectAttributes as `attr:${K}`]?: NoiSelectAttributes[K] } & { [K in keyof NoiSelect & keyof NoiSelectAttributes as `prop:${K}`]?: NoiSelect[K] };

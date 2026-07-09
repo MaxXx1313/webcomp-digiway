@@ -277,28 +277,25 @@ export class NoiDigiwayComponent implements StencilComponent {
             </noi-checkbox>
           )}
 
-          <div class="p-bottom-small checkbox-group">
-            <div class="checkbox-group-main">
-              <noi-checkbox loading={this.layersLoading.includes('layer-poi')}
-                            checked={this.layersActive.includes('layer-poi')}
-                            onCheckedChange={(event) => this.activateLayer('layer-poi', event.detail.checked)}>
-                <div class="checkbox-content">
-                  <noi-icon name="pointer-alert"></noi-icon>
-                  <span>{this.languageService.translate('map.layer-poi')}</span>
-                </div>
-              </noi-checkbox>
-            </div>
-            <div class="checkbox-group-inner">
-              <noi-checkbox loading={this.layersLoading.includes('layer-poi')}
-                            checked={this.layersActive.includes('layer-poi')}
-                            onCheckedChange={(event) => this.activateLayer('layer-poi', event.detail.checked)}>
-                <div class="checkbox-content">
-                  <noi-icon name="pointer-alert"></noi-icon>
-                  <span>{this.languageService.translate('map.layer-poi')}</span>
-                </div>
-              </noi-checkbox>
-            </div>
-          </div>
+          <noi-checkbox-group class="p-bottom-small">
+            <noi-checkbox slot="main"
+                          loading={this.layersLoading.includes('layer-poi')}
+                          checked={this.layersActive.includes('layer-poi')}
+                          onCheckedChange={(event) => this.activateLayer('layer-poi', event.detail.checked)}>
+              <div class="checkbox-content">
+                <noi-icon name="pointer-alert"></noi-icon>
+                <span>{this.languageService.translate('map.layer-poi')}</span>
+              </div>
+            </noi-checkbox>
+            <noi-checkbox loading={this.layersLoading.includes('layer-poi')}
+                          checked={this.layersActive.includes('layer-poi')}
+                          onCheckedChange={(event) => this.activateLayer('layer-poi', event.detail.checked)}>
+              <div class="checkbox-content">
+                <noi-icon name="pointer-alert"></noi-icon>
+                <span>{this.languageService.translate('map.layer-poi')}</span>
+              </div>
+            </noi-checkbox>
+          </noi-checkbox-group>
 
           {/*
           <div class="menu-section-header p-top p-bottom">

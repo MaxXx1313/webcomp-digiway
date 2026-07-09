@@ -33,6 +33,11 @@ export namespace Components {
         "loading": boolean;
     }
     /**
+     * (INTERNAL) render a checkbox group
+     */
+    interface NoiCheckboxGroup {
+    }
+    /**
      * Consolidated web-component to show Open Data Hub data imported within the Digiway project
      */
     interface NoiDigiway {
@@ -170,6 +175,15 @@ declare global {
         new (): HTMLNoiCheckboxElement;
     };
     /**
+     * (INTERNAL) render a checkbox group
+     */
+    interface HTMLNoiCheckboxGroupElement extends Components.NoiCheckboxGroup, HTMLStencilElement {
+    }
+    var HTMLNoiCheckboxGroupElement: {
+        prototype: HTMLNoiCheckboxGroupElement;
+        new (): HTMLNoiCheckboxGroupElement;
+    };
+    /**
      * Consolidated web-component to show Open Data Hub data imported within the Digiway project
      */
     interface HTMLNoiDigiwayElement extends Components.NoiDigiway, HTMLStencilElement {
@@ -300,6 +314,7 @@ declare global {
     };
     interface HTMLElementTagNameMap {
         "noi-checkbox": HTMLNoiCheckboxElement;
+        "noi-checkbox-group": HTMLNoiCheckboxGroupElement;
         "noi-digiway": HTMLNoiDigiwayElement;
         "noi-icon": HTMLNoiIconElement;
         "noi-map": HTMLNoiMapElement;
@@ -333,6 +348,11 @@ declare namespace LocalJSX {
           * Emitted when user clicks on the button
          */
         "onCheckedChange"?: (event: NoiCheckboxCustomEvent<{ checked: boolean }>) => void;
+    }
+    /**
+     * (INTERNAL) render a checkbox group
+     */
+    interface NoiCheckboxGroup {
     }
     /**
      * Consolidated web-component to show Open Data Hub data imported within the Digiway project
@@ -475,6 +495,7 @@ declare namespace LocalJSX {
 
     interface IntrinsicElements {
         "noi-checkbox": Omit<NoiCheckbox, keyof NoiCheckboxAttributes> & { [K in keyof NoiCheckbox & keyof NoiCheckboxAttributes]?: NoiCheckbox[K] } & { [K in keyof NoiCheckbox & keyof NoiCheckboxAttributes as `attr:${K}`]?: NoiCheckboxAttributes[K] } & { [K in keyof NoiCheckbox & keyof NoiCheckboxAttributes as `prop:${K}`]?: NoiCheckbox[K] };
+        "noi-checkbox-group": NoiCheckboxGroup;
         "noi-digiway": Omit<NoiDigiway, keyof NoiDigiwayAttributes> & { [K in keyof NoiDigiway & keyof NoiDigiwayAttributes]?: NoiDigiway[K] } & { [K in keyof NoiDigiway & keyof NoiDigiwayAttributes as `attr:${K}`]?: NoiDigiwayAttributes[K] } & { [K in keyof NoiDigiway & keyof NoiDigiwayAttributes as `prop:${K}`]?: NoiDigiway[K] };
         "noi-icon": Omit<NoiIcon, keyof NoiIconAttributes> & { [K in keyof NoiIcon & keyof NoiIconAttributes]?: NoiIcon[K] } & { [K in keyof NoiIcon & keyof NoiIconAttributes as `attr:${K}`]?: NoiIconAttributes[K] } & { [K in keyof NoiIcon & keyof NoiIconAttributes as `prop:${K}`]?: NoiIcon[K] };
         "noi-map": Omit<NoiMap, keyof NoiMapAttributes> & { [K in keyof NoiMap & keyof NoiMapAttributes]?: NoiMap[K] } & { [K in keyof NoiMap & keyof NoiMapAttributes as `attr:${K}`]?: NoiMapAttributes[K] } & { [K in keyof NoiMap & keyof NoiMapAttributes as `prop:${K}`]?: NoiMap[K] };
@@ -494,6 +515,10 @@ declare module "@stencil/core" {
              * (INTERNAL) render a checkbox
              */
             "noi-checkbox": LocalJSX.IntrinsicElements["noi-checkbox"] & JSXBase.HTMLAttributes<HTMLNoiCheckboxElement>;
+            /**
+             * (INTERNAL) render a checkbox group
+             */
+            "noi-checkbox-group": LocalJSX.IntrinsicElements["noi-checkbox-group"] & JSXBase.HTMLAttributes<HTMLNoiCheckboxGroupElement>;
             /**
              * Consolidated web-component to show Open Data Hub data imported within the Digiway project
              */

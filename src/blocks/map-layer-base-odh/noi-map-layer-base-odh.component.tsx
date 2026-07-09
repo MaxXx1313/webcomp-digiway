@@ -65,6 +65,7 @@ const defaultStyles = {
 
 export interface LayerConfig {
   markerIconSVG?: string;
+  isLineInteractive?: boolean;
   sourceLayer: string;
   additional: string;
   center?: [number, number];
@@ -367,7 +368,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
       console.log('(debug) Clicked polygons:', feature);
       this._popup = new Popup()
         .setLngLat(e.lngLat)
-        .setHTML(createDebugPopup(feature, 'Polygon'))
+        .setHTML(createDebugPopup(feature, 'polygons'))
         .addTo(this.map);
     });
     this._subscriptions.push(_polygonsClick);
@@ -378,21 +379,23 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
       console.log('(debug) Clicked unclusteredpoints:', feature);
       this._popup = new Popup()
         .setLngLat(e.lngLat)
-        .setHTML(this.createPopup(feature, 'Point'))
+        .setHTML(this.createPopup(feature, 'unclusteredpoints'))
         .addTo(this.map);
     });
     this._subscriptions.push(_pointClick);
 
     // 'lines' should come after 'unclusteredpoints', so we can skip it if point is clicked
-    // const _linesClick = this.map.on('click', uid('lines'), (e) => {
-    //   const feature = e.features[0];
-    //   console.log('(debug) Clicked lines:', feature);
-    //   new Popup()
-    //     .setLngLat(e.lngLat)
-    //     .setHTML(createDebugPopup(feature, 'Line'))
-    //     .addTo(this.map);
-    // });
-    // this._subscriptions.push(_linesClick);
+    if (this.config.isLineInteractive) {
+      const _linesClick = this.map.on('click', this.uid('lines'), (e) => {
+        const feature = e.features[0];
+        console.log('(debug) Clicked lines:', feature);
+        this._popup = new Popup()
+          .setLngLat(e.lngLat)
+          .setHTML(this.createPopup(feature, 'line'))
+          .addTo(this.map);
+      });
+      this._subscriptions.push(_linesClick);
+    }
 
     const _clusterClick = this.map.on('click', this.uid('clusters'), (e) => {
       const feature = e.features[0] as any;
@@ -413,8 +416,13 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     };
 
     // Hover effects
+    let hoverTargets = ['unclusteredpoints', 'polygons', 'clusters'];
+    if (this.config.isLineInteractive) {
+      hoverTargets = ['unclusteredpoints', 'polygons', 'lines', 'clusters'];
+    }
     // ['unclusteredpoints', 'polygons', 'lines', 'clusters'].forEach(layerName => {
-    ['unclusteredpoints', 'polygons', 'clusters'].forEach(layerName => {
+    // ['unclusteredpoints', 'polygons', 'clusters'].forEach(layerName => {
+    hoverTargets.forEach(layerName => {
       const layer = this.uid(layerName);
       const source = this.uid('vector-tiles');
 

@@ -39,18 +39,24 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
       zoom: 10
     },
     'bolzano-prov': {
+      isLineInteractive: true,
+
       sourceLayer: "spatialdata",
       additional: '?source=civis.geoserver&tagfilter=cyclewaystyrol&operationmode=pointsandtracks',
       center: [10.98, 46.88],
       zoom: 10
     },
     'bolzano-int': {
+      isLineInteractive: true,
+
       sourceLayer: "spatialdata",
       additional: '?source=civis.geoserver&tagfilter=intermunicipalcyclingroutes&operationmode=pointsandtracks&displaytracksonzoomlevel=10',
       center: [11.35, 46.5],
       zoom: 10
     },
     'trento': {
+      isLineInteractive: true,
+
       sourceLayer: "spatialdata",
       additional: '?source=siat.provincia.tn.it&tagfilter=elementi_cicloviari_v&operationmode=pointsandtracks',
       center: [11.12, 46.07],
@@ -59,12 +65,16 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
 
 
     'mountainbikeroutes': {
+      isLineInteractive: true,
+
       sourceLayer: "spatialdata",
       additional: '?source=civis.geoserver&tagfilter=mountainbikeroutes&operationmode=pointsandtracks&displaytracksonzoomlevel=10',
       center: [11.35, 46.5],
       zoom: 10
     },
     'mtb_percorsi_v': {
+      isLineInteractive: true,
+
       sourceLayer: "spatialdata",
       additional: '?source=siat.provincia.tn.it&tagfilter=mtb_percorsi_v&operationmode=pointsandtracks',
       center: [11.12, 46.07],

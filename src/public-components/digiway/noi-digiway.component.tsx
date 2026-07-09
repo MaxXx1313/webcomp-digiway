@@ -72,8 +72,8 @@ export class NoiDigiwayComponent implements StencilComponent {
   isMenuOpened = false;
 
   private modes: MapSourceOption[] = [
-    {value: 'tirol', text: 'base-map.tirol'},
-    {value: 'osm', text: 'base-map.osm'},
+    {value: 'tirol', text: 'map.base.tirol'},
+    {value: 'osm', text: 'map.base.osm'},
   ];
   private modesTranslated: MapSourceOption[] = [];
   // private subModes: SelectOption[] = [
@@ -84,9 +84,18 @@ export class NoiDigiwayComponent implements StencilComponent {
 
 
   private dataLayers: DataLayerOption[] = [
-    {value: 'layer-closures', text: 'map.route-closures', icon: 'pointer-off', forceGrayscale: false},
-    {value: 'layer-exposure', text: 'map.risk-exposure', icon: 'context', forceGrayscale: true},
+    {value: 'layer-closures', text: 'map.layer.route-closures', icon: 'pointer-off', forceGrayscale: false},
+    {value: 'layer-exposure', text: 'map.layer.risk-exposure', icon: 'context', forceGrayscale: true},
     // {value: 'layer-poi', text: 'map.layer-poi', icon: 'group'},
+  ];
+
+  private poiDataLayers: DataLayerOption[] = [
+    {value: 'layer-poi-culture', text: 'map.layer.poi-culture', forceGrayscale: false},
+    {value: 'layer-poi-services', text: 'map.layer.poi-services', forceGrayscale: false},
+    {value: 'layer-poi-summer', text: 'map.layer.poi-summer', forceGrayscale: false},
+    {value: 'layer-poi-winter', text: 'map.layer.poi-winter', forceGrayscale: false},
+    {value: 'layer-poi-wellness', text: 'map.layer.poi-wellness', forceGrayscale: false},
+    {value: 'layer-poi-other', text: 'map.layer.poi-other', forceGrayscale: false},
   ];
 
   // private contentLayers: SelectOption[] = [
@@ -284,17 +293,19 @@ export class NoiDigiwayComponent implements StencilComponent {
                           onCheckedChange={(event) => this.activateLayer('layer-poi', event.detail.checked)}>
               <div class="checkbox-content">
                 <noi-icon name="pointer-alert"></noi-icon>
-                <span>{this.languageService.translate('map.layer-poi')}</span>
+                <span>{this.languageService.translate('map.layer.poi')}</span>
               </div>
             </noi-checkbox>
-            <noi-checkbox loading={this.layersLoading.includes('layer-poi')}
-                          checked={this.layersActive.includes('layer-poi')}
-                          onCheckedChange={(event) => this.activateLayer('layer-poi', event.detail.checked)}>
-              <div class="checkbox-content">
-                <noi-icon name="pointer-alert"></noi-icon>
-                <span>{this.languageService.translate('map.layer-poi')}</span>
-              </div>
-            </noi-checkbox>
+
+            {this.poiDataLayers.map(layer =>
+              <noi-checkbox loading={this.layersLoading.includes(layer.value)}
+                            checked={this.layersActive.includes(layer.value)}
+                            onCheckedChange={(event) => this.activateLayer(layer.value, event.detail.checked)}>
+                <div class="checkbox-content">
+                  <span>{this.languageService.translate(layer.text)}</span>
+                </div>
+              </noi-checkbox>
+            )}
           </noi-checkbox-group>
 
           {/*

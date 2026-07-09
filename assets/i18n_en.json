@@ -5,6 +5,7 @@
   "base-map.osm": "Open Street Map",
   "map.route-closures": "Route Closures",
   "map.risk-exposure": "Risk Exposure",
+  "map.layer-poi": "Points of interest",
   "route-closures.start-time": "Start Time",
   "route-closures.end-time": "End Time",
   "risk-exposure.low": "minor",

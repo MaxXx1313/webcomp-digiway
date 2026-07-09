@@ -86,7 +86,7 @@ export class NoiDigiwayComponent implements StencilComponent {
   private dataLayers: DataLayerOption[] = [
     {value: 'layer-closures', text: 'map.route-closures', icon: 'pointer-off', forceGrayscale: false},
     {value: 'layer-exposure', text: 'map.risk-exposure', icon: 'context', forceGrayscale: true},
-    // {value: 'layer-2', text: 'Route Frequency', icon: 'group'},
+    // {value: 'layer-poi', text: 'map.layer-poi', icon: 'group'},
   ];
 
   // private contentLayers: SelectOption[] = [
@@ -276,6 +276,29 @@ export class NoiDigiwayComponent implements StencilComponent {
               </div>
             </noi-checkbox>
           )}
+
+          <div class="p-bottom-small checkbox-group">
+            <div class="checkbox-group-main">
+              <noi-checkbox loading={this.layersLoading.includes('layer-poi')}
+                            checked={this.layersActive.includes('layer-poi')}
+                            onCheckedChange={(event) => this.activateLayer('layer-poi', event.detail.checked)}>
+                <div class="checkbox-content">
+                  <noi-icon name="pointer-alert"></noi-icon>
+                  <span>{this.languageService.translate('map.layer-poi')}</span>
+                </div>
+              </noi-checkbox>
+            </div>
+            <div class="checkbox-group-inner">
+              <noi-checkbox loading={this.layersLoading.includes('layer-poi')}
+                            checked={this.layersActive.includes('layer-poi')}
+                            onCheckedChange={(event) => this.activateLayer('layer-poi', event.detail.checked)}>
+                <div class="checkbox-content">
+                  <noi-icon name="pointer-alert"></noi-icon>
+                  <span>{this.languageService.translate('map.layer-poi')}</span>
+                </div>
+              </noi-checkbox>
+            </div>
+          </div>
 
           {/*
           <div class="menu-section-header p-top p-bottom">

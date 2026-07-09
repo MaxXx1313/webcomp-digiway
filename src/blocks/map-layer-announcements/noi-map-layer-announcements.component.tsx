@@ -47,6 +47,8 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     sourceLayer: "announcement",
     // additional: '?source=tirol.mapservices.eu&operationmode=pointsandtracks&displaytracksonzoomlevel=10&jsonselector=StartTime,EndTime,Mapping[\'tirol.mapservices.eu\'].description';
     additional: '?source=tirol.mapservices.eu&operationmode=pointsandtracks&displaytracksonzoomlevel=10&jsonselector=StartTime,EndTime,Mapping',
+    center: [11.3, 46.9],
+    zoom: 9
   }
 
   constructor() {

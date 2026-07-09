@@ -122,7 +122,7 @@ export namespace Components {
      * (INTERNAL) render map layer
      */
     interface NoiMapLayerCyclingRoads {
-        "region": 'tyrol' | 'bolzano-prov' | 'bolzano-int' | 'trento';
+        "region": 'tyrol' | 'bolzano-prov' | 'bolzano-int' | 'trento' | 'mountainbikeroutes' | 'mtb_percorsi_v';
     }
     /**
      * (INTERNAL) render map layer
@@ -523,7 +523,7 @@ declare namespace LocalJSX {
           * Emitted when layer data is loading
          */
         "onLayerLoading"?: (event: NoiMapLayerCyclingRoadsCustomEvent<boolean>) => void;
-        "region": 'tyrol' | 'bolzano-prov' | 'bolzano-int' | 'trento';
+        "region": 'tyrol' | 'bolzano-prov' | 'bolzano-int' | 'trento' | 'mountainbikeroutes' | 'mtb_percorsi_v';
     }
     /**
      * (INTERNAL) render map layer
@@ -588,7 +588,7 @@ declare namespace LocalJSX {
         "variant": 'color' | 'grayscale';
     }
     interface NoiMapLayerCyclingRoadsAttributes {
-        "region": 'tyrol' | 'bolzano-prov' | 'bolzano-int' | 'trento';
+        "region": 'tyrol' | 'bolzano-prov' | 'bolzano-int' | 'trento' | 'mountainbikeroutes' | 'mtb_percorsi_v';
     }
     interface NoiSelectAttributes {
         "disabled": boolean;

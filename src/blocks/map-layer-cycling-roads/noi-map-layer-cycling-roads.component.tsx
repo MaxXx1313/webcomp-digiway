@@ -25,7 +25,7 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
   /**
    */
   @Prop({mutable: false})
-  region!: 'tyrol' | 'bolzano-prov' | 'bolzano-int' | 'trento';
+  region!: 'tyrol' | 'bolzano-prov' | 'bolzano-int' | 'trento' | 'mountainbikeroutes' | 'mtb_percorsi_v';
 
   // private languageService = LanguageDataService.getInstance();
 
@@ -46,6 +46,16 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
     'trento': {
       sourceLayer: "spatialdata",
       additional: '?source=siat.provincia.tn.it&tagfilter=elementi_cicloviari_v&operationmode=pointsandtracks',
+    },
+
+
+    'mountainbikeroutes': {
+      sourceLayer: "spatialdata",
+      additional: '?source=civis.geoserver&tagfilter=mountainbikeroutes&operationmode=pointsandtracks&displaytracksonzoomlevel=10',
+    },
+    'mtb_percorsi_v': {
+      sourceLayer: "spatialdata",
+      additional: '?source=siat.provincia.tn.it&tagfilter=mtb_percorsi_v&operationmode=pointsandtracks',
     },
   }
 

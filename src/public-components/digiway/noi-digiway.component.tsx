@@ -278,6 +278,20 @@ export class NoiDigiwayComponent implements StencilComponent {
               onLayerLoading={(e) => this._setLayerLoading('layer-cycling-trento', e.detail)}></noi-map-layer-cycling-roads>
             : ''}
 
+          {this.layersActive.includes('layer-mountain-bolzano')
+            ? <noi-map-layer-cycling-roads
+              key="layer-mountain-bolzano"
+              region="mountainbikeroutes"
+              onLayerLoading={(e) => this._setLayerLoading('layer-mountain-bolzano', e.detail)}></noi-map-layer-cycling-roads>
+            : ''}
+
+          {this.layersActive.includes('layer-mountain-trento')
+            ? <noi-map-layer-cycling-roads
+              key="layer-mountain-trento"
+              region="mtb_percorsi_v"
+              onLayerLoading={(e) => this._setLayerLoading('layer-mountain-trento', e.detail)}></noi-map-layer-cycling-roads>
+            : ''}
+
         </noi-map>
         {this._renderLegend()}
         <div class={this.isMenuOpened ? "sidebar-backdrop open" : "sidebar-backdrop"}

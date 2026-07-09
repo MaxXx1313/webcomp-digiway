@@ -8,10 +8,12 @@ import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { ViewLayout } from "./utils/breakpoints";
 import { IconName } from "./blocks/icon/icon.component";
 import { Map } from "maplibre-gl";
+import { PopupDefinition } from "./blocks/map-layer-base-odh/noi-map-layer-base-odh.component";
 import { SelectOption } from "./blocks/select/select.component";
 export { ViewLayout } from "./utils/breakpoints";
 export { IconName } from "./blocks/icon/icon.component";
 export { Map } from "maplibre-gl";
+export { PopupDefinition } from "./blocks/map-layer-base-odh/noi-map-layer-base-odh.component";
 export { SelectOption } from "./blocks/select/select.component";
 export namespace Components {
     /**
@@ -117,6 +119,7 @@ export namespace Components {
           * @default ''
          */
         "additional": string;
+        "popupStructure"?: ((feature: any, featureType: string) => PopupDefinition | string);
         /**
           * @default ''
          */
@@ -292,7 +295,6 @@ declare global {
         new (): HTMLNoiMapLayerAnnouncementsElement;
     };
     interface HTMLNoiMapLayerBaseOdhElementEventMap {
-        "popup": { checked: boolean };
         "layerLoading": boolean;
     }
     /**
@@ -518,7 +520,7 @@ declare namespace LocalJSX {
           * Emitted when layer data is loading
          */
         "onLayerLoading"?: (event: NoiMapLayerBaseOdhCustomEvent<boolean>) => void;
-        "onPopup"?: (event: NoiMapLayerBaseOdhCustomEvent<{ checked: boolean }>) => void;
+        "popupStructure"?: ((feature: any, featureType: string) => PopupDefinition | string);
         /**
           * @default ''
          */

@@ -6,7 +6,7 @@ import { Component, Element, Event, EventEmitter, Prop } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
 import { Map, Popup, Subscription } from "maplibre-gl";
 import { listenLayerReady } from "../../utils/maplibre";
-import { LanguageDataService } from "../../data/language/language-data-service";
+import { sanitizeText } from "../../utils/html";
 
 const HOST = 'https://geo.api.opendatahub.testingmachine.eu';
 
@@ -63,6 +63,22 @@ const defaultStyles = {
   }
 };
 
+export interface PopupDefinition {
+  title?: {
+    icon?: string;
+    text?: string;
+  },
+  body: Array<{
+    type: 'name' | 'description' | 'section';
+    // 'text' is for 'name' and 'description'
+    text?: string;
+    // 'section' is for 'section'
+    section?: {
+      name: string;
+      value: string;
+    };
+  }>;
+}
 
 /**
  * (INTERNAL) render map layer
@@ -97,9 +113,9 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
   additional: string = '';
 
   /**
-   *
    */
-  @Event() popup: EventEmitter<{ checked: boolean }>;
+  @Prop({mutable: false})
+  popupStructure?: ((feature: any, featureType: string) => PopupDefinition | string);
 
   /**
    * Emitted when layer data is loading
@@ -107,8 +123,6 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
   @Event() layerLoading: EventEmitter<boolean>;
 
   private _subscriptions: Subscription[] = [];
-
-  private languageService = LanguageDataService.getInstance();
 
   constructor() {
     this._uid = NoiMapLayerBaseOdhComponent._uid_seed++;
@@ -356,7 +370,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
       console.log('(debug) Clicked unclusteredpoints:', feature);
       new Popup()
         .setLngLat(e.lngLat)
-        .setHTML(this.createPopup(feature/*, 'Point'*/))
+        .setHTML(this.createPopup(feature, 'Point'))
         .addTo(this.map);
     });
     this._subscriptions.push(_pointClick);
@@ -448,57 +462,52 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
   }
 
   // Feature popup helper
-  createPopup(feature/*, featureType*/) {
-    const props = feature.properties;
-    // const icon = getAssetPath('route-closures-icon.svg');
-
-    let data = props.data;
-    try {
-      data = JSON.parse(props.data);
-    } catch (e) {
-      console.warn(e);
+  createPopup(feature, featureType) {
+    const fn = this.popupStructure || createDebugPopup;
+    const structure = fn(feature, featureType);
+    if (typeof structure === 'string') {
+      return structure;
+    } else {
+      return _popupBuilder(structure);
     }
-    console.log('[DEBUG] Parsed data:', data);
-
-    const name = data['Mapping']?.['tirol.mapservices.eu']?.['name'];
-
-    const lang = this.languageService.currentLanguage;
-    const description = data['Mapping']?.['tirol.mapservices.eu']?.[`publicDescription.${lang}`]
-      || data['Mapping']?.['tirol.mapservices.eu']?.['publicDescription.en']
-      || data['Mapping']?.['tirol.mapservices.eu']?.['description']
-      || data['Mapping.tirol.mapservices.eu.description'];
-
-    return `<div class="noi-map-layer-announcements-popup" part="popup">
-    <div class="popup__header">
-      <noi-icon class="popup__header-icon" name="route-closures" alt="icon"></noi-icon>
-      <div>${this.languageService.translate('map.cycling-roads')}</div>
-    </div>`
-
-      + (name
-        ? `<div class="popup__name">${name}</div>`
-        : '')
-
-      + (description
-        ? `<div class="popup__description">${sanitizeText(description)}</div>`
-        : '')
-
-      + (data['StartTime']
-        ? `<div class="popup__section">
-          <div class="popup__section-name">${this.languageService.translate('route-closures.start-time')}</div>
-          <div class="popup__section-value">${data['StartTime']}</div>
-        </div>`
-        : '')
-
-      + (data['EndTime']
-        ? `<div class="popup__section">
-          <div class="popup__section-name">${this.languageService.translate('route-closures.end-time')}</div>
-          <div class="popup__section-value">${data['EndTime']}</div>
-        </div>`
-        : '')
-      + `
-  </div>`;
   }
 
+}
+
+/**
+ */
+function _popupBuilder(def: PopupDefinition): string {
+
+  let popupContent = '';
+  if (def.title) {
+
+    let popupTitleContent = '';
+    if (def.title?.icon) {
+      popupTitleContent += `<noi-icon className="popup__header-icon" name="${def.title.icon}" alt="icon"></noi-icon>`;
+    }
+    if (def.title?.text) {
+      popupTitleContent += `<div>${def.title.text}</div>`;
+    }
+
+    popupContent += `<div class="popup__header">${popupTitleContent}</div>`;
+  }
+
+  for (const bDef of def.body) {
+
+    if (bDef.type === 'name') {
+      popupContent += `<div class="popup__name">${bDef.text}</div>`;
+    }
+    if (bDef.type === 'description') {
+      popupContent += `<div class="popup__description">${sanitizeText(bDef.text)}</div>`;
+    }
+    if (bDef.type === 'section') {
+      popupContent += `<div class="popup__section">
+          <div class="popup__section-name">${bDef.section.name}</div>
+          <div class="popup__section-value">${bDef.section.value}</div>
+        </div>`;
+    }
+  }
+  return `<div class="noi-map-layer-announcements-popup" part="popup">${popupContent}</div>`;
 }
 
 // Feature popup helper
@@ -530,17 +539,4 @@ function createDebugPopup(feature, featureType) {
   });
 
   return html;
-}
-
-
-function sanitizeText(innerHtml: string) {
-  // 1. Create a temporary element (not a text node)
-  const tempElement = document.createElement('div');
-
-// 2. Insert your HTML string
-  tempElement.innerHTML = innerHtml;
-
-// 3. Extract clean text with no styles or tags
-  const cleanText = tempElement.textContent || "";
-  return cleanText;
 }

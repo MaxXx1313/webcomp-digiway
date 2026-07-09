@@ -180,6 +180,7 @@ export class NoiDigiwayComponent implements StencilComponent {
 
   activateLayer(layer: string, isActive: boolean) {
     if (isActive) {
+      // activate layer
       if (!this.layersActive.includes(layer)) {
         this.layersActive.push(layer);
         this.layersActive = [...this.layersActive];
@@ -188,10 +189,21 @@ export class NoiDigiwayComponent implements StencilComponent {
         this._setLayerLoading(layer, true);
       }
     } else {
+      // deactivate layers
       this.layersActive = this.layersActive.filter(l => l !== layer);
 
       // also clear loading state in case it's still loading
       this._setLayerLoading(layer, false);
+
+      // TODO: deactivate nested layers
+      if (layer === 'layer-cycling') {
+        const layersNested = this.cyclingDataLayers.map(dl => dl.value);
+
+        this.layersActive = this.layersActive.filter(l => !layersNested.includes(l));
+        for (const l of layersNested) {
+          this._setLayerLoading(l, false);
+        }
+      }
     }
 
     // recalculate _isGrayscaleMap

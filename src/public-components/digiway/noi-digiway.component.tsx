@@ -240,14 +240,41 @@ export class NoiDigiwayComponent implements StencilComponent {
             ? <noi-map-layer-risk-exposure
               onLayerLoading={(e) => this._setLayerLoading('layer-exposure', e.detail)}></noi-map-layer-risk-exposure>
             : ''}
+
           {this.layersActive.includes('layer-closures')
             ? <noi-map-layer-announcements
+              key="layer-closures"
               onLayerLoading={(e) => this._setLayerLoading('layer-closures', e.detail)}></noi-map-layer-announcements>
             : ''}
+
           {this.layersActive.includes('layer-cycling-tyrol')
             ? <noi-map-layer-cycling-roads
+              key="layer-cycling-tyrol"
+              region="tyrol"
               onLayerLoading={(e) => this._setLayerLoading('layer-cycling-tyrol', e.detail)}></noi-map-layer-cycling-roads>
             : ''}
+
+          {this.layersActive.includes('layer-cycling-bolzano-prov')
+            ? <noi-map-layer-cycling-roads
+              key="layer-cycling-bolzano-prov"
+              region="bolzano-prov"
+              onLayerLoading={(e) => this._setLayerLoading('layer-cycling-bolzano-prov', e.detail)}></noi-map-layer-cycling-roads>
+            : ''}
+
+          {this.layersActive.includes('layer-cycling-bolzano-int')
+            ? <noi-map-layer-cycling-roads
+              key="layer-cycling-bolzano-int"
+              region="bolzano-int"
+              onLayerLoading={(e) => this._setLayerLoading('layer-cycling-bolzano-int', e.detail)}></noi-map-layer-cycling-roads>
+            : ''}
+
+          {this.layersActive.includes('layer-cycling-trento')
+            ? <noi-map-layer-cycling-roads
+              key="layer-cycling-bolzano-trento"
+              region="trento"
+              onLayerLoading={(e) => this._setLayerLoading('layer-cycling-trento', e.detail)}></noi-map-layer-cycling-roads>
+            : ''}
+
         </noi-map>
         {this._renderLegend()}
         <div class={this.isMenuOpened ? "sidebar-backdrop open" : "sidebar-backdrop"}

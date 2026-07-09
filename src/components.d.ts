@@ -122,6 +122,7 @@ export namespace Components {
      * (INTERNAL) render map layer
      */
     interface NoiMapLayerCyclingRoads {
+        "region": 'tyrol' | 'bolzano-prov' | 'bolzano-int' | 'trento';
     }
     /**
      * (INTERNAL) render map layer
@@ -395,6 +396,8 @@ declare global {
     }
 }
 declare namespace LocalJSX {
+    type OneOf<K extends string, PropT, AttrT = PropT> = { [P in K]: PropT } & { [P in `attr:${K}` | `prop:${K}`]?: never } | { [P in `attr:${K}`]: AttrT } & { [P in K | `prop:${K}`]?: never } | { [P in `prop:${K}`]: PropT } & { [P in K | `attr:${K}`]?: never };
+
     /**
      * (INTERNAL) render a checkbox
      */
@@ -520,6 +523,7 @@ declare namespace LocalJSX {
           * Emitted when layer data is loading
          */
         "onLayerLoading"?: (event: NoiMapLayerCyclingRoadsCustomEvent<boolean>) => void;
+        "region": 'tyrol' | 'bolzano-prov' | 'bolzano-int' | 'trento';
     }
     /**
      * (INTERNAL) render map layer
@@ -583,6 +587,9 @@ declare namespace LocalJSX {
     interface NoiMapBaseTirolAttributes {
         "variant": 'color' | 'grayscale';
     }
+    interface NoiMapLayerCyclingRoadsAttributes {
+        "region": 'tyrol' | 'bolzano-prov' | 'bolzano-int' | 'trento';
+    }
     interface NoiSelectAttributes {
         "disabled": boolean;
         "value": string;
@@ -598,7 +605,7 @@ declare namespace LocalJSX {
         "noi-map-base-tirol": Omit<NoiMapBaseTirol, keyof NoiMapBaseTirolAttributes> & { [K in keyof NoiMapBaseTirol & keyof NoiMapBaseTirolAttributes]?: NoiMapBaseTirol[K] } & { [K in keyof NoiMapBaseTirol & keyof NoiMapBaseTirolAttributes as `attr:${K}`]?: NoiMapBaseTirolAttributes[K] } & { [K in keyof NoiMapBaseTirol & keyof NoiMapBaseTirolAttributes as `prop:${K}`]?: NoiMapBaseTirol[K] };
         "noi-map-layer-announcements": NoiMapLayerAnnouncements;
         "noi-map-layer-base-odh": NoiMapLayerBaseOdh;
-        "noi-map-layer-cycling-roads": NoiMapLayerCyclingRoads;
+        "noi-map-layer-cycling-roads": Omit<NoiMapLayerCyclingRoads, keyof NoiMapLayerCyclingRoadsAttributes> & { [K in keyof NoiMapLayerCyclingRoads & keyof NoiMapLayerCyclingRoadsAttributes]?: NoiMapLayerCyclingRoads[K] } & { [K in keyof NoiMapLayerCyclingRoads & keyof NoiMapLayerCyclingRoadsAttributes as `attr:${K}`]?: NoiMapLayerCyclingRoadsAttributes[K] } & { [K in keyof NoiMapLayerCyclingRoads & keyof NoiMapLayerCyclingRoadsAttributes as `prop:${K}`]?: NoiMapLayerCyclingRoads[K] } & OneOf<"region", NoiMapLayerCyclingRoads["region"], NoiMapLayerCyclingRoadsAttributes["region"]>;
         "noi-map-layer-risk-exposure": NoiMapLayerRiskExposure;
         "noi-select": Omit<NoiSelect, keyof NoiSelectAttributes> & { [K in keyof NoiSelect & keyof NoiSelectAttributes]?: NoiSelect[K] } & { [K in keyof NoiSelect & keyof NoiSelectAttributes as `attr:${K}`]?: NoiSelectAttributes[K] } & { [K in keyof NoiSelect & keyof NoiSelectAttributes as `prop:${K}`]?: NoiSelect[K] };
         "noi-spinner": NoiSpinner;

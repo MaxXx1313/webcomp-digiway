@@ -86,6 +86,8 @@ export interface PopupDefinition {
   }>;
 }
 
+let _uid_seed = 0;
+
 /**
  * (INTERNAL) render map layer
  */
@@ -96,7 +98,6 @@ export interface PopupDefinition {
 })
 export class NoiMapLayerBaseOdhComponent implements StencilComponent {
 
-  static _uid_seed = 0;
   private _uid = -1;
 
 
@@ -126,13 +127,18 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
   private _subscriptions: Subscription[] = [];
 
   constructor() {
-    this._uid = NoiMapLayerBaseOdhComponent._uid_seed++;
+    this._uid = (_uid_seed++);
+  }
+
+  componentWillLoad() {
   }
 
 
   async connectedCallback() {
     // 1. Find the parent map element in the DOM tree
     const mapParent = this.el.closest('noi-map') as HTMLNoiMapElement;
+
+    this.el.setAttribute('data-id', this._uid + '');
 
     if (!mapParent) {
       console.error('[noi-map-layer-base-odh] must be a child of my-map');
@@ -164,7 +170,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
    *
    */
   destroyLayer() {
-    console.log('[noi-map-layer-base-odh] Removing layer from map');
+    console.log(`[noi-map-layer-base-odh] Removing layer from map (${this._uid})`);
 
     for (const subscription of this._subscriptions) {
       subscription.unsubscribe();
@@ -179,9 +185,9 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
       this.map.removeLayer(this.uid('clusters'));
       this.map.removeLayer(this.uid('cluster-count'));
       this.map.removeLayer(this.uid('unclusteredpoints'));
-      this.map.removeLayer(this.uid('unclustered-icons'));
 
       if (this.config.markerIconSVG) {
+        this.map.removeLayer(this.uid('unclustered-icons'));
         this.map.removeImage(this.uid('marker-icon'));
       }
       this.map.removeSource(this.uid('vector-tiles'));
@@ -202,7 +208,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
 
     this.tileSource = `${HOST}/api/tiles/${sourceLayer}/{z}/{x}/{y}.pbf${additional}`;
 
-    console.log(`[noi-map-layer-base-odh] Adding layer to map`);
+    console.log(`[noi-map-layer-base-odh] Adding layer to map (${this._uid})`);
     const sourceId = this.uid('vector-tiles');
 
 

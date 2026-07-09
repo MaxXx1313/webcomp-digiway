@@ -2,10 +2,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { Component, Event, EventEmitter, h } from "@stencil/core";
+import { Component, Event, EventEmitter, h, Prop } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
 import { LayerConfig } from "../map-layer-base-odh/noi-map-layer-base-odh.component";
-
 
 
 /**
@@ -23,19 +22,41 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
    */
   @Event() layerLoading: EventEmitter<boolean>;
 
+  /**
+   */
+  @Prop({mutable: false})
+  region!: 'tyrol' | 'bolzano-prov' | 'bolzano-int' | 'trento';
 
   // private languageService = LanguageDataService.getInstance();
 
-  private config: LayerConfig = {
-    sourceLayer: "spatialdata",
-    additional: '?source=dservices3.arcgis.com&tagfilter=radrouten_tirol',
+  private config: { [key: string]: LayerConfig } = {
+    'tyrol': {
+      sourceLayer: "spatialdata",
+      additional: '?source=dservices3.arcgis.com&tagfilter=radrouten_tirol',
+      // additional: '?source=dservices3.arcgis.com&tagfilter=radrouten_tirol&operationmode=pointsandtracks',
+    },
+    'bolzano-prov': {
+      sourceLayer: "spatialdata",
+      additional: '?source=civis.geoserver&tagfilter=cyclewaystyrol&operationmode=pointsandtracks',
+    },
+    'bolzano-int': {
+      sourceLayer: "spatialdata",
+      additional: '?source=civis.geoserver&tagfilter=intermunicipalcyclingroutes&operationmode=pointsandtracks&displaytracksonzoomlevel=10',
+    },
+    'trento': {
+      sourceLayer: "spatialdata",
+      additional: '?source=siat.provincia.tn.it&tagfilter=elementi_cicloviari_v&operationmode=pointsandtracks',
+    },
   }
 
-  constructor() {
+  private regionConfig!: LayerConfig;
+
+  connectedCallback() {
+    this.regionConfig = this.config[this.region];
   }
 
   render(): any {
-    return (<noi-map-layer-base-odh config={this.config}
+    return (<noi-map-layer-base-odh config={this.regionConfig}
                                     onLayerLoading={(e) => this.layerLoading.emit(e.detail)}
     ></noi-map-layer-base-odh>)
   }

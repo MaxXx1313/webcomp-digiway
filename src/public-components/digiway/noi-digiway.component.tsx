@@ -234,6 +234,10 @@ export class NoiDigiwayComponent implements StencilComponent {
             ? <noi-map-layer-announcements
               onLayerLoading={(e) => this._setLayerLoading('layer-closures', e.detail)}></noi-map-layer-announcements>
             : ''}
+          {this.layersActive.includes('layer-poi')
+            ? <noi-map-layer-cycling-roads
+              onLayerLoading={(e) => this._setLayerLoading('layer-poi', e.detail)}></noi-map-layer-cycling-roads>
+            : ''}
         </noi-map>
         {this._renderLegend()}
         <div class={this.isMenuOpened ? "sidebar-backdrop open" : "sidebar-backdrop"}

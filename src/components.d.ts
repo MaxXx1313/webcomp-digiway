@@ -112,6 +112,24 @@ export namespace Components {
     /**
      * (INTERNAL) render map layer
      */
+    interface NoiMapLayerBaseOdh {
+        /**
+          * @default ''
+         */
+        "additional": string;
+        /**
+          * @default ''
+         */
+        "sourceLayer": string;
+    }
+    /**
+     * (INTERNAL) render map layer
+     */
+    interface NoiMapLayerCyclingRoads {
+    }
+    /**
+     * (INTERNAL) render map layer
+     */
     interface NoiMapLayerRiskExposure {
     }
     /**
@@ -148,6 +166,14 @@ export interface NoiMapCustomEvent<T> extends CustomEvent<T> {
 export interface NoiMapLayerAnnouncementsCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLNoiMapLayerAnnouncementsElement;
+}
+export interface NoiMapLayerBaseOdhCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLNoiMapLayerBaseOdhElement;
+}
+export interface NoiMapLayerCyclingRoadsCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLNoiMapLayerCyclingRoadsElement;
 }
 export interface NoiMapLayerRiskExposureCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -265,6 +291,47 @@ declare global {
         prototype: HTMLNoiMapLayerAnnouncementsElement;
         new (): HTMLNoiMapLayerAnnouncementsElement;
     };
+    interface HTMLNoiMapLayerBaseOdhElementEventMap {
+        "popup": { checked: boolean };
+        "layerLoading": boolean;
+    }
+    /**
+     * (INTERNAL) render map layer
+     */
+    interface HTMLNoiMapLayerBaseOdhElement extends Components.NoiMapLayerBaseOdh, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLNoiMapLayerBaseOdhElementEventMap>(type: K, listener: (this: HTMLNoiMapLayerBaseOdhElement, ev: NoiMapLayerBaseOdhCustomEvent<HTMLNoiMapLayerBaseOdhElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLNoiMapLayerBaseOdhElementEventMap>(type: K, listener: (this: HTMLNoiMapLayerBaseOdhElement, ev: NoiMapLayerBaseOdhCustomEvent<HTMLNoiMapLayerBaseOdhElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLNoiMapLayerBaseOdhElement: {
+        prototype: HTMLNoiMapLayerBaseOdhElement;
+        new (): HTMLNoiMapLayerBaseOdhElement;
+    };
+    interface HTMLNoiMapLayerCyclingRoadsElementEventMap {
+        "layerLoading": boolean;
+    }
+    /**
+     * (INTERNAL) render map layer
+     */
+    interface HTMLNoiMapLayerCyclingRoadsElement extends Components.NoiMapLayerCyclingRoads, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLNoiMapLayerCyclingRoadsElementEventMap>(type: K, listener: (this: HTMLNoiMapLayerCyclingRoadsElement, ev: NoiMapLayerCyclingRoadsCustomEvent<HTMLNoiMapLayerCyclingRoadsElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLNoiMapLayerCyclingRoadsElementEventMap>(type: K, listener: (this: HTMLNoiMapLayerCyclingRoadsElement, ev: NoiMapLayerCyclingRoadsCustomEvent<HTMLNoiMapLayerCyclingRoadsElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLNoiMapLayerCyclingRoadsElement: {
+        prototype: HTMLNoiMapLayerCyclingRoadsElement;
+        new (): HTMLNoiMapLayerCyclingRoadsElement;
+    };
     interface HTMLNoiMapLayerRiskExposureElementEventMap {
         "layerLoading": boolean;
     }
@@ -325,6 +392,8 @@ declare global {
         "noi-map-base-osm": HTMLNoiMapBaseOsmElement;
         "noi-map-base-tirol": HTMLNoiMapBaseTirolElement;
         "noi-map-layer-announcements": HTMLNoiMapLayerAnnouncementsElement;
+        "noi-map-layer-base-odh": HTMLNoiMapLayerBaseOdhElement;
+        "noi-map-layer-cycling-roads": HTMLNoiMapLayerCyclingRoadsElement;
         "noi-map-layer-risk-exposure": HTMLNoiMapLayerRiskExposureElement;
         "noi-select": HTMLNoiSelectElement;
         "noi-spinner": HTMLNoiSpinnerElement;
@@ -440,6 +509,33 @@ declare namespace LocalJSX {
     /**
      * (INTERNAL) render map layer
      */
+    interface NoiMapLayerBaseOdh {
+        /**
+          * @default ''
+         */
+        "additional"?: string;
+        /**
+          * Emitted when layer data is loading
+         */
+        "onLayerLoading"?: (event: NoiMapLayerBaseOdhCustomEvent<boolean>) => void;
+        "onPopup"?: (event: NoiMapLayerBaseOdhCustomEvent<{ checked: boolean }>) => void;
+        /**
+          * @default ''
+         */
+        "sourceLayer"?: string;
+    }
+    /**
+     * (INTERNAL) render map layer
+     */
+    interface NoiMapLayerCyclingRoads {
+        /**
+          * Emitted when layer data is loading
+         */
+        "onLayerLoading"?: (event: NoiMapLayerCyclingRoadsCustomEvent<boolean>) => void;
+    }
+    /**
+     * (INTERNAL) render map layer
+     */
     interface NoiMapLayerRiskExposure {
         /**
           * Emitted when layer data is loading
@@ -499,6 +595,10 @@ declare namespace LocalJSX {
     interface NoiMapBaseTirolAttributes {
         "variant": 'color' | 'grayscale';
     }
+    interface NoiMapLayerBaseOdhAttributes {
+        "sourceLayer": string;
+        "additional": string;
+    }
     interface NoiSelectAttributes {
         "disabled": boolean;
         "value": string;
@@ -513,6 +613,8 @@ declare namespace LocalJSX {
         "noi-map-base-osm": Omit<NoiMapBaseOsm, keyof NoiMapBaseOsmAttributes> & { [K in keyof NoiMapBaseOsm & keyof NoiMapBaseOsmAttributes]?: NoiMapBaseOsm[K] } & { [K in keyof NoiMapBaseOsm & keyof NoiMapBaseOsmAttributes as `attr:${K}`]?: NoiMapBaseOsmAttributes[K] } & { [K in keyof NoiMapBaseOsm & keyof NoiMapBaseOsmAttributes as `prop:${K}`]?: NoiMapBaseOsm[K] };
         "noi-map-base-tirol": Omit<NoiMapBaseTirol, keyof NoiMapBaseTirolAttributes> & { [K in keyof NoiMapBaseTirol & keyof NoiMapBaseTirolAttributes]?: NoiMapBaseTirol[K] } & { [K in keyof NoiMapBaseTirol & keyof NoiMapBaseTirolAttributes as `attr:${K}`]?: NoiMapBaseTirolAttributes[K] } & { [K in keyof NoiMapBaseTirol & keyof NoiMapBaseTirolAttributes as `prop:${K}`]?: NoiMapBaseTirol[K] };
         "noi-map-layer-announcements": NoiMapLayerAnnouncements;
+        "noi-map-layer-base-odh": Omit<NoiMapLayerBaseOdh, keyof NoiMapLayerBaseOdhAttributes> & { [K in keyof NoiMapLayerBaseOdh & keyof NoiMapLayerBaseOdhAttributes]?: NoiMapLayerBaseOdh[K] } & { [K in keyof NoiMapLayerBaseOdh & keyof NoiMapLayerBaseOdhAttributes as `attr:${K}`]?: NoiMapLayerBaseOdhAttributes[K] } & { [K in keyof NoiMapLayerBaseOdh & keyof NoiMapLayerBaseOdhAttributes as `prop:${K}`]?: NoiMapLayerBaseOdh[K] };
+        "noi-map-layer-cycling-roads": NoiMapLayerCyclingRoads;
         "noi-map-layer-risk-exposure": NoiMapLayerRiskExposure;
         "noi-select": Omit<NoiSelect, keyof NoiSelectAttributes> & { [K in keyof NoiSelect & keyof NoiSelectAttributes]?: NoiSelect[K] } & { [K in keyof NoiSelect & keyof NoiSelectAttributes as `attr:${K}`]?: NoiSelectAttributes[K] } & { [K in keyof NoiSelect & keyof NoiSelectAttributes as `prop:${K}`]?: NoiSelect[K] };
         "noi-spinner": NoiSpinner;
@@ -556,6 +658,14 @@ declare module "@stencil/core" {
              * (INTERNAL) render map layer
              */
             "noi-map-layer-announcements": LocalJSX.IntrinsicElements["noi-map-layer-announcements"] & JSXBase.HTMLAttributes<HTMLNoiMapLayerAnnouncementsElement>;
+            /**
+             * (INTERNAL) render map layer
+             */
+            "noi-map-layer-base-odh": LocalJSX.IntrinsicElements["noi-map-layer-base-odh"] & JSXBase.HTMLAttributes<HTMLNoiMapLayerBaseOdhElement>;
+            /**
+             * (INTERNAL) render map layer
+             */
+            "noi-map-layer-cycling-roads": LocalJSX.IntrinsicElements["noi-map-layer-cycling-roads"] & JSXBase.HTMLAttributes<HTMLNoiMapLayerCyclingRoadsElement>;
             /**
              * (INTERNAL) render map layer
              */

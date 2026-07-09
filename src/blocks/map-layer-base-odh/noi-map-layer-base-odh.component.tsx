@@ -2,22 +2,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { Component, Element, Event, EventEmitter } from "@stencil/core";
-// import * as L from 'leaflet';
-// import { Control, LatLng, Map, TileLayer } from 'leaflet';
+import { Component, Element, Event, EventEmitter, Prop } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
 import { Map, Popup, Subscription } from "maplibre-gl";
 import { listenLayerReady } from "../../utils/maplibre";
 import { LanguageDataService } from "../../data/language/language-data-service";
-import { sanitizeText } from "../../utils/html";
-
 
 const HOST = 'https://geo.api.opendatahub.testingmachine.eu';
-const SOURCE_LAYER = 'announcement';
-// const additional = '?source=tirol.mapservices.eu&operationmode=pointsandtracks&displaytracksonzoomlevel=10&jsonselector=StartTime,EndTime,Mapping[\'tirol.mapservices.eu\'].description';
-const additional = '?source=tirol.mapservices.eu&operationmode=pointsandtracks&displaytracksonzoomlevel=10&jsonselector=StartTime,EndTime,Mapping';
-
-const TILE_SOURCE = `${HOST}/api/tiles/${SOURCE_LAYER}/{z}/{x}/{y}.pbf${additional}`;
 
 // Default styles
 const defaultStyles = {
@@ -73,23 +64,42 @@ const defaultStyles = {
 };
 
 
-function uid(name: string) {
-  return 'announcements-' + name;
-}
-
 /**
  * (INTERNAL) render map layer
  */
 @Component({
-  tag: 'noi-map-layer-announcements',
-  styleUrl: 'noi-map-layer-announcements.css',
+  tag: 'noi-map-layer-base-odh',
+  styleUrl: 'noi-map-layer-base-odh.css',
   shadow: false,
 })
-export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
+export class NoiMapLayerBaseOdhComponent implements StencilComponent {
+
+  static _uid_seed = 0;
+  private _uid = -1;
+
+
+  uid(name: string) {
+    return 'base-odh-' + name + '-' + this._uid;
+  }
 
   private map: Map = null;
 
   @Element() el: HTMLElement;
+
+  /**
+   */
+  @Prop({mutable: false})
+  sourceLayer: string = '';
+
+  /**
+   */
+  @Prop({mutable: false})
+  additional: string = '';
+
+  /**
+   *
+   */
+  @Event() popup: EventEmitter<{ checked: boolean }>;
 
   /**
    * Emitted when layer data is loading
@@ -101,6 +111,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
   private languageService = LanguageDataService.getInstance();
 
   constructor() {
+    this._uid = NoiMapLayerBaseOdhComponent._uid_seed++;
   }
 
 
@@ -109,7 +120,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     const mapParent = this.el.closest('noi-map') as HTMLNoiMapElement;
 
     if (!mapParent) {
-      console.error('[noi-map-announcements] must be a child of my-map');
+      console.error('[noi-map-layer-base-odh] must be a child of my-map');
       return;
     }
 
@@ -138,7 +149,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
    *
    */
   destroyLayer() {
-    console.log('[noi-map-announcements] Removing layer from map');
+    console.log('[noi-map-layer-base-odh] Removing layer from map');
 
     for (const subscription of this._subscriptions) {
       subscription.unsubscribe();
@@ -146,26 +157,34 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     this._subscriptions = [];
 
     // Cleanup source when HTML element gets removed from DOM
-    if (this.map && this.map.getSource(uid('vector-tiles'))) {
+    if (this.map && this.map.getSource(this.uid('vector-tiles'))) {
       // Must remove dependent layers first before removing the source
-      this.map.removeLayer(uid('polygons'));
-      this.map.removeLayer(uid('lines'));
-      this.map.removeLayer(uid('clusters'));
-      this.map.removeLayer(uid('cluster-count'));
-      this.map.removeLayer(uid('unclusteredpoints'));
-      this.map.removeLayer(uid('unclustered-icons'));
+      this.map.removeLayer(this.uid('polygons'));
+      this.map.removeLayer(this.uid('lines'));
+      this.map.removeLayer(this.uid('clusters'));
+      this.map.removeLayer(this.uid('cluster-count'));
+      this.map.removeLayer(this.uid('unclusteredpoints'));
+      this.map.removeLayer(this.uid('unclustered-icons'));
 
-      this.map.removeImage('route-closures-icon');
-      this.map.removeSource(uid('vector-tiles'));
+      this.map.removeImage(this.uid('marker-icon'));
+      this.map.removeSource(this.uid('vector-tiles'));
     }
   }
+
+  private tileSource: string = '';
 
   /**
    *
    */
   initLayer() {
-    console.log(`[noi-map-announcements] Adding layer to map`);
-    const sourceId = uid('vector-tiles');
+
+    // private SOURCE_LAYER = 'spatialdata';
+    // private additional = '?source=dservices3.arcgis.com&tagfilter=radrouten_tirol';
+
+    this.tileSource = `${HOST}/api/tiles/${this.sourceLayer}/{z}/{x}/{y}.pbf${this.additional}`;
+
+    console.log(`[noi-map-layer-base-odh] Adding layer to map`);
+    const sourceId = this.uid('vector-tiles');
 
 
     // 1. Start listening to incoming source updates
@@ -175,9 +194,9 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     this._subscriptions.push(_loadEvent);
 
     // Register your vector tile configuration
-    this.map.addSource(uid('vector-tiles'), {
+    this.map.addSource(this.uid('vector-tiles'), {
       type: 'vector',
-      tiles: [TILE_SOURCE],
+      tiles: [this.tileSource],
       minzoom: 0,
       maxzoom: 22,
       promoteId: 'id' // Promotes your 'id' data property to the native feature.id hook
@@ -185,10 +204,10 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
 
     // Register layers
     this.map.addLayer({
-      id: uid('polygons'),
+      id: this.uid('polygons'),
       type: 'fill',
-      source: uid('vector-tiles'),
-      'source-layer': SOURCE_LAYER,
+      source: this.uid('vector-tiles'),
+      'source-layer': this.sourceLayer,
       filter: ['any',
         ['==', ['geometry-type'], 'Polygon'],
         ['==', ['geometry-type'], 'MultiPolygon']
@@ -197,10 +216,10 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     });
 
     this.map.addLayer({
-      id: uid('lines'),
+      id: this.uid('lines'),
       type: 'line',
-      source: uid('vector-tiles'),
-      'source-layer': SOURCE_LAYER,
+      source: this.uid('vector-tiles'),
+      'source-layer': this.sourceLayer,
       filter: ['any',
         ['==', ['geometry-type'], 'LineString'],
         ['==', ['geometry-type'], 'MultiLineString']
@@ -214,10 +233,10 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
 
     // CLUSTER CIRCLES
     this.map.addLayer({
-      id: uid('clusters'),
+      id: this.uid('clusters'),
       type: 'circle',
-      source: uid('vector-tiles'),
-      'source-layer': SOURCE_LAYER,
+      source: this.uid('vector-tiles'),
+      'source-layer': this.sourceLayer,
       filter: ['all',
         ['==', ['geometry-type'], 'Point'],
         ['==', ['get', 'cluster'], true]
@@ -246,10 +265,10 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     });
     // CLUSTER COUNT LABEL
     this.map.addLayer({
-      id: uid('cluster-count'),
+      id: this.uid('cluster-count'),
       type: 'symbol',
-      source: uid('vector-tiles'),
-      'source-layer': SOURCE_LAYER,
+      source: this.uid('vector-tiles'),
+      'source-layer': this.sourceLayer,
       filter: ['all',
         ['==', ['geometry-type'], 'Point'],
         ['==', ['get', 'cluster'], true]
@@ -265,10 +284,10 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
 
     // SINGLE POINTS
     this.map.addLayer({
-      id: uid('unclusteredpoints'),
+      id: this.uid('unclusteredpoints'),
       type: 'circle',
-      source: uid('vector-tiles'),
-      'source-layer': SOURCE_LAYER,
+      source: this.uid('vector-tiles'),
+      'source-layer': this.sourceLayer,
       filter: ['all',
         ['==', ['geometry-type'], 'Point'],
         ['!=', ['get', 'cluster'], true]
@@ -277,16 +296,16 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     });
     // ICON LAYER ON TOP OF CIRCLES
     this.map.addLayer({
-      id: uid('unclustered-icons'),
+      id: this.uid('unclustered-icons'),
       type: 'symbol',
-      source: uid('vector-tiles'),
-      'source-layer': SOURCE_LAYER,
+      source: this.uid('vector-tiles'),
+      'source-layer': this.sourceLayer,
       filter: ['all',
         ['==', ['geometry-type'], 'Point'],
         ['!=', ['get', 'cluster'], true]
       ],
       layout: {
-        'icon-image': 'route-closures-icon', // Matches the ID
+        'icon-image': this.uid('marker-icon'), // Matches the ID
         'icon-size': 1.0,               // Adjust scale if needed
         'icon-allow-overlap': true,     // Prevents icon from hiding when crowded
         'icon-ignore-placement': true
@@ -314,14 +333,14 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     img.src = svgDataUrl;
     img.onload = () => {
       // Add the image to the map style with a unique ID
-      this.map.addImage('route-closures-icon', img, {sdf: true, pixelRatio: 1});
+      this.map.addImage(this.uid('marker-icon'), img, {sdf: true, pixelRatio: 1});
     };
 
-    console.log(`Successfully registered ${uid("vector-tiles")} source.`);
+    console.log(`[noi-map-layer-base-odh] Successfully registered ${this.uid("vector-tiles")} source.`);
 
 
     ///////// Click handlers
-    const _polygonsClick = this.map.on('click', uid('polygons'), (e) => {
+    const _polygonsClick = this.map.on('click', this.uid('polygons'), (e) => {
       const feature = e.features[0];
       console.log('(debug) Clicked polygons:', feature);
       new Popup()
@@ -332,7 +351,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     this._subscriptions.push(_polygonsClick);
 
 
-    const _pointClick = this.map.on('click', uid('unclusteredpoints'), (e) => {
+    const _pointClick = this.map.on('click', this.uid('unclusteredpoints'), (e) => {
       const feature = e.features[0];
       console.log('(debug) Clicked unclusteredpoints:', feature);
       new Popup()
@@ -353,7 +372,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     // });
     // this._subscriptions.push(_linesClick);
 
-    const _clusterClick = this.map.on('click', uid('clusters'), (e) => {
+    const _clusterClick = this.map.on('click', this.uid('clusters'), (e) => {
       const feature = e.features[0] as any;
       console.log('(debug) Clicked clusters:', feature);
       this.map.easeTo({
@@ -374,8 +393,8 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     // Hover effects
     // ['unclusteredpoints', 'polygons', 'lines', 'clusters'].forEach(layerName => {
     ['unclusteredpoints', 'polygons', 'clusters'].forEach(layerName => {
-      const layer = uid(layerName);
-      const source = uid('vector-tiles');
+      const layer = this.uid(layerName);
+      const source = this.uid('vector-tiles');
 
       //
       const _layerEnter = this.map.on('mouseenter', layer, (e) => {
@@ -389,7 +408,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
         // Clear previous hover on this layer
         if (hoveredIds[layerName] !== null) {
           this.map.setFeatureState(
-            {source: source, sourceLayer: SOURCE_LAYER, id: hoveredIds[layerName]},
+            {source: source, sourceLayer: this.sourceLayer, id: hoveredIds[layerName]},
             {hover: false}
           );
         }
@@ -397,7 +416,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
         // Set new hover
         hoveredIds[layerName] = featureId;
         this.map.setFeatureState(
-          {source: source, sourceLayer: SOURCE_LAYER, id: hoveredIds[layerName]},
+          {source: source, sourceLayer: this.sourceLayer, id: hoveredIds[layerName]},
           {hover: true}
         );
       });
@@ -410,7 +429,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
         // Clear hover on this layer
         if (hoveredIds[layerName] !== null) {
           this.map.setFeatureState(
-            {source: source, sourceLayer: SOURCE_LAYER, id: hoveredIds[layerName]},
+            {source: source, sourceLayer: this.sourceLayer, id: hoveredIds[layerName]},
             {hover: false}
           );
           hoveredIds[layerName] = null;
@@ -452,7 +471,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     return `<div class="noi-map-layer-announcements-popup" part="popup">
     <div class="popup__header">
       <noi-icon class="popup__header-icon" name="route-closures" alt="icon"></noi-icon>
-      <div>${this.languageService.translate('map.route-closures')}</div>
+      <div>${this.languageService.translate('map.cycling-roads')}</div>
     </div>`
 
       + (name
@@ -511,4 +530,17 @@ function createDebugPopup(feature, featureType) {
   });
 
   return html;
+}
+
+
+function sanitizeText(innerHtml: string) {
+  // 1. Create a temporary element (not a text node)
+  const tempElement = document.createElement('div');
+
+// 2. Insert your HTML string
+  tempElement.innerHTML = innerHtml;
+
+// 3. Extract clean text with no styles or tags
+  const cleanText = tempElement.textContent || "";
+  return cleanText;
 }

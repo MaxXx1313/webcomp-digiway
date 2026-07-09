@@ -128,6 +128,9 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
 
   private _subscriptions: Subscription[] = [];
 
+  private tileSource: string = '';
+  private _popup?: Popup;
+
   constructor() {
     this._uid = (_uid_seed++);
   }
@@ -194,9 +197,10 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
       }
       this.map.removeSource(this.uid('vector-tiles'));
     }
+
+    this._popup?.remove();
   }
 
-  private tileSource: string = '';
 
   /**
    *
@@ -361,7 +365,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     const _polygonsClick = this.map.on('click', this.uid('polygons'), (e) => {
       const feature = e.features[0];
       console.log('(debug) Clicked polygons:', feature);
-      new Popup()
+      this._popup = new Popup()
         .setLngLat(e.lngLat)
         .setHTML(createDebugPopup(feature, 'Polygon'))
         .addTo(this.map);
@@ -372,7 +376,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     const _pointClick = this.map.on('click', this.uid('unclusteredpoints'), (e) => {
       const feature = e.features[0];
       console.log('(debug) Clicked unclusteredpoints:', feature);
-      new Popup()
+      this._popup = new Popup()
         .setLngLat(e.lngLat)
         .setHTML(this.createPopup(feature, 'Point'))
         .addTo(this.map);

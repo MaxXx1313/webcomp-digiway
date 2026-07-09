@@ -476,7 +476,7 @@ function _popupBuilder(def: PopupDefinition): string {
 
     let popupTitleContent = '';
     if (def.title?.icon) {
-      popupTitleContent += `<noi-icon className="popup__header-icon" name="${def.title.icon}" alt="icon"></noi-icon>`;
+      popupTitleContent += `<noi-icon class="popup__header-icon" name="${def.title.icon}" alt="icon"></noi-icon>`;
     }
     if (def.title?.text) {
       popupTitleContent += `<div>${def.title.text}</div>`;
@@ -503,7 +503,7 @@ function _popupBuilder(def: PopupDefinition): string {
         </div>`;
     }
   }
-  return `<div class="noi-map-layer-announcements-popup" part="popup">${popupContent}</div>`;
+  return `<div class="noi-map-popup" part="popup">${popupContent}</div>`;
 }
 
 // Feature popup helper

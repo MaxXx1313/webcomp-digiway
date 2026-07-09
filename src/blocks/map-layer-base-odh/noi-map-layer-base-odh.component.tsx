@@ -494,6 +494,9 @@ function _popupBuilder(def: PopupDefinition): string {
       popupContent += `<div class="popup__description">${sanitizeText(bDef.text)}</div>`;
     }
     if (bDef.type === 'section') {
+      if (bDef.section?.value === null || bDef.section?.value === undefined) {
+        continue;
+      }
       popupContent += `<div class="popup__section">
           <div class="popup__section-name">${bDef.section.name}</div>
           <div class="popup__section-value">${bDef.section.value}</div>

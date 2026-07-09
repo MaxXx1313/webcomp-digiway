@@ -33,29 +33,41 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
     'tyrol': {
       sourceLayer: "spatialdata",
       additional: '?source=dservices3.arcgis.com&tagfilter=radrouten_tirol',
-      // additional: '?source=dservices3.arcgis.com&tagfilter=radrouten_tirol&operationmode=pointsandtracks',
+      // additional: '?source=dservices3.arcgis.com&tagfilter=radrouten_tirol&operationmode=pointsandtracks', // TODO: calrify
+      center: [11.06, 47.27],
+      zoom: 10
     },
     'bolzano-prov': {
       sourceLayer: "spatialdata",
       additional: '?source=civis.geoserver&tagfilter=cyclewaystyrol&operationmode=pointsandtracks',
+      center: [10.98, 46.88],
+      zoom: 10
     },
     'bolzano-int': {
       sourceLayer: "spatialdata",
       additional: '?source=civis.geoserver&tagfilter=intermunicipalcyclingroutes&operationmode=pointsandtracks&displaytracksonzoomlevel=10',
+      center: [11.35, 46.5],
+      zoom: 10
     },
     'trento': {
       sourceLayer: "spatialdata",
       additional: '?source=siat.provincia.tn.it&tagfilter=elementi_cicloviari_v&operationmode=pointsandtracks',
+      center: [11.12, 46.07],
+      zoom: 10
     },
 
 
     'mountainbikeroutes': {
       sourceLayer: "spatialdata",
       additional: '?source=civis.geoserver&tagfilter=mountainbikeroutes&operationmode=pointsandtracks&displaytracksonzoomlevel=10',
+      center: [11.35, 46.5],
+      zoom: 10
     },
     'mtb_percorsi_v': {
       sourceLayer: "spatialdata",
       additional: '?source=siat.provincia.tn.it&tagfilter=mtb_percorsi_v&operationmode=pointsandtracks',
+      center: [11.12, 46.07],
+      zoom: 10
     },
   }
 

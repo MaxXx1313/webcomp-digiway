@@ -67,6 +67,8 @@ export interface LayerConfig {
   markerIconSVG?: string;
   sourceLayer: string;
   additional: string;
+  center?: [number, number];
+  zoom?: number;
 }
 
 export interface PopupDefinition {
@@ -288,6 +290,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
         'circle-opacity': 0.85
       }
     });
+
     // CLUSTER COUNT LABEL
     this.map.addLayer({
       id: this.uid('cluster-count'),
@@ -320,8 +323,9 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
       paint: defaultStyles.unclusteredpoints as any,
     });
 
+
+    // ICON LAYER ON TOP OF CIRCLES
     if (this.config.markerIconSVG) {
-      // ICON LAYER ON TOP OF CIRCLES
       this.map.addLayer({
         id: this.uid('unclustered-icons'),
         type: 'symbol',
@@ -351,6 +355,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     }
     console.log(`[noi-map-layer-base-odh] Successfully registered ${this.uid("vector-tiles")} source.`);
 
+    this.resetPosition();
 
     ///////// Click handlers
     const _polygonsClick = this.map.on('click', this.uid('polygons'), (e) => {
@@ -458,6 +463,15 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
       console.log('[DEBUG] Vector features:', features.filter(f => f.source === 'vector-tiles'));
     });
     this._subscriptions.push(_debugClick);
+  }
+
+  resetPosition() {
+    if (this.config.center || this.config.zoom) {
+      this.map.flyTo({
+        center: this.config.center ?? undefined,
+        zoom: this.config.zoom ?? undefined,
+      });
+    }
   }
 
   // Feature popup helper

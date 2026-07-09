@@ -452,7 +452,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     return `<div class="noi-map-layer-announcements-popup" part="popup">
     <div class="popup__header">
       <noi-icon class="popup__header-icon" name="route-closures" alt="icon"></noi-icon>
-      <div>${this.languageService.translate('map.route-closures')}</div>
+      <div>${this.languageService.translate('map.layer.route-closures')}</div>
     </div>`
 
       + (name

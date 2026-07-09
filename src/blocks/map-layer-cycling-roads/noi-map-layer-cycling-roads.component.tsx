@@ -4,7 +4,8 @@
 
 import { Component, Event, EventEmitter, h, Prop } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
-import { LayerConfig } from "../map-layer-base-odh/noi-map-layer-base-odh.component";
+import { LayerConfig, PopupDefinition } from "../map-layer-base-odh/noi-map-layer-base-odh.component";
+import { LanguageDataService } from "../../data/language/language-data-service";
 
 
 /**
@@ -72,6 +73,7 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
   }
 
   private regionConfig!: LayerConfig;
+  private languageService = LanguageDataService.getInstance();
 
   connectedCallback() {
     this.regionConfig = this.config[this.region];
@@ -79,8 +81,26 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
 
   render(): any {
     return (<noi-map-layer-base-odh config={this.regionConfig}
+                                    popupStructure={this.createPopup.bind(this)}
                                     onLayerLoading={(e) => this.layerLoading.emit(e.detail)}
     ></noi-map-layer-base-odh>)
+  }
+
+
+  // Feature popup helper
+  createPopup(feature/*, featureType*/): PopupDefinition | string {
+    const description = feature.properties.data;
+
+    return {
+      title: {
+        icon: 'pointer-alert',
+        text: this.languageService.translate(this.region),
+      },
+      body: [
+        {type: 'name', text: description},
+      ],
+    };
+
   }
 
 }

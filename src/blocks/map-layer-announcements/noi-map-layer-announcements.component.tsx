@@ -85,7 +85,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
 
     return {
       title: {
-        icon: 'route-closures',
+        icon: 'pointer-off',
         text: this.languageService.translate('map.layer.route-closures'),
       },
       body: [

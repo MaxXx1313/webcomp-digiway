@@ -89,13 +89,11 @@ export class NoiDigiwayComponent implements StencilComponent {
     // {value: 'layer-poi', text: 'map.layer-poi', icon: 'group'},
   ];
 
-  private poiDataLayers: DataLayerOption[] = [
-    {value: 'layer-poi-culture', text: 'map.layer.poi-culture', forceGrayscale: false},
-    {value: 'layer-poi-services', text: 'map.layer.poi-services', forceGrayscale: false},
-    {value: 'layer-poi-summer', text: 'map.layer.poi-summer', forceGrayscale: false},
-    {value: 'layer-poi-winter', text: 'map.layer.poi-winter', forceGrayscale: false},
-    {value: 'layer-poi-wellness', text: 'map.layer.poi-wellness', forceGrayscale: false},
-    {value: 'layer-poi-other', text: 'map.layer.poi-other', forceGrayscale: false},
+  private cyclingDataLayers: DataLayerOption[] = [
+    {value: 'layer-cycling-tyrol', text: 'map.layer.cycling-tyrol', forceGrayscale: false},
+    {value: 'layer-cycling-bolzano-prov', text: 'map.layer.cycling-bolzano-prov', forceGrayscale: false},
+    {value: 'layer-cycling-bolzano-int', text: 'map.layer.cycling-bolzano-int', forceGrayscale: false},
+    {value: 'layer-cycling-trento', text: 'map.layer.cycling-trento', forceGrayscale: false},
   ];
 
   // private contentLayers: SelectOption[] = [
@@ -234,9 +232,9 @@ export class NoiDigiwayComponent implements StencilComponent {
             ? <noi-map-layer-announcements
               onLayerLoading={(e) => this._setLayerLoading('layer-closures', e.detail)}></noi-map-layer-announcements>
             : ''}
-          {this.layersActive.includes('layer-poi')
+          {this.layersActive.includes('layer-cycling-tyrol')
             ? <noi-map-layer-cycling-roads
-              onLayerLoading={(e) => this._setLayerLoading('layer-poi', e.detail)}></noi-map-layer-cycling-roads>
+              onLayerLoading={(e) => this._setLayerLoading('layer-cycling-tyrol', e.detail)}></noi-map-layer-cycling-roads>
             : ''}
         </noi-map>
         {this._renderLegend()}
@@ -290,17 +288,17 @@ export class NoiDigiwayComponent implements StencilComponent {
             </noi-checkbox>
           )}
 
-          <noi-checkbox-group class="p-bottom-small" open={this.layersActive.includes('layer-poi')}>
+          <noi-checkbox-group class="p-bottom-small" open={this.layersActive.includes('layer-cycling')}>
             <noi-checkbox slot="main"
-                          checked={this.layersActive.includes('layer-poi')}
-                          onCheckedChange={(event) => this.activateLayer('layer-poi', event.detail.checked)}>
+                          checked={this.layersActive.includes('layer-cycling')}
+                          onCheckedChange={(event) => this.activateLayer('layer-cycling', event.detail.checked)}>
               <div class="checkbox-content">
                 <noi-icon name="pointer-alert"></noi-icon>
-                <span>{this.languageService.translate('map.layer.poi')}</span>
+                <span>{this.languageService.translate('map.layer.cycling')}</span>
               </div>
             </noi-checkbox>
 
-            {this.poiDataLayers.map(layer =>
+            {this.cyclingDataLayers.map(layer =>
               <noi-checkbox loading={this.layersLoading.includes(layer.value)}
                             checked={this.layersActive.includes(layer.value)}
                             onCheckedChange={(event) => this.activateLayer(layer.value, event.detail.checked)}>

@@ -33,8 +33,7 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
   private config: { [key: string]: LayerConfig } = {
     'tyrol': {
       sourceLayer: "spatialdata",
-      additional: '?source=dservices3.arcgis.com&tagfilter=radrouten_tirol',
-      // additional: '?source=dservices3.arcgis.com&tagfilter=radrouten_tirol&operationmode=pointsandtracks', // TODO: calrify
+      additional: '?source=dservices3.arcgis.com&tagfilter=radrouten_tirol&operationmode=pointsandtracks',
       center: [11.06, 47.27],
       zoom: 10
     },

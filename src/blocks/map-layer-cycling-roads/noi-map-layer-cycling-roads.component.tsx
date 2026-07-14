@@ -5,7 +5,6 @@
 import { Component, Event, EventEmitter, h, Prop } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
 import { LayerConfig, PopupDefinition } from "../map-layer-base-odh/noi-map-layer-base-odh.component";
-import { LanguageDataService } from "../../data/language/language-data-service";
 
 
 /**
@@ -27,6 +26,16 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
    */
   @Prop({mutable: false})
   region!: 'tyrol' | 'bolzano-prov' | 'bolzano-int' | 'trento' | 'mountainbikeroutes' | 'mtb_percorsi_v';
+
+
+  /**
+   */
+  @Prop({mutable: false})
+  titleText?: string;
+  /**
+   */
+  @Prop({mutable: false})
+  titleIcon?: string;
 
   // private languageService = LanguageDataService.getInstance();
 
@@ -81,17 +90,7 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
     },
   }
 
-  private _headers = {
-    'tyrol': 'map.layer.cycling',
-    'bolzano-prov': 'map.layer.cycling',
-    'bolzano-int': 'map.layer.cycling',
-    'trento': 'map.layer.cycling',
-    'mountainbikeroutes': 'map.layer.mountain',
-    'mtb_percorsi_v': 'map.layer.mountain',
-  }
-
   private regionConfig!: LayerConfig;
-  private languageService = LanguageDataService.getInstance();
 
   connectedCallback() {
     this.regionConfig = this.config[this.region];
@@ -108,13 +107,12 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
   // Feature popup helper
   createPopup(feature/*, featureType*/): PopupDefinition | string {
 
-    const header = this._headers[this.region] || this.region;
     const description = feature.properties.data;
 
     return {
       title: {
-        icon: 'pointer-alert',
-        text: this.languageService.translate(header),
+        icon: this.titleIcon,
+        text: this.titleText,
       },
       body: [
         {type: 'name', text: description},

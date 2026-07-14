@@ -254,6 +254,8 @@ export class NoiDigiwayComponent implements StencilComponent {
             ? <noi-map-layer-cycling-roads
               key="layer-cycling-tyrol"
               region="tyrol"
+              titleIcon="bicycle"
+              titleText={this.languageService.translate('map.layer.cycling')}
               onLayerLoading={(e) => this._setLayerLoading('layer-cycling-tyrol', e.detail)}></noi-map-layer-cycling-roads>
             : ''}
 
@@ -261,6 +263,8 @@ export class NoiDigiwayComponent implements StencilComponent {
             ? <noi-map-layer-cycling-roads
               key="layer-cycling-bolzano-prov"
               region="bolzano-prov"
+              titleIcon="bicycle"
+              titleText={this.languageService.translate('map.layer.cycling')}
               onLayerLoading={(e) => this._setLayerLoading('layer-cycling-bolzano-prov', e.detail)}></noi-map-layer-cycling-roads>
             : ''}
 
@@ -268,6 +272,8 @@ export class NoiDigiwayComponent implements StencilComponent {
             ? <noi-map-layer-cycling-roads
               key="layer-cycling-bolzano-int"
               region="bolzano-int"
+              titleIcon="bicycle"
+              titleText={this.languageService.translate('map.layer.cycling')}
               onLayerLoading={(e) => this._setLayerLoading('layer-cycling-bolzano-int', e.detail)}></noi-map-layer-cycling-roads>
             : ''}
 
@@ -275,6 +281,8 @@ export class NoiDigiwayComponent implements StencilComponent {
             ? <noi-map-layer-cycling-roads
               key="layer-cycling-bolzano-trento"
               region="trento"
+              titleIcon="bicycle"
+              titleText={this.languageService.translate('map.layer.cycling')}
               onLayerLoading={(e) => this._setLayerLoading('layer-cycling-trento', e.detail)}></noi-map-layer-cycling-roads>
             : ''}
 
@@ -282,6 +290,8 @@ export class NoiDigiwayComponent implements StencilComponent {
             ? <noi-map-layer-cycling-roads
               key="layer-mountain-bolzano"
               region="mountainbikeroutes"
+              titleIcon="mountain"
+              titleText={this.languageService.translate('map.layer.mountain')}
               onLayerLoading={(e) => this._setLayerLoading('layer-mountain-bolzano', e.detail)}></noi-map-layer-cycling-roads>
             : ''}
 
@@ -289,6 +299,8 @@ export class NoiDigiwayComponent implements StencilComponent {
             ? <noi-map-layer-cycling-roads
               key="layer-mountain-trento"
               region="mtb_percorsi_v"
+              titleIcon="mountain"
+              titleText={this.languageService.translate('map.layer.mountain')}
               onLayerLoading={(e) => this._setLayerLoading('layer-mountain-trento', e.detail)}></noi-map-layer-cycling-roads>
             : ''}
 
@@ -349,7 +361,7 @@ export class NoiDigiwayComponent implements StencilComponent {
                           checked={this.layersActive.includes('layer-cycling')}
                           onCheckedChange={(event) => this.activateLayer('layer-cycling', event.detail.checked)}>
               <div class="checkbox-content">
-                <noi-icon name="pointer-alert"></noi-icon>
+                <noi-icon name="bicycle"></noi-icon>
                 <span>{this.languageService.translate('map.layer.cycling')}</span>
               </div>
             </noi-checkbox>
@@ -370,7 +382,7 @@ export class NoiDigiwayComponent implements StencilComponent {
                           checked={this.layersActive.includes('layer-mountain')}
                           onCheckedChange={(event) => this.activateLayer('layer-mountain', event.detail.checked)}>
               <div class="checkbox-content">
-                <noi-icon name="pointer-alert"></noi-icon>
+                <noi-icon name="mountain"></noi-icon>
                 <span>{this.languageService.translate('map.layer.mountain')}</span>
               </div>
             </noi-checkbox>

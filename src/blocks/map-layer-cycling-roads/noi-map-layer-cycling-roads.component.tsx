@@ -33,7 +33,7 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
   private config: { [key: string]: LayerConfig } = {
     'tyrol': {
       sourceLayer: "spatialdata",
-      additional: '?source=dservices3.arcgis.com&tagfilter=radrouten_tirol&operationmode=pointsandtracks',
+      additional: '?source=dservices3.arcgis.com&tagfilter=radrouten_tirol&operationmode=pointsandtracks&displaytracksonzoomlevel=10',
       center: [11.06, 47.27],
       zoom: 10
     },
@@ -41,7 +41,7 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
       isLineInteractive: true,
 
       sourceLayer: "spatialdata",
-      additional: '?source=civis.geoserver&tagfilter=cyclewaystyrol&operationmode=pointsandtracks',
+      additional: '?source=civis.geoserver&tagfilter=cyclewaystyrol&operationmode=pointsandtracks&displaytracksonzoomlevel=10',
       center: [10.98, 46.88],
       zoom: 10
     },
@@ -57,7 +57,7 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
       isLineInteractive: true,
 
       sourceLayer: "spatialdata",
-      additional: '?source=siat.provincia.tn.it&tagfilter=elementi_cicloviari_v&operationmode=pointsandtracks',
+      additional: '?source=siat.provincia.tn.it&tagfilter=elementi_cicloviari_v&operationmode=pointsandtracks&displaytracksonzoomlevel=10',
       center: [11.12, 46.07],
       zoom: 10
     },
@@ -75,7 +75,7 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
       isLineInteractive: true,
 
       sourceLayer: "spatialdata",
-      additional: '?source=siat.provincia.tn.it&tagfilter=mtb_percorsi_v&operationmode=pointsandtracks',
+      additional: '?source=siat.provincia.tn.it&tagfilter=mtb_percorsi_v&operationmode=pointsandtracks&displaytracksonzoomlevel=10',
       center: [11.12, 46.07],
       zoom: 10
     },

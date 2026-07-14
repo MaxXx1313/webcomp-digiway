@@ -351,7 +351,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
 
       const svgDataUrl = `data:image/svg+xml;base64,${btoa(this.config.markerIconSVG)}`;
 
-      const img = new Image(13, 14); // Set desired width and height
+      const img = new Image(16, 16); // Set desired width and height
       img.src = svgDataUrl;
       img.onload = () => {
         // Add the image to the map style with a unique ID

@@ -4,7 +4,7 @@
   "base-map.tirol": "Tirol",
   "base-map.osm": "Open Street Map",
   "map.route-closures": "Streckensperrungen",
-  "map.risk-exposure": "Risikoexposition",
+  "map.risk-exposure": "Ausgesetztheit",
   "route-closures.start-time": "Startzeit",
   "route-closures.end-time": "Endzeit",
   "risk-exposure.low": "gering",

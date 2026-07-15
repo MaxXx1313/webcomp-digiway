@@ -60,6 +60,9 @@ const defaultStyles = {
   icon: {
     // You can now pass any color dynamically here!
     'icon-color': '#FFFFFF',
+  },
+  text: {
+    'text-color': '#FFFFFF',
   }
 };
 
@@ -331,32 +334,98 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
 
     // ICON LAYER ON TOP OF CIRCLES
     if (this.config.markerIconSVG) {
-      this.map.addLayer({
-        id: this.uid('unclustered-icons'),
-        type: 'symbol',
-        source: this.uid('vector-tiles'),
-        'source-layer': sourceLayer,
-        filter: ['all',
-          ['==', ['geometry-type'], 'Point'],
-          ['!=', ['get', 'cluster'], true]
-        ],
-        layout: {
-          'icon-image': this.uid('marker-icon'), // Matches the ID
-          'icon-size': 1.0,               // Adjust scale if needed
-          'icon-allow-overlap': true,     // Prevents icon from hiding when crowded
-          'icon-ignore-placement': true
-        },
-        paint: defaultStyles.icon as any,
+
+      // 1. Inject the Google Fonts Stylesheet dynamically into the browser DOM
+      if (!document.getElementById('test-icon-font-link')) {
+        const link = document.createElement('link');
+        link.id = 'test-icon-font-link';
+        link.rel = 'stylesheet';
+        link.href = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0';
+        document.head.appendChild(link);
+      }
+      // 2. Wait for the browser to download and verify the font layout
+      document.fonts.load('14px "Material Symbols Outlined"').then(() => {
+
+
+        // Layout target boundaries
+        const targetWidth = 14;
+        const targetHeight = 14;
+        const scale = 1; // 4x multiplier ensures sharp sub-pixel anti-aliasing
+
+
+        // Create an offscreen rendering surface
+        const canvas = document.createElement('canvas');
+        canvas.width = targetWidth * scale;
+        canvas.height = targetHeight * scale;
+        const ctx = canvas.getContext('2d');
+
+        if (ctx) {
+          // FORCE CRITICAL BROWSER ANTI-ALIASING ENGINE HINTS
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+
+          // Clear background canvas space completely
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // Apply scaling and text rendering layout details
+          ctx.font = `${14 * scale}px "Material Symbols Outlined"`;
+          ctx.fillStyle = '#FFFFFF'; // Target paint color
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+
+          // Render the exact hex string character ('\ue0c8' = Material Pin Marker)
+          // Placed in the absolute center of the scaled resolution zone
+          // ctx.fillText('\ue0c8', canvas.width / 2, canvas.height / 2);
+          ctx.fillText('\ue0c8', canvas.width / 2, canvas.height / 2);
+          // ctx.fillText('location_on', canvas.width / 2, canvas.height / 2);
+
+          // 4. FIX: Safely extract ImageData from the canvas.
+          // This bypasses type errors and ensures MapLibre gets pure pixel data.
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+
+          // 3. Register the crisp canvas bitmap straight into MapLibre
+          this.map.addImage(this.uid('marker-icon'), imageData as any, {
+            sdf: false,        // Keeps raw crisp canvas colors unchanged
+            pixelRatio: scale  // Shrinks the 4x vector rendering smoothly down onto screen
+          });
+        }
+        document.body.appendChild(canvas);
+
+        this.map.addLayer({
+          id: this.uid('unclustered-icons'),
+          type: 'symbol',
+          source: this.uid('vector-tiles'),
+          'source-layer': sourceLayer,
+          filter: ['all',
+            ['==', ['geometry-type'], 'Point'],
+            ['!=', ['get', 'cluster'], true]
+          ],
+
+          layout: {
+            'icon-image': this.uid('marker-icon'), // Pointing to the generated canvas
+            'icon-size': 1.0,
+            'icon-allow-overlap': true,
+            'icon-ignore-placement': true
+          },
+          // layout: {
+          //   // 1. Point the engine to your exact font asset family name
+          //   // 'text-font': ['Your Custom Icon Font Name'],
+          //   'text-font': ['Material Icons'],
+          //
+          //   // 2. Supply the exact string key mapped to your icon character
+          //   // 'text-field': 'location_on',
+          //   'text-field': '\ue0c8',
+          //
+          //   'text-size': 14, // Matches your target 13px baseline canvas constraints
+          //   'text-allow-overlap': true,
+          //   'text-ignore-placement': true
+          // },
+          // paint: defaultStyles.text as any,
+          paint: defaultStyles.icon as any,
+        });
+
       });
-
-      const svgDataUrl = `data:image/svg+xml;base64,${btoa(this.config.markerIconSVG)}`;
-
-      const img = new Image(16, 16); // Set desired width and height
-      img.src = svgDataUrl;
-      img.onload = () => {
-        // Add the image to the map style with a unique ID
-        this.map.addImage(this.uid('marker-icon'), img, {sdf: true, pixelRatio: 1});
-      };
     }
     console.log(`[noi-map-layer-base-odh] Successfully registered ${this.uid("vector-tiles")} source.`);
 

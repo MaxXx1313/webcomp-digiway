@@ -7,6 +7,7 @@ import { StencilComponent } from "../../utils/StencilComponent";
 import { Map, Popup, Subscription } from "maplibre-gl";
 import { listenLayerReady } from "../../utils/maplibre";
 import { sanitizeText } from "../../utils/html";
+import { base64String } from "./icon-font";
 
 const HOST = 'https://geo.api.opendatahub.testingmachine.eu';
 
@@ -61,13 +62,23 @@ const defaultStyles = {
     // You can now pass any color dynamically here!
     'icon-color': '#FFFFFF',
   },
-  text: {
-    'text-color': '#FFFFFF',
-  }
 };
 
+const _icons = {
+  'bicycle': '\ue800',
+  'closure': '\ue801',
+  'frequency': '\ue802',
+  'weather-prediction': '\ue803',
+  'weather-real-time': '\ue804',
+  'poi': '\ue805',
+  'transport': '\ue806',
+  'gastronomy': '\ue807',
+  'map': '\ue808',
+  'mountain-trails': '\ue809',
+} as const;
+
 export interface LayerConfig {
-  markerIconSVG?: string;
+  markerIcon?: keyof typeof _icons,
   isLineInteractive?: boolean;
   sourceLayer: string;
   additional: string;
@@ -195,7 +206,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
       this.map.removeLayer(this.uid('cluster-count'));
       this.map.removeLayer(this.uid('unclusteredpoints'));
 
-      if (this.config.markerIconSVG) {
+      if (this.config.markerIcon) {
         this.map.removeLayer(this.uid('unclustered-icons'));
         this.map.removeImage(this.uid('marker-icon'));
       }
@@ -333,25 +344,12 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
 
 
     // ICON LAYER ON TOP OF CIRCLES
-    if (this.config.markerIconSVG) {
-
-      // 1. Inject the Google Fonts Stylesheet dynamically into the browser DOM
-      if (!document.getElementById('test-icon-font-link')) {
-        const link = document.createElement('link');
-        link.id = 'test-icon-font-link';
-        link.rel = 'stylesheet';
-        link.href = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0';
-        document.head.appendChild(link);
-      }
-      // 2. Wait for the browser to download and verify the font layout
-      document.fonts.load('14px "Material Symbols Outlined"').then(() => {
-
-
+    if (this.config.markerIcon) {
+      this._loadIconFont().then(() => {
         // Layout target boundaries
         const targetWidth = 14;
         const targetHeight = 14;
         const scale = 1; // 4x multiplier ensures sharp sub-pixel anti-aliasing
-
 
         // Create an offscreen rendering surface
         const canvas = document.createElement('canvas');
@@ -368,16 +366,13 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
 
           // Apply scaling and text rendering layout details
-          ctx.font = `${14 * scale}px "Material Symbols Outlined"`;
-          ctx.fillStyle = '#FFFFFF'; // Target paint color
+          ctx.font = `${14 * scale}px "fontello"`;
+          ctx.fillStyle = defaultStyles.icon["icon-color"];  // '#FFFFFF'; // Target paint color
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
 
           // Render the exact hex string character ('\ue0c8' = Material Pin Marker)
-          // Placed in the absolute center of the scaled resolution zone
-          // ctx.fillText('\ue0c8', canvas.width / 2, canvas.height / 2);
-          ctx.fillText('\ue0c8', canvas.width / 2, canvas.height / 2);
-          // ctx.fillText('location_on', canvas.width / 2, canvas.height / 2);
+          ctx.fillText(_icons[this.config.markerIcon], canvas.width / 2, canvas.height / 2);
 
           // 4. FIX: Safely extract ImageData from the canvas.
           // This bypasses type errors and ensures MapLibre gets pure pixel data.
@@ -386,11 +381,10 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
 
           // 3. Register the crisp canvas bitmap straight into MapLibre
           this.map.addImage(this.uid('marker-icon'), imageData as any, {
-            sdf: false,        // Keeps raw crisp canvas colors unchanged
+            sdf: false,
             pixelRatio: scale  // Shrinks the 4x vector rendering smoothly down onto screen
           });
         }
-        document.body.appendChild(canvas);
 
         this.map.addLayer({
           id: this.uid('unclustered-icons'),
@@ -408,23 +402,10 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
             'icon-allow-overlap': true,
             'icon-ignore-placement': true
           },
-          // layout: {
-          //   // 1. Point the engine to your exact font asset family name
-          //   // 'text-font': ['Your Custom Icon Font Name'],
-          //   'text-font': ['Material Icons'],
-          //
-          //   // 2. Supply the exact string key mapped to your icon character
-          //   // 'text-field': 'location_on',
-          //   'text-field': '\ue0c8',
-          //
-          //   'text-size': 14, // Matches your target 13px baseline canvas constraints
-          //   'text-allow-overlap': true,
-          //   'text-ignore-placement': true
-          // },
-          // paint: defaultStyles.text as any,
           paint: defaultStyles.icon as any,
         });
 
+        console.log(`[noi-map-layer-base-odh] layer added: ${this.uid('unclustered-icons')}`);
       });
     }
     console.log(`[noi-map-layer-base-odh] Successfully registered ${this.uid("vector-tiles")} source.`);
@@ -564,6 +545,36 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     } else {
       return _popupBuilder(structure);
     }
+  }
+
+  async _loadIconFont() {
+
+    // TypeScript's internal DOM type definitions have a historical gap regarding the FontFaceSet interface, so we use 'any'
+    const documentFonts = document.fonts as any;
+
+    // 1. Check if another instance of your icon component already registered this font
+    const isAlreadyLoaded = Array.from(documentFonts.values()).some(
+      (font: any) => font.family === 'fontello'
+    );
+
+    if (isAlreadyLoaded) {
+      console.debug(`[noi-map-layer-base-odh] _loadIconFont - already loaded`);
+      return;
+    }
+
+    console.log(`[noi-map-layer-base-odh] _loadIconFont`);
+
+    // 2. Instantiate and load the font directly into memory
+    const fontelloFace = new FontFace(
+      "fontello",
+      `url(${base64String}) format('woff2')`
+    );
+
+    const fontLoadResult = await fontelloFace.load();
+    console.debug(`[noi-map-layer-base-odh] "fontello" font loaded`, fontLoadResult);
+
+    // Inject it into document.fonts so the entire page (and all shadow roots) can use it
+    documentFonts.add(fontelloFace);
   }
 
 }

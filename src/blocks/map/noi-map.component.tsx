@@ -66,7 +66,6 @@ export class NoiMapComponent implements StencilComponent {
       container: this.el,
       center: mapCenterParsed.center || {lat: 46.5, lng: 11.35},
       zoom: !isNaN(mapCenterParsed.zoom) ? mapCenterParsed.zoom : 10,
-      localIdeographFontFamily: '"fontello"'
     });
 
     // this.map.addSource('osm', {

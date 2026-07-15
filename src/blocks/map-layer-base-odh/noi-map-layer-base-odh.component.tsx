@@ -11,6 +11,8 @@ import { base64String } from "./icon-font";
 
 const HOST = 'https://geo.api.opendatahub.testingmachine.eu';
 
+const ICON_FONT_NAME = 'noi-digiway-map-icons';
+
 // Default styles
 const defaultStyles = {
   polygons: {
@@ -366,7 +368,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
 
           // Apply scaling and text rendering layout details
-          ctx.font = `${14 * scale}px "fontello"`;
+          ctx.font = `${14 * scale}px "${ICON_FONT_NAME}"`;
           ctx.fillStyle = defaultStyles.icon["icon-color"];  // '#FFFFFF'; // Target paint color
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
@@ -554,7 +556,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
 
     // 1. Check if another instance of your icon component already registered this font
     const isAlreadyLoaded = Array.from(documentFonts.values()).some(
-      (font: any) => font.family === 'fontello'
+      (font: any) => font.family === ICON_FONT_NAME
     );
 
     if (isAlreadyLoaded) {
@@ -565,16 +567,16 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     console.log(`[noi-map-layer-base-odh] _loadIconFont`);
 
     // 2. Instantiate and load the font directly into memory
-    const fontelloFace = new FontFace(
-      "fontello",
+    const iconFontFace = new FontFace(
+      ICON_FONT_NAME,
       `url(${base64String}) format('woff2')`
     );
 
-    const fontLoadResult = await fontelloFace.load();
-    console.debug(`[noi-map-layer-base-odh] "fontello" font loaded`, fontLoadResult);
+    const fontLoadResult = await iconFontFace.load();
+    console.debug(`[noi-map-layer-base-odh] icon font loaded`, fontLoadResult);
 
     // Inject it into document.fonts so the entire page (and all shadow roots) can use it
-    documentFonts.add(fontelloFace);
+    documentFonts.add(iconFontFace);
   }
 
 }

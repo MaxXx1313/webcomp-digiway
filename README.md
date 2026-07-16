@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: NOI Techpark <digital@noi.bz.it>
 SPDX-License-Identifier: CC0-1.0
 -->
 
-# Generic Map to show Open Data Hub data imported withhin the Digiway project
+# Generic Map to show Open Data Hub data imported within the Digiway project
 
 [![REUSE Compliance](https://github.com/noi-techpark/webcomp-digiway/actions/workflows/reuse.yml/badge.svg)](https://github.com/noi-techpark/odh-docs/wiki/REUSE#badges)
 [![REUSE status](https://api.reuse.software/badge/github.com/noi-techpark/webcomp-digiway)](https://api.reuse.software/info/github.com/noi-techpark/webcomp-digiway)

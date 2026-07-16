@@ -46,7 +46,7 @@ const defaultStyles = {
   unclusteredpoints: {
     'circle-radius': [
       'interpolate', ['linear'], ['zoom'],
-      0, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 8],
+      0, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 9],
       10, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 10],
       14, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 12],
       18, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 14]
@@ -349,8 +349,8 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     if (this.config.markerIcon) {
       this._loadIconFont().then(() => {
         // Layout target boundaries
-        const targetWidth = 14;
-        const targetHeight = 14;
+        const targetWidth = 16;
+        const targetHeight = 16;
         const scale = 1; // 4x multiplier ensures sharp sub-pixel anti-aliasing
 
         // Create an offscreen rendering surface
@@ -368,7 +368,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
 
           // Apply scaling and text rendering layout details
-          ctx.font = `${14 * scale}px "${ICON_FONT_NAME}"`;
+          ctx.font = `${16 * scale}px "${ICON_FONT_NAME}"`;
           ctx.fillStyle = defaultStyles.icon["icon-color"];  // '#FFFFFF'; // Target paint color
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';

@@ -5,7 +5,9 @@
  */
 
 :host {
-  display: inline-block;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
   line-height: 0; /* ignore possible whitespace */
   height: 1.5em;
   width: 1.5em;

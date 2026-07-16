@@ -72,8 +72,8 @@ export class NoiDigiwayComponent implements StencilComponent {
   isMenuOpened = false;
 
   private modes: MapSourceOption[] = [
-    {value: 'tirol', text: 'base-map.tirol'},
-    {value: 'osm', text: 'base-map.osm'},
+    {value: 'tirol', text: 'map.base.tirol'},
+    {value: 'osm', text: 'map.base.osm'},
   ];
   private modesTranslated: MapSourceOption[] = [];
   // private subModes: SelectOption[] = [
@@ -84,18 +84,23 @@ export class NoiDigiwayComponent implements StencilComponent {
 
 
   private dataLayers: DataLayerOption[] = [
-    {value: 'layer-closures', text: 'map.route-closures', icon: 'pointer-off', forceGrayscale: false},
-    {value: 'layer-exposure', text: 'map.risk-exposure', icon: 'context', forceGrayscale: true},
-    // {value: 'layer-2', text: 'Route Frequency', icon: 'group'},
+    {value: 'layer-closures', text: 'map.layer.route-closures', icon: 'pointer-off', forceGrayscale: false},
+    {value: 'layer-exposure', text: 'map.layer.risk-exposure', icon: 'context', forceGrayscale: true},
+    // {value: 'layer-poi', text: 'map.layer-poi', icon: 'group'},
   ];
 
-  // private contentLayers: SelectOption[] = [
-  //   {value: 'layer-3', text: 'Context Data', icon: 'context'},
-  //   {value: 'layer-4', text: 'Weather predictions', icon: 'weather-alert'},
-  //   {value: 'layer-5', text: 'Real-time weather data', icon: 'weather-time'},
-  //   {value: 'layer-6', text: 'Points of interest', icon: 'pointer-alert'},
-  //   {value: 'layer-7', text: 'Gastronomy locations', icon: 'fork-spoon'},
-  // ];
+  private cyclingDataLayers: DataLayerOption[] = [
+    // {value: 'layer-cycling-tyrol', text: 'map.layer.cycling-tyrol', forceGrayscale: false},
+    {value: 'layer-cycling-bolzano-prov', text: 'map.layer.cycling-bolzano-prov', forceGrayscale: false},
+    {value: 'layer-cycling-bolzano-int', text: 'map.layer.cycling-bolzano-int', forceGrayscale: false},
+    {value: 'layer-cycling-trento', text: 'map.layer.cycling-trento', forceGrayscale: false},
+  ];
+
+  private mountainDataLayers: DataLayerOption[] = [
+    {value: 'layer-mountain-bolzano', text: 'map.layer.mountain-bolzano', forceGrayscale: false},
+    {value: 'layer-mountain-trento', text: 'map.layer.mountain-trento', forceGrayscale: false},
+  ];
+
 
   @State()
   mapMode: MapSourceOption = this.modes[0];
@@ -173,6 +178,7 @@ export class NoiDigiwayComponent implements StencilComponent {
 
   activateLayer(layer: string, isActive: boolean) {
     if (isActive) {
+      // activate layer
       if (!this.layersActive.includes(layer)) {
         this.layersActive.push(layer);
         this.layersActive = [...this.layersActive];
@@ -181,10 +187,26 @@ export class NoiDigiwayComponent implements StencilComponent {
         this._setLayerLoading(layer, true);
       }
     } else {
+      // deactivate layers
       this.layersActive = this.layersActive.filter(l => l !== layer);
 
       // also clear loading state in case it's still loading
       this._setLayerLoading(layer, false);
+
+      // TODO: deactivate nested layers
+      let layersNested = [];
+      if (layer === 'layer-cycling') {
+        layersNested = this.cyclingDataLayers.map(dl => dl.value);
+      }
+
+      if (layer === 'layer-mountain') {
+        layersNested = this.mountainDataLayers.map(dl => dl.value);
+      }
+
+      this.layersActive = this.layersActive.filter(l => !layersNested.includes(l));
+      for (const l of layersNested) {
+        this._setLayerLoading(l, false);
+      }
     }
 
     // recalculate _isGrayscaleMap
@@ -221,10 +243,67 @@ export class NoiDigiwayComponent implements StencilComponent {
             ? <noi-map-layer-risk-exposure
               onLayerLoading={(e) => this._setLayerLoading('layer-exposure', e.detail)}></noi-map-layer-risk-exposure>
             : ''}
+
           {this.layersActive.includes('layer-closures')
             ? <noi-map-layer-announcements
+              key="layer-closures"
               onLayerLoading={(e) => this._setLayerLoading('layer-closures', e.detail)}></noi-map-layer-announcements>
             : ''}
+
+          {this.layersActive.includes('layer-cycling-tyrol')
+            ? <noi-map-layer-cycling-roads
+              key="layer-cycling-tyrol"
+              region="tyrol"
+              titleIcon="bicycle"
+              titleText={this.languageService.translate('map.layer.cycling')}
+              onLayerLoading={(e) => this._setLayerLoading('layer-cycling-tyrol', e.detail)}></noi-map-layer-cycling-roads>
+            : ''}
+
+          {this.layersActive.includes('layer-cycling-bolzano-prov')
+            ? <noi-map-layer-cycling-roads
+              key="layer-cycling-bolzano-prov"
+              region="bolzano-prov"
+              titleIcon="bicycle"
+              titleText={this.languageService.translate('map.layer.cycling')}
+              onLayerLoading={(e) => this._setLayerLoading('layer-cycling-bolzano-prov', e.detail)}></noi-map-layer-cycling-roads>
+            : ''}
+
+          {this.layersActive.includes('layer-cycling-bolzano-int')
+            ? <noi-map-layer-cycling-roads
+              key="layer-cycling-bolzano-int"
+              region="bolzano-int"
+              titleIcon="bicycle"
+              titleText={this.languageService.translate('map.layer.cycling')}
+              onLayerLoading={(e) => this._setLayerLoading('layer-cycling-bolzano-int', e.detail)}></noi-map-layer-cycling-roads>
+            : ''}
+
+          {this.layersActive.includes('layer-cycling-trento')
+            ? <noi-map-layer-cycling-roads
+              key="layer-cycling-bolzano-trento"
+              region="trento"
+              titleIcon="bicycle"
+              titleText={this.languageService.translate('map.layer.cycling')}
+              onLayerLoading={(e) => this._setLayerLoading('layer-cycling-trento', e.detail)}></noi-map-layer-cycling-roads>
+            : ''}
+
+          {this.layersActive.includes('layer-mountain-bolzano')
+            ? <noi-map-layer-cycling-roads
+              key="layer-mountain-bolzano"
+              region="mountainbikeroutes"
+              titleIcon="mountain"
+              titleText={this.languageService.translate('map.layer.mountain')}
+              onLayerLoading={(e) => this._setLayerLoading('layer-mountain-bolzano', e.detail)}></noi-map-layer-cycling-roads>
+            : ''}
+
+          {this.layersActive.includes('layer-mountain-trento')
+            ? <noi-map-layer-cycling-roads
+              key="layer-mountain-trento"
+              region="mtb_percorsi_v"
+              titleIcon="mountain"
+              titleText={this.languageService.translate('map.layer.mountain')}
+              onLayerLoading={(e) => this._setLayerLoading('layer-mountain-trento', e.detail)}></noi-map-layer-cycling-roads>
+            : ''}
+
         </noi-map>
         {this._renderLegend()}
         <div class={this.isMenuOpened ? "sidebar-backdrop open" : "sidebar-backdrop"}
@@ -276,6 +355,48 @@ export class NoiDigiwayComponent implements StencilComponent {
               </div>
             </noi-checkbox>
           )}
+
+          <noi-checkbox-group class="p-bottom-small" open={this.layersActive.includes('layer-cycling')}>
+            <noi-checkbox slot="main"
+                          checked={this.layersActive.includes('layer-cycling')}
+                          onCheckedChange={(event) => this.activateLayer('layer-cycling', event.detail.checked)}>
+              <div class="checkbox-content">
+                <noi-icon name="bicycle"></noi-icon>
+                <span>{this.languageService.translate('map.layer.cycling')}</span>
+              </div>
+            </noi-checkbox>
+
+            {this.cyclingDataLayers.map(layer =>
+              <noi-checkbox loading={this.layersLoading.includes(layer.value)}
+                            checked={this.layersActive.includes(layer.value)}
+                            onCheckedChange={(event) => this.activateLayer(layer.value, event.detail.checked)}>
+                <div class="checkbox-content">
+                  <span>{this.languageService.translate(layer.text)}</span>
+                </div>
+              </noi-checkbox>
+            )}
+          </noi-checkbox-group>
+
+          <noi-checkbox-group class="p-bottom-small" open={this.layersActive.includes('layer-mountain')}>
+            <noi-checkbox slot="main"
+                          checked={this.layersActive.includes('layer-mountain')}
+                          onCheckedChange={(event) => this.activateLayer('layer-mountain', event.detail.checked)}>
+              <div class="checkbox-content">
+                <noi-icon name="mountain"></noi-icon>
+                <span>{this.languageService.translate('map.layer.mountain')}</span>
+              </div>
+            </noi-checkbox>
+
+            {this.mountainDataLayers.map(layer =>
+              <noi-checkbox loading={this.layersLoading.includes(layer.value)}
+                            checked={this.layersActive.includes(layer.value)}
+                            onCheckedChange={(event) => this.activateLayer(layer.value, event.detail.checked)}>
+                <div class="checkbox-content">
+                  <span>{this.languageService.translate(layer.text)}</span>
+                </div>
+              </noi-checkbox>
+            )}
+          </noi-checkbox-group>
 
           {/*
           <div class="menu-section-header p-top p-bottom">

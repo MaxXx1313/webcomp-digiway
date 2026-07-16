@@ -1,0 +1,41 @@
+/*
+ * SPDX-FileCopyrightText: 2025 NOI Techpark <digital@noi.bz.it>
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
+:host {
+  box-sizing: border-box;
+  display: block;
+  --checkbox-border-color: var(--color-border);
+}
+
+
+/* checkbox group */
+.checkbox-group {
+}
+
+.checkbox-group noi-checkbox {
+  border: none;
+  min-height: 40px;
+}
+
+.checkbox-group-main {
+  border: 2px solid var(--checkbox-border-color);
+  border-radius: 4px;
+}
+
+.checkbox-group.open .checkbox-group-main {
+  border-radius: 4px 4px 0 0;
+}
+
+.checkbox-group-inner {
+  border: 2px solid var(--checkbox-border-color);
+  border-top: 0;
+  border-radius: 0 0 4px 4px;
+  display: none;
+}
+
+.checkbox-group.open .checkbox-group-inner {
+  display: block;
+}

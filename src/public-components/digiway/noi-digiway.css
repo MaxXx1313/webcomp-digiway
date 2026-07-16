@@ -205,7 +205,7 @@ noi-map {
   padding: 0 12px;
   flex: 1;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: scroll;
   display: flex;
   flex-direction: column;
 }
@@ -220,11 +220,6 @@ noi-map {
   gap: 0.5ch;
 }
 
-.checkbox-content__icon {
-  min-height: 1.5em;
-  min-width: 1.5em;
-  line-height: 0;
-}
 
 /* weather widget */
 .weather {

@@ -4,7 +4,7 @@
 
 import { Component, Element, Event, EventEmitter, Prop } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
-import { Map, Popup, Subscription } from "maplibre-gl";
+import { Map, MapGeoJSONFeature, MapMouseEvent, Popup, Subscription } from "maplibre-gl";
 import { listenLayerReady } from "../../utils/maplibre";
 import { sanitizeText } from "../../utils/html";
 import { base64String } from "./icon-font";
@@ -136,7 +136,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
   /**
    */
   @Prop({mutable: false})
-  popupStructure?: ((feature: any, featureType: string) => PopupDefinition | string);
+  popupStructure?: ((feature: MapGeoJSONFeature, featureType: string) => PopupDefinition | string);
 
   /**
    * Emitted when layer data is loading
@@ -147,6 +147,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
 
   private tileSource: string = '';
   private _popup?: Popup;
+  private _popupFeatureId?: string | number;
 
   constructor() {
     this._uid = (_uid_seed++);
@@ -418,10 +419,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     const _polygonsClick = this.map.on('click', this.uid('polygons'), (e) => {
       const feature = e.features[0];
       console.log('(debug) Clicked polygons:', feature);
-      this._popup = new Popup()
-        .setLngLat(e.lngLat)
-        .setHTML(createDebugPopup(feature, 'polygons'))
-        .addTo(this.map);
+      this.createFeaturePopup(feature, e.lngLat);
     });
     this._subscriptions.push(_polygonsClick);
 
@@ -429,10 +427,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     const _pointClick = this.map.on('click', this.uid('unclusteredpoints'), (e) => {
       const feature = e.features[0];
       console.log('(debug) Clicked unclusteredpoints:', feature);
-      this._popup = new Popup()
-        .setLngLat(e.lngLat)
-        .setHTML(this.createPopup(feature, 'unclusteredpoints'))
-        .addTo(this.map);
+      this.createFeaturePopup(feature, e.lngLat);
     });
     this._subscriptions.push(_pointClick);
 
@@ -441,10 +436,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
       const _linesClick = this.map.on('click', this.uid('lines'), (e) => {
         const feature = e.features[0];
         console.log('(debug) Clicked lines:', feature);
-        this._popup = new Popup()
-          .setLngLat(e.lngLat)
-          .setHTML(this.createPopup(feature, 'line'))
-          .addTo(this.map);
+        this.createFeaturePopup(feature, e.lngLat);
       });
       this._subscriptions.push(_linesClick);
     }
@@ -538,9 +530,24 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     }
   }
 
+  createFeaturePopup(feature: MapGeoJSONFeature, lngLat: MapMouseEvent['lngLat']) {
+    const featureId = feature.id;
+    if (this._popupFeatureId === featureId) {
+      return; // same popup is already opened by another event
+    }
+    this._popupFeatureId = featureId;
+    this._popup = new Popup()
+      .setLngLat(lngLat)
+      .setHTML(this._createPopupBodyHTML(feature, feature.layer.type))
+      .addTo(this.map);
+    this._popup.on('close', () => {
+      this._popupFeatureId = undefined;
+    });
+  }
+
   // Feature popup helper
-  createPopup(feature, featureType) {
-    const fn = this.popupStructure || createDebugPopup;
+  _createPopupBodyHTML(feature: MapGeoJSONFeature, featureType: string) {
+    const fn = this.popupStructure || debugPopupStructure;
     const structure = fn(feature, featureType);
     if (typeof structure === 'string') {
       return structure;
@@ -621,7 +628,7 @@ function _popupBuilder(def: PopupDefinition): string {
 }
 
 // Feature popup helper
-function createDebugPopup(feature, featureType) {
+function debugPopupStructure(feature, featureType) {
   const props = feature.properties;
   let html = `<strong>${featureType} Feature</strong><br>`;
   html += `<strong>ID:</strong> ${props.id}<br>`;

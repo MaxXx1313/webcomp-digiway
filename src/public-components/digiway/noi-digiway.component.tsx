@@ -90,7 +90,7 @@ export class NoiDigiwayComponent implements StencilComponent {
   ];
 
   private cyclingDataLayers: DataLayerOption[] = [
-    {value: 'layer-cycling-tyrol', text: 'map.layer.cycling-tyrol', forceGrayscale: false},
+    // {value: 'layer-cycling-tyrol', text: 'map.layer.cycling-tyrol', forceGrayscale: false},
     {value: 'layer-cycling-bolzano-prov', text: 'map.layer.cycling-bolzano-prov', forceGrayscale: false},
     {value: 'layer-cycling-bolzano-int', text: 'map.layer.cycling-bolzano-int', forceGrayscale: false},
     {value: 'layer-cycling-trento', text: 'map.layer.cycling-trento', forceGrayscale: false},

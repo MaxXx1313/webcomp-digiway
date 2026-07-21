@@ -16,6 +16,7 @@ const SOURCE_LAYER = 'announcement';
 // const additional = '?source=tirol.mapservices.eu&operationmode=pointsandtracks&displaytracksonzoomlevel=10&jsonselector=StartTime,EndTime,Mapping[\'tirol.mapservices.eu\'].description';
 const additional = '?source=tirol.mapservices.eu&operationmode=pointsandtracks&displaytracksonzoomlevel=10&jsonselector=StartTime,EndTime,Mapping';
 
+const TILE_SOURCE_FILTER = `${HOST}/api/tiles/${SOURCE_LAYER}/`;
 const TILE_SOURCE = `${HOST}/api/tiles/${SOURCE_LAYER}/{z}/{x}/{y}.pbf${additional}`;
 
 // Default styles
@@ -130,6 +131,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     // Clean up the layer if the HTML element is removed from the DOM
     if (this.map) {
       this.destroyLayer();
+      this.map.setTransformRequest(null);
     }
   }
 
@@ -162,7 +164,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
   /**
    *
    */
-  initLayer() {
+  async initLayer() {
     console.log(`[noi-map-announcements] Adding layer to map`);
     const sourceId = uid('vector-tiles');
 
@@ -172,6 +174,35 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
       this.layerLoading.emit(false);
     });
     this._subscriptions.push(_loadEvent);
+
+
+    // fetch desired IDs
+    const date = new Date();
+    const year = date.getFullYear();
+    // Adds a leading '0' and takes the last 2 digits
+    const month = ('0' + (date.getMonth() + 1)).slice(-2);
+    const day = ('0' + date.getDate()).slice(-2);
+
+    const dateString = `${year}${month}${day}`;
+    const ids = await fetch(`https://tourism.api.opendatahub.com/v1/Announcement?source=tirol.mapservices.eu&rawfilter=or(isnull(EndTime),gt(EndTime,'${dateString}'))&fields=Id&pagesize=0&getasidarray=true`)
+    const payload = await ids.text();
+
+    // set data source
+    // TODO: this implementatio will not work if any other component uses 'setTransformRequest'
+    this.map.setTransformRequest((url, resourceType) => {
+      // Only target requests aimed at your vector tile server
+      if (resourceType === 'Tile' && url.includes(TILE_SOURCE_FILTER)) {
+        return {
+          url: url,
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: payload,
+          // body: JSON.stringify(['urn:announcements:tirol.mapservices.eu:121795001']),
+        };
+      }
+      // Allow standard GET requests for fonts, sprites, base maps
+      return {url: url};
+    });
 
     // Register your vector tile configuration
     this.map.addSource(uid('vector-tiles'), {

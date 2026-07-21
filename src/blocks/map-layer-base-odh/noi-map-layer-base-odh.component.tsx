@@ -612,7 +612,10 @@ function _popupBuilder(def: PopupDefinition): string {
       popupContent += `<div class="popup__name">${bDef.text}</div>`;
     }
     if (bDef.type === 'description') {
-      popupContent += `<div class="popup__description">${sanitizeText(bDef.text)}</div>`;
+      if (bDef.text) {
+        popupContent += `<div class="popup__description">${sanitizeText(bDef.text)}</div>`;
+      }
+      continue;
     }
     if (bDef.type === 'section') {
       if (bDef.section?.value === null || bDef.section?.value === undefined) {

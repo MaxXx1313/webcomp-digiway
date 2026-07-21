@@ -60,6 +60,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     } catch (e) {
       console.warn(e);
     }
+    // console.log('[DEBUG] feature:', feature);
     console.log('[DEBUG] Parsed data:', data);
 
     const name = data['Mapping']?.['tirol.mapservices.eu']?.['name'];
@@ -68,7 +69,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     const description = data['Mapping']?.['tirol.mapservices.eu']?.[`publicDescription.${lang}`]
       || data['Mapping']?.['tirol.mapservices.eu']?.['publicDescription.en']
       || data['Mapping']?.['tirol.mapservices.eu']?.['description']
-      || data['Mapping.tirol.mapservices.eu.description'];
+      || "";
 
     return {
       title: {

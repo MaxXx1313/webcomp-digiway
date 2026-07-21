@@ -190,7 +190,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     const payload = await ids.text();
 
     // set data source
-    this._mapParent.setUrlTransform(TILE_SOURCE_FILTER, (url) => {
+    await this._mapParent.setUrlTransform(TILE_SOURCE_FILTER, (url) => {
       return {
         url: url,
         method: 'POST',

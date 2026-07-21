@@ -127,7 +127,7 @@ export class NoiMapComponent implements StencilComponent {
   }
 
   @Method()
-  setUrlTransform(urlPart: string, transformFn: RequestTransformFunction | null) {
+  async setUrlTransform(urlPart: string, transformFn: RequestTransformFunction | null) {
     this._tileTransforms[urlPart] = transformFn;
   }
 

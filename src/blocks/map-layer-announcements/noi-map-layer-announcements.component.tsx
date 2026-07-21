@@ -98,6 +98,8 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
 
   private _subscriptions: Subscription[] = [];
 
+  private _mapParent!: HTMLNoiMapElement;
+
   private languageService = LanguageDataService.getInstance();
 
   constructor() {
@@ -106,9 +108,9 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
 
   async connectedCallback() {
     // 1. Find the parent map element in the DOM tree
-    const mapParent = this.el.closest('noi-map') as HTMLNoiMapElement;
+    this._mapParent = this.el.closest('noi-map') as HTMLNoiMapElement;
 
-    if (!mapParent) {
+    if (!this._mapParent) {
       console.error('[noi-map-announcements] must be a child of my-map');
       return;
     }
@@ -117,7 +119,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
 
     try {
       // 2. Safely wait for the map instance to be initialized by the parent
-      this.map = await mapParent.getMapAsync();
+      this.map = await this._mapParent.getMapAsync();
 
       // 3. Add this layer to the map library instance
       this.initLayer();
@@ -131,7 +133,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     // Clean up the layer if the HTML element is removed from the DOM
     if (this.map) {
       this.destroyLayer();
-      this.map.setTransformRequest(null);
+      this._mapParent.setUrlTransform(TILE_SOURCE_FILTER, null);
     }
   }
 
@@ -188,20 +190,15 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     const payload = await ids.text();
 
     // set data source
-    // TODO: this implementatio will not work if any other component uses 'setTransformRequest'
-    this.map.setTransformRequest((url, resourceType) => {
-      // Only target requests aimed at your vector tile server
-      if (resourceType === 'Tile' && url.includes(TILE_SOURCE_FILTER)) {
-        return {
-          url: url,
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: payload,
-          // body: JSON.stringify(['urn:announcements:tirol.mapservices.eu:121795001']),
-        };
-      }
-      // Allow standard GET requests for fonts, sprites, base maps
-      return {url: url};
+    this._mapParent.setUrlTransform(TILE_SOURCE_FILTER, (url) => {
+      return {
+        url: url,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: payload,
+        // body: JSON.stringify(['urn:announcements:tirol.mapservices.eu:121795001']),
+      };
+
     });
 
     // Register your vector tile configuration

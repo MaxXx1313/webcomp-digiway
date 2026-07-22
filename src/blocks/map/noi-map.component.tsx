@@ -4,12 +4,9 @@
 
 import { Component, Element, Event, EventEmitter, Method, Prop, Watch } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
-import { Map, NavigationControl, ScaleControl } from "maplibre-gl";
+import { Map, NavigationControl, RequestTransformFunction, ScaleControl } from "maplibre-gl";
 
 
-/**
- *
- */
 /**
  * (INTERNAL) render a basic map with no layouts
  */
@@ -47,6 +44,10 @@ export class NoiMapComponent implements StencilComponent {
   });
   private _resolveMap: (map: Map) => void;
 
+
+  // NOTE: it's not intended to have multiple transforms for the same web page
+  private _tileTransforms: { [id: string]: RequestTransformFunction | null } = {};
+
   // private _layers: { [name: string]: TileLayer };
   // private _layerControl?: Control.Layers;
 
@@ -66,6 +67,22 @@ export class NoiMapComponent implements StencilComponent {
       container: this.el,
       center: mapCenterParsed.center || {lat: 46.5, lng: 11.35},
       zoom: !isNaN(mapCenterParsed.zoom) ? mapCenterParsed.zoom : 10,
+
+      // // Intercept all map network traffic
+      transformRequest: (url, resourceType) => {
+        for (const urlPart in this._tileTransforms) {
+          // Only target requests aimed at your vector tile server
+          if (resourceType === 'Tile' && url.includes(urlPart)) {
+            if (this._tileTransforms[urlPart]) {
+              return this._tileTransforms[urlPart](url, resourceType);
+            }
+            break;
+          }
+        }
+
+        // Allow standard GET requests for fonts, sprites, base maps
+        return {url: url};
+      }
     });
 
     // this.map.addSource('osm', {
@@ -107,6 +124,11 @@ export class NoiMapComponent implements StencilComponent {
     if (mapCenterParsed.zoom) {
       this.map.setZoom(mapCenterParsed.zoom);
     }
+  }
+
+  @Method()
+  async setUrlTransform(urlPart: string, transformFn: RequestTransformFunction | null) {
+    this._tileTransforms[urlPart] = transformFn;
   }
 
   _parseCenterProperty(): { center?: { lat: number, lng: number }, zoom?: number } {

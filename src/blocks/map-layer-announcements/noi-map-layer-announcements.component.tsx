@@ -16,6 +16,7 @@ const SOURCE_LAYER = 'announcement';
 // const additional = '?source=tirol.mapservices.eu&operationmode=pointsandtracks&displaytracksonzoomlevel=10&jsonselector=StartTime,EndTime,Mapping[\'tirol.mapservices.eu\'].description';
 const additional = '?source=tirol.mapservices.eu&operationmode=pointsandtracks&displaytracksonzoomlevel=10&jsonselector=StartTime,EndTime,Mapping';
 
+const TILE_SOURCE_FILTER = `${HOST}/api/tiles/${SOURCE_LAYER}/`;
 const TILE_SOURCE = `${HOST}/api/tiles/${SOURCE_LAYER}/{z}/{x}/{y}.pbf${additional}`;
 
 // Default styles
@@ -97,6 +98,8 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
 
   private _subscriptions: Subscription[] = [];
 
+  private _mapParent!: HTMLNoiMapElement;
+
   private languageService = LanguageDataService.getInstance();
 
   constructor() {
@@ -105,9 +108,9 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
 
   async connectedCallback() {
     // 1. Find the parent map element in the DOM tree
-    const mapParent = this.el.closest('noi-map') as HTMLNoiMapElement;
+    this._mapParent = this.el.closest('noi-map') as HTMLNoiMapElement;
 
-    if (!mapParent) {
+    if (!this._mapParent) {
       console.error('[noi-map-announcements] must be a child of my-map');
       return;
     }
@@ -116,7 +119,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
 
     try {
       // 2. Safely wait for the map instance to be initialized by the parent
-      this.map = await mapParent.getMapAsync();
+      this.map = await this._mapParent.getMapAsync();
 
       // 3. Add this layer to the map library instance
       this.initLayer();
@@ -130,6 +133,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     // Clean up the layer if the HTML element is removed from the DOM
     if (this.map) {
       this.destroyLayer();
+      this._mapParent.setUrlTransform(TILE_SOURCE_FILTER, null);
     }
   }
 
@@ -162,7 +166,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
   /**
    *
    */
-  initLayer() {
+  async initLayer() {
     console.log(`[noi-map-announcements] Adding layer to map`);
     const sourceId = uid('vector-tiles');
 
@@ -172,6 +176,30 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
       this.layerLoading.emit(false);
     });
     this._subscriptions.push(_loadEvent);
+
+
+    // fetch desired IDs
+    const date = new Date();
+    const year = date.getFullYear();
+    // Adds a leading '0' and takes the last 2 digits
+    const month = ('0' + (date.getMonth() + 1)).slice(-2);
+    const day = ('0' + date.getDate()).slice(-2);
+
+    const dateString = `${year}${month}${day}`;
+    const ids = await fetch(`https://tourism.api.opendatahub.com/v1/Announcement?source=tirol.mapservices.eu&rawfilter=or(isnull(EndTime),gt(EndTime,'${dateString}'))&fields=Id&pagesize=0&getasidarray=true`)
+    const payload = await ids.text();
+
+    // set data source
+    await this._mapParent.setUrlTransform(TILE_SOURCE_FILTER, (url) => {
+      return {
+        url: url,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: payload,
+        // body: JSON.stringify(['urn:announcements:tirol.mapservices.eu:121795001']),
+      };
+
+    });
 
     // Register your vector tile configuration
     this.map.addSource(uid('vector-tiles'), {

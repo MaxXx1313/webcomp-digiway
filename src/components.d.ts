@@ -11,11 +11,11 @@
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { ViewLayout } from "./utils/breakpoints";
 import { IconName } from "./blocks/icon/icon.component";
-import { Map } from "maplibre-gl";
+import { Map, RequestTransformFunction } from "maplibre-gl";
 import { SelectOption } from "./blocks/select/select.component";
 export { ViewLayout } from "./utils/breakpoints";
 export { IconName } from "./blocks/icon/icon.component";
-export { Map } from "maplibre-gl";
+export { Map, RequestTransformFunction } from "maplibre-gl";
 export { SelectOption } from "./blocks/select/select.component";
 export namespace Components {
     /**
@@ -80,6 +80,7 @@ export namespace Components {
          */
         "centermap": string;
         "getMapAsync": () => Promise<Map>;
+        "setUrlTransform": (urlPart: string, transformFn: RequestTransformFunction | null) => Promise<void>;
     }
     /**
      * (INTERNAL) render map layer

@@ -4,7 +4,14 @@
 
 import { Component, Element, Event, EventEmitter, Prop } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
-import { Map, MapGeoJSONFeature, MapMouseEvent, Popup, Subscription } from "maplibre-gl";
+import {
+  Map,
+  MapGeoJSONFeature,
+  MapMouseEvent,
+  Popup,
+  RequestTransformFunction,
+  Subscription
+} from "maplibre-gl";
 import { listenLayerReady } from "../../utils/maplibre";
 import { sanitizeText } from "../../utils/html";
 import { base64String } from "./icon-font";
@@ -86,6 +93,8 @@ export interface LayerConfig {
   additional: string;
   center?: [number, number];
   zoom?: number;
+
+  requestTransform?: RequestTransformFunction;
 }
 
 export interface PopupDefinition {
@@ -124,9 +133,6 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     return 'base-odh-' + name + '-' + this._uid;
   }
 
-  private map: Map = null;
-
-  @Element() el: HTMLElement;
 
   /**
    */
@@ -141,11 +147,18 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
   /**
    * Emitted when layer data is loading
    */
-  @Event() layerLoading: EventEmitter<boolean>;
+  @Event() layerLoading!: EventEmitter<boolean>;
+
+  private map!: Map;
+
+  @Element() el!: HTMLElement;
+
+  private _mapParent!: HTMLNoiMapElement;
 
   private _subscriptions: Subscription[] = [];
 
   private tileSource: string = '';
+  private tileSourceFilter: string = '';
   private _popup?: Popup;
   private _popupFeatureId?: string | number;
 
@@ -159,11 +172,11 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
 
   async connectedCallback() {
     // 1. Find the parent map element in the DOM tree
-    const mapParent = this.el.closest('noi-map') as HTMLNoiMapElement;
+    this._mapParent = this.el.closest('noi-map') as HTMLNoiMapElement;
 
     this.el.setAttribute('data-id', this._uid + '');
 
-    if (!mapParent) {
+    if (!this._mapParent) {
       console.error('[noi-map-layer-base-odh] must be a child of my-map');
       return;
     }
@@ -172,10 +185,10 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
 
     try {
       // 2. Safely wait for the map instance to be initialized by the parent
-      this.map = await mapParent.getMapAsync();
+      this.map = await this._mapParent.getMapAsync();
 
       // 3. Add this layer to the map library instance
-      this.initLayer();
+      await this.initLayer();
     } catch (error) {
       console.error('Failed to get map instance:', error);
     }
@@ -186,6 +199,9 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     // Clean up the layer if the HTML element is removed from the DOM
     if (this.map) {
       this.destroyLayer();
+      if (this.config.requestTransform) {
+        this._mapParent.setUrlTransform(this.tileSourceFilter, null);
+      }
     }
   }
 
@@ -223,16 +239,18 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
   /**
    *
    */
-  initLayer() {
+  async initLayer() {
+    console.log(`[noi-map-layer-base-odh] Adding layer to map (${this._uid})`);
     const sourceLayer = this.config.sourceLayer;
     const additional = this.config.additional;
 
-    // private SOURCE_LAYER = 'spatialdata';
-    // private additional = '?source=dservices3.arcgis.com&tagfilter=radrouten_tirol';
 
     this.tileSource = `${HOST}/api/tiles/${sourceLayer}/{z}/{x}/{y}.pbf${additional}`;
+    if (this.config.requestTransform) {
+      this.tileSourceFilter = `${HOST}/api/tiles/${sourceLayer}/`;
+      await this._mapParent.setUrlTransform(this.tileSourceFilter, this.config.requestTransform);
+    }
 
-    console.log(`[noi-map-layer-base-odh] Adding layer to map (${this._uid})`);
     const sourceId = this.uid('vector-tiles');
 
 
@@ -375,7 +393,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
           ctx.textBaseline = 'middle';
 
           // Render the exact hex string character ('\ue0c8' = Material Pin Marker)
-          ctx.fillText(_icons[this.config.markerIcon], canvas.width / 2, canvas.height / 2);
+          ctx.fillText(_icons[this.config.markerIcon!], canvas.width / 2, canvas.height / 2);
 
           // 4. FIX: Safely extract ImageData from the canvas.
           // This bypasses type errors and ensures MapLibre gets pure pixel data.
@@ -417,7 +435,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
 
     ///////// Click handlers
     const _polygonsClick = this.map.on('click', this.uid('polygons'), (e) => {
-      const feature = e.features[0];
+      const feature = e.features![0];
       console.log('(debug) Clicked polygons:', feature);
       this.createFeaturePopup(feature, e.lngLat);
     });
@@ -425,7 +443,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
 
 
     const _pointClick = this.map.on('click', this.uid('unclusteredpoints'), (e) => {
-      const feature = e.features[0];
+      const feature = e.features![0];
       console.log('(debug) Clicked unclusteredpoints:', feature);
       this.createFeaturePopup(feature, e.lngLat);
     });
@@ -434,7 +452,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     // 'lines' should come after 'unclusteredpoints', so we can skip it if point is clicked
     if (this.config.isLineInteractive) {
       const _linesClick = this.map.on('click', this.uid('lines'), (e) => {
-        const feature = e.features[0];
+        const feature = e.features![0];
         console.log('(debug) Clicked lines:', feature);
         this.createFeaturePopup(feature, e.lngLat);
       });
@@ -442,7 +460,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     }
 
     const _clusterClick = this.map.on('click', this.uid('clusters'), (e) => {
-      const feature = e.features[0] as any;
+      const feature = e.features![0] as any;
       console.log('(debug) Clicked clusters:', feature);
       this.map.easeTo({
         center: feature.geometry.coordinates,
@@ -452,7 +470,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     this._subscriptions.push(_clusterClick);
 
 
-    const hoveredIds = {
+    const hoveredIds: { [event: string]: string | null } = {
       lines: null,
       unclusteredpoints: null,
       polygons: null,
@@ -474,7 +492,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
       const _layerEnter = this.map.on('mouseenter', layer, (e) => {
         this.map.getCanvas().style.cursor = 'pointer';
 
-        const featureId = e.features[0]?.id;
+        const featureId = e.features![0]?.id as string;
         // console.log('mouseenter', featureId, e);
 
         if (featureId == null) return; // guard
@@ -631,7 +649,7 @@ function _popupBuilder(def: PopupDefinition): string {
 }
 
 // Feature popup helper
-function debugPopupStructure(feature, featureType) {
+function debugPopupStructure(feature: MapGeoJSONFeature, featureType: string) {
   const props = feature.properties;
   let html = `<strong>${featureType} Feature</strong><br>`;
   html += `<strong>ID:</strong> ${props.id}<br>`;

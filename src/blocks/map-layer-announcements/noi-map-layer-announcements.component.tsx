@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { Component, Event, EventEmitter, h } from "@stencil/core";
+import { Component, Event, EventEmitter, h, State } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
 import { LanguageDataService } from "../../data/language/language-data-service";
 import { LayerConfig, PopupDefinition } from "../map-layer-base-odh/noi-map-layer-base-odh.component";
@@ -36,14 +36,49 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
     zoom: 9
   }
 
+
+  @State()
+  private configReady?: LayerConfig;
+
   constructor() {
   }
 
+
+  async connectedCallback() {
+    this.layerLoading.emit(true);
+
+    // fetch desired IDs
+    const date = new Date();
+    const year = date.getFullYear();
+    // Adds a leading '0' and takes the last 2 digits
+    const month = ('0' + (date.getMonth() + 1)).slice(-2);
+    const day = ('0' + date.getDate()).slice(-2);
+
+    const dateString = `${year}${month}${day}`;
+    const ids = await fetch(`https://tourism.api.opendatahub.com/v1/Announcement?source=tirol.mapservices.eu&rawfilter=or(isnull(EndTime),gt(EndTime,'${dateString}'))&fields=Id&pagesize=0&getasidarray=true`)
+    const payload = await ids.text();
+
+    this.configReady = {...this.config};
+    this.configReady.requestTransform = (url: string) => {
+      return {
+        url: url,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: payload,
+        // body: JSON.stringify(['urn:announcements:tirol.mapservices.eu:121795001']),
+      };
+    };
+  }
+
   render(): any {
-    return (<noi-map-layer-base-odh config={this.config}
-                                    popupStructure={this.createPopup.bind(this)}
-                                    onLayerLoading={(e) => this.layerLoading.emit(e.detail)}
-    ></noi-map-layer-base-odh>)
+    if (this.configReady) {
+      return (<noi-map-layer-base-odh config={this.configReady}
+                                      popupStructure={this.createPopup.bind(this)}
+                                      onLayerLoading={(e) => this.layerLoading.emit(e.detail)}
+      ></noi-map-layer-base-odh>)
+    } else {
+      return '';
+    }
   }
 
   ///////////////

@@ -128,6 +128,9 @@ export class NoiMapComponent implements StencilComponent {
 
   @Method()
   async setUrlTransform(urlPart: string, transformFn: RequestTransformFunction | null) {
+    if (!!transformFn && this._tileTransforms[urlPart]) {
+      console.error('[noi-map] setUrlTransform: url already has transformer', urlPart);
+    }
     this._tileTransforms[urlPart] = transformFn;
   }
 

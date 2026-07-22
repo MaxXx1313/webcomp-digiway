@@ -21,45 +21,37 @@ import { Map, NavigationControl, RequestTransformFunction, ScaleControl } from "
 })
 export class NoiMapComponent implements StencilComponent {
 
-  map: Map = null;
-  sizeObserver: ResizeObserver = null;
+  map!: Map;
+  sizeObserver: ResizeObserver | null = null;
 
   /**
    * Map center.
    * Pass latitude, longitude and zoomlevel separated by "," if map should be centered an a specific gps point
    */
   @Prop({mutable: true})
-  centermap: string;
+  centermap?: string;
 
-  @Element() el: HTMLElement;
+  @Element() el!: HTMLElement;
 
   /**
    * Emitted when map is initialized and ready to draw on it
    */
-  @Event() mapReady: EventEmitter<Map>;
+  @Event() mapReady!: EventEmitter<Map>;
 
   // Create a promise that resolves when the map is ready
+  private _resolveMap!: (map: Map) => void;
+
   private mapReadyPromise: Promise<Map> = new Promise((resolve) => {
     this._resolveMap = resolve;
   });
-  private _resolveMap: (map: Map) => void;
 
 
   // NOTE: it's not intended to have multiple transforms for the same web page
   private _tileTransforms: { [id: string]: RequestTransformFunction | null } = {};
 
-  // private _layers: { [name: string]: TileLayer };
-  // private _layerControl?: Control.Layers;
-
-  // private _overlays: { [name: string]: layerGroup };
-
-  constructor() {
-    // this._layers = {
-    //   "OpenStreetMap": new TileLayer(TILE_LAYER),
-    //   "AlternativeStreetMap": new TileLayer(TILE_LAYER),
-    // }
-  }
-
+  /**
+   *
+   */
   connectedCallback() {
     const mapCenterParsed = this._parseCenterProperty();
 

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 NOI Techpark <digital@noi.bz.it>
+//
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 /* eslint-disable */
 /* tslint:disable */
 /**
@@ -85,7 +89,7 @@ export namespace Components {
         /**
           * Map center. Pass latitude, longitude and zoomlevel separated by "," if map should be centered an a specific gps point
          */
-        "centermap": string;
+        "centermap"?: string;
         "getMapAsync": () => Promise<Map>;
         "setUrlTransform": (urlPart: string, transformFn: RequestTransformFunction | null) => Promise<void>;
     }

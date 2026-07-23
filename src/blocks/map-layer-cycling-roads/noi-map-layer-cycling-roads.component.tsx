@@ -5,6 +5,7 @@
 import { Component, Event, EventEmitter, h, Prop } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
 import { LayerConfig, PopupDefinition } from "../map-layer-base-odh/noi-map-layer-base-odh.component";
+import { MapGeoJSONFeature } from "maplibre-gl";
 
 /**
  * (INTERNAL) render map layer
@@ -19,12 +20,19 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
   /**
    * Emitted when layer data is loading
    */
-  @Event() layerLoading: EventEmitter<boolean>;
+  @Event() layerLoading!: EventEmitter<boolean>;
 
   /**
    */
   @Prop({mutable: false})
-  region!: 'tyrol' | 'bolzano-prov' | 'bolzano-int' | 'trento' | 'mountainbikeroutes' | 'mtb_percorsi_v';
+  region!: 'tyrol'
+    | 'bolzano-prov'
+    | 'bolzano-int'
+    | 'trento'
+    | 'mountainbikeroutes'
+    | 'mtb_percorsi_v'
+    | 'hiking-bolzano'
+    | 'hiking-trento';
 
 
   /**
@@ -95,6 +103,27 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
       center: [11.12, 46.07],
       zoom: 10
     },
+
+
+    'hiking-bolzano': {
+      markerIcon: 'trekking',
+      isLineInteractive: true,
+
+      sourceLayer: "spatialdata",
+      additional: '?source=civis.geoserver&tagfilter=hikingtrails&operationmode=pointsandtracks&displaytracksonzoomlevel=10',
+      center: [11.35, 46.5],
+      zoom: 10
+    },
+
+    'hiking-trento': {
+      markerIcon: 'trekking',
+      isLineInteractive: true,
+
+      sourceLayer: "spatialdata",
+      additional: '?source=siat.provincia.tn.it&tagfilter=sentieri_della_sat&operationmode=pointsandtracks&displaytracksonzoomlevel=10',
+      center: [11.0900, 46.2300],
+      zoom: 10
+    },
   }
 
   private regionConfig!: LayerConfig;
@@ -112,7 +141,7 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
 
 
   // Feature popup helper
-  createPopup(feature/*, featureType*/): PopupDefinition | string {
+  createPopup(feature: MapGeoJSONFeature/*, featureType*/): PopupDefinition | string {
 
     const description = feature.properties.data;
 

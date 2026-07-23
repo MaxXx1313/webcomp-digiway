@@ -11,11 +11,13 @@
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { ViewLayout } from "./utils/breakpoints";
 import { IconName } from "./blocks/icon/icon.component";
-import { Map, RequestTransformFunction } from "maplibre-gl";
+import { Map, MapGeoJSONFeature, RequestTransformFunction } from "maplibre-gl";
+import { LayerConfig, PopupDefinition } from "./blocks/map-layer-base-odh/noi-map-layer-base-odh.component";
 import { SelectOption } from "./blocks/select/select.component";
 export { ViewLayout } from "./utils/breakpoints";
 export { IconName } from "./blocks/icon/icon.component";
-export { Map, RequestTransformFunction } from "maplibre-gl";
+export { Map, MapGeoJSONFeature, RequestTransformFunction } from "maplibre-gl";
+export { LayerConfig, PopupDefinition } from "./blocks/map-layer-base-odh/noi-map-layer-base-odh.component";
 export { SelectOption } from "./blocks/select/select.component";
 export namespace Components {
     /**
@@ -35,6 +37,15 @@ export namespace Components {
           * @default false
          */
         "loading": boolean;
+    }
+    /**
+     * (INTERNAL) render a checkbox group
+     */
+    interface NoiCheckboxGroup {
+        /**
+          * @default false
+         */
+        "open": boolean;
     }
     /**
      * Consolidated web-component to show Open Data Hub data imported within the Digiway project
@@ -78,7 +89,7 @@ export namespace Components {
         /**
           * Map center. Pass latitude, longitude and zoomlevel separated by "," if map should be centered an a specific gps point
          */
-        "centermap": string;
+        "centermap"?: string;
         "getMapAsync": () => Promise<Map>;
         "setUrlTransform": (urlPart: string, transformFn: RequestTransformFunction | null) => Promise<void>;
     }
@@ -104,6 +115,21 @@ export namespace Components {
      * (INTERNAL) render map layer
      */
     interface NoiMapLayerAnnouncements {
+    }
+    /**
+     * (INTERNAL) render map layer
+     */
+    interface NoiMapLayerBaseOdh {
+        "config": LayerConfig;
+        "popupStructure"?: ((feature: MapGeoJSONFeature, featureType: string) => PopupDefinition | string);
+    }
+    /**
+     * (INTERNAL) render map layer
+     */
+    interface NoiMapLayerCyclingRoads {
+        "region": 'tyrol' | 'bolzano-prov' | 'bolzano-int' | 'trento' | 'mountainbikeroutes' | 'mtb_percorsi_v';
+        "titleIcon"?: string;
+        "titleText"?: string;
     }
     /**
      * (INTERNAL) render map layer
@@ -145,6 +171,14 @@ export interface NoiMapLayerAnnouncementsCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLNoiMapLayerAnnouncementsElement;
 }
+export interface NoiMapLayerBaseOdhCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLNoiMapLayerBaseOdhElement;
+}
+export interface NoiMapLayerCyclingRoadsCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLNoiMapLayerCyclingRoadsElement;
+}
 export interface NoiMapLayerRiskExposureCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLNoiMapLayerRiskExposureElement;
@@ -173,6 +207,15 @@ declare global {
     var HTMLNoiCheckboxElement: {
         prototype: HTMLNoiCheckboxElement;
         new (): HTMLNoiCheckboxElement;
+    };
+    /**
+     * (INTERNAL) render a checkbox group
+     */
+    interface HTMLNoiCheckboxGroupElement extends Components.NoiCheckboxGroup, HTMLStencilElement {
+    }
+    var HTMLNoiCheckboxGroupElement: {
+        prototype: HTMLNoiCheckboxGroupElement;
+        new (): HTMLNoiCheckboxGroupElement;
     };
     /**
      * Consolidated web-component to show Open Data Hub data imported within the Digiway project
@@ -252,6 +295,46 @@ declare global {
         prototype: HTMLNoiMapLayerAnnouncementsElement;
         new (): HTMLNoiMapLayerAnnouncementsElement;
     };
+    interface HTMLNoiMapLayerBaseOdhElementEventMap {
+        "layerLoading": boolean;
+    }
+    /**
+     * (INTERNAL) render map layer
+     */
+    interface HTMLNoiMapLayerBaseOdhElement extends Components.NoiMapLayerBaseOdh, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLNoiMapLayerBaseOdhElementEventMap>(type: K, listener: (this: HTMLNoiMapLayerBaseOdhElement, ev: NoiMapLayerBaseOdhCustomEvent<HTMLNoiMapLayerBaseOdhElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLNoiMapLayerBaseOdhElementEventMap>(type: K, listener: (this: HTMLNoiMapLayerBaseOdhElement, ev: NoiMapLayerBaseOdhCustomEvent<HTMLNoiMapLayerBaseOdhElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLNoiMapLayerBaseOdhElement: {
+        prototype: HTMLNoiMapLayerBaseOdhElement;
+        new (): HTMLNoiMapLayerBaseOdhElement;
+    };
+    interface HTMLNoiMapLayerCyclingRoadsElementEventMap {
+        "layerLoading": boolean;
+    }
+    /**
+     * (INTERNAL) render map layer
+     */
+    interface HTMLNoiMapLayerCyclingRoadsElement extends Components.NoiMapLayerCyclingRoads, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLNoiMapLayerCyclingRoadsElementEventMap>(type: K, listener: (this: HTMLNoiMapLayerCyclingRoadsElement, ev: NoiMapLayerCyclingRoadsCustomEvent<HTMLNoiMapLayerCyclingRoadsElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLNoiMapLayerCyclingRoadsElementEventMap>(type: K, listener: (this: HTMLNoiMapLayerCyclingRoadsElement, ev: NoiMapLayerCyclingRoadsCustomEvent<HTMLNoiMapLayerCyclingRoadsElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLNoiMapLayerCyclingRoadsElement: {
+        prototype: HTMLNoiMapLayerCyclingRoadsElement;
+        new (): HTMLNoiMapLayerCyclingRoadsElement;
+    };
     interface HTMLNoiMapLayerRiskExposureElementEventMap {
         "layerLoading": boolean;
     }
@@ -305,18 +388,23 @@ declare global {
     };
     interface HTMLElementTagNameMap {
         "noi-checkbox": HTMLNoiCheckboxElement;
+        "noi-checkbox-group": HTMLNoiCheckboxGroupElement;
         "noi-digiway": HTMLNoiDigiwayElement;
         "noi-icon": HTMLNoiIconElement;
         "noi-map": HTMLNoiMapElement;
         "noi-map-base-osm": HTMLNoiMapBaseOsmElement;
         "noi-map-base-tirol": HTMLNoiMapBaseTirolElement;
         "noi-map-layer-announcements": HTMLNoiMapLayerAnnouncementsElement;
+        "noi-map-layer-base-odh": HTMLNoiMapLayerBaseOdhElement;
+        "noi-map-layer-cycling-roads": HTMLNoiMapLayerCyclingRoadsElement;
         "noi-map-layer-risk-exposure": HTMLNoiMapLayerRiskExposureElement;
         "noi-select": HTMLNoiSelectElement;
         "noi-spinner": HTMLNoiSpinnerElement;
     }
 }
 declare namespace LocalJSX {
+    type OneOf<K extends string, PropT, AttrT = PropT> = { [P in K]: PropT } & { [P in `attr:${K}` | `prop:${K}`]?: never } | { [P in `attr:${K}`]: AttrT } & { [P in K | `prop:${K}`]?: never } | { [P in `prop:${K}`]: PropT } & { [P in K | `attr:${K}`]?: never };
+
     /**
      * (INTERNAL) render a checkbox
      */
@@ -338,6 +426,15 @@ declare namespace LocalJSX {
           * Emitted when user clicks on the button
          */
         "onCheckedChange"?: (event: NoiCheckboxCustomEvent<{ checked: boolean }>) => void;
+    }
+    /**
+     * (INTERNAL) render a checkbox group
+     */
+    interface NoiCheckboxGroup {
+        /**
+          * @default false
+         */
+        "open"?: boolean;
     }
     /**
      * Consolidated web-component to show Open Data Hub data imported within the Digiway project
@@ -417,6 +514,29 @@ declare namespace LocalJSX {
     /**
      * (INTERNAL) render map layer
      */
+    interface NoiMapLayerBaseOdh {
+        "config": LayerConfig;
+        /**
+          * Emitted when layer data is loading
+         */
+        "onLayerLoading"?: (event: NoiMapLayerBaseOdhCustomEvent<boolean>) => void;
+        "popupStructure"?: ((feature: MapGeoJSONFeature, featureType: string) => PopupDefinition | string);
+    }
+    /**
+     * (INTERNAL) render map layer
+     */
+    interface NoiMapLayerCyclingRoads {
+        /**
+          * Emitted when layer data is loading
+         */
+        "onLayerLoading"?: (event: NoiMapLayerCyclingRoadsCustomEvent<boolean>) => void;
+        "region": 'tyrol' | 'bolzano-prov' | 'bolzano-int' | 'trento' | 'mountainbikeroutes' | 'mtb_percorsi_v';
+        "titleIcon"?: string;
+        "titleText"?: string;
+    }
+    /**
+     * (INTERNAL) render map layer
+     */
     interface NoiMapLayerRiskExposure {
         /**
           * Emitted when layer data is loading
@@ -455,6 +575,9 @@ declare namespace LocalJSX {
         "checked": boolean;
         "loading": boolean;
     }
+    interface NoiCheckboxGroupAttributes {
+        "open": boolean;
+    }
     interface NoiDigiwayAttributes {
         "layout": ViewLayout;
         "baseMap": 'osm' | 'tirol';
@@ -473,6 +596,11 @@ declare namespace LocalJSX {
     interface NoiMapBaseTirolAttributes {
         "variant": 'color' | 'grayscale';
     }
+    interface NoiMapLayerCyclingRoadsAttributes {
+        "region": 'tyrol' | 'bolzano-prov' | 'bolzano-int' | 'trento' | 'mountainbikeroutes' | 'mtb_percorsi_v';
+        "titleText": string;
+        "titleIcon": string;
+    }
     interface NoiSelectAttributes {
         "disabled": boolean;
         "value": string;
@@ -480,12 +608,15 @@ declare namespace LocalJSX {
 
     interface IntrinsicElements {
         "noi-checkbox": Omit<NoiCheckbox, keyof NoiCheckboxAttributes> & { [K in keyof NoiCheckbox & keyof NoiCheckboxAttributes]?: NoiCheckbox[K] } & { [K in keyof NoiCheckbox & keyof NoiCheckboxAttributes as `attr:${K}`]?: NoiCheckboxAttributes[K] } & { [K in keyof NoiCheckbox & keyof NoiCheckboxAttributes as `prop:${K}`]?: NoiCheckbox[K] };
+        "noi-checkbox-group": Omit<NoiCheckboxGroup, keyof NoiCheckboxGroupAttributes> & { [K in keyof NoiCheckboxGroup & keyof NoiCheckboxGroupAttributes]?: NoiCheckboxGroup[K] } & { [K in keyof NoiCheckboxGroup & keyof NoiCheckboxGroupAttributes as `attr:${K}`]?: NoiCheckboxGroupAttributes[K] } & { [K in keyof NoiCheckboxGroup & keyof NoiCheckboxGroupAttributes as `prop:${K}`]?: NoiCheckboxGroup[K] };
         "noi-digiway": Omit<NoiDigiway, keyof NoiDigiwayAttributes> & { [K in keyof NoiDigiway & keyof NoiDigiwayAttributes]?: NoiDigiway[K] } & { [K in keyof NoiDigiway & keyof NoiDigiwayAttributes as `attr:${K}`]?: NoiDigiwayAttributes[K] } & { [K in keyof NoiDigiway & keyof NoiDigiwayAttributes as `prop:${K}`]?: NoiDigiway[K] };
         "noi-icon": Omit<NoiIcon, keyof NoiIconAttributes> & { [K in keyof NoiIcon & keyof NoiIconAttributes]?: NoiIcon[K] } & { [K in keyof NoiIcon & keyof NoiIconAttributes as `attr:${K}`]?: NoiIconAttributes[K] } & { [K in keyof NoiIcon & keyof NoiIconAttributes as `prop:${K}`]?: NoiIcon[K] };
         "noi-map": Omit<NoiMap, keyof NoiMapAttributes> & { [K in keyof NoiMap & keyof NoiMapAttributes]?: NoiMap[K] } & { [K in keyof NoiMap & keyof NoiMapAttributes as `attr:${K}`]?: NoiMapAttributes[K] } & { [K in keyof NoiMap & keyof NoiMapAttributes as `prop:${K}`]?: NoiMap[K] };
         "noi-map-base-osm": Omit<NoiMapBaseOsm, keyof NoiMapBaseOsmAttributes> & { [K in keyof NoiMapBaseOsm & keyof NoiMapBaseOsmAttributes]?: NoiMapBaseOsm[K] } & { [K in keyof NoiMapBaseOsm & keyof NoiMapBaseOsmAttributes as `attr:${K}`]?: NoiMapBaseOsmAttributes[K] } & { [K in keyof NoiMapBaseOsm & keyof NoiMapBaseOsmAttributes as `prop:${K}`]?: NoiMapBaseOsm[K] };
         "noi-map-base-tirol": Omit<NoiMapBaseTirol, keyof NoiMapBaseTirolAttributes> & { [K in keyof NoiMapBaseTirol & keyof NoiMapBaseTirolAttributes]?: NoiMapBaseTirol[K] } & { [K in keyof NoiMapBaseTirol & keyof NoiMapBaseTirolAttributes as `attr:${K}`]?: NoiMapBaseTirolAttributes[K] } & { [K in keyof NoiMapBaseTirol & keyof NoiMapBaseTirolAttributes as `prop:${K}`]?: NoiMapBaseTirol[K] };
         "noi-map-layer-announcements": NoiMapLayerAnnouncements;
+        "noi-map-layer-base-odh": NoiMapLayerBaseOdh;
+        "noi-map-layer-cycling-roads": Omit<NoiMapLayerCyclingRoads, keyof NoiMapLayerCyclingRoadsAttributes> & { [K in keyof NoiMapLayerCyclingRoads & keyof NoiMapLayerCyclingRoadsAttributes]?: NoiMapLayerCyclingRoads[K] } & { [K in keyof NoiMapLayerCyclingRoads & keyof NoiMapLayerCyclingRoadsAttributes as `attr:${K}`]?: NoiMapLayerCyclingRoadsAttributes[K] } & { [K in keyof NoiMapLayerCyclingRoads & keyof NoiMapLayerCyclingRoadsAttributes as `prop:${K}`]?: NoiMapLayerCyclingRoads[K] } & OneOf<"region", NoiMapLayerCyclingRoads["region"], NoiMapLayerCyclingRoadsAttributes["region"]>;
         "noi-map-layer-risk-exposure": NoiMapLayerRiskExposure;
         "noi-select": Omit<NoiSelect, keyof NoiSelectAttributes> & { [K in keyof NoiSelect & keyof NoiSelectAttributes]?: NoiSelect[K] } & { [K in keyof NoiSelect & keyof NoiSelectAttributes as `attr:${K}`]?: NoiSelectAttributes[K] } & { [K in keyof NoiSelect & keyof NoiSelectAttributes as `prop:${K}`]?: NoiSelect[K] };
         "noi-spinner": NoiSpinner;
@@ -499,6 +630,10 @@ declare module "@stencil/core" {
              * (INTERNAL) render a checkbox
              */
             "noi-checkbox": LocalJSX.IntrinsicElements["noi-checkbox"] & JSXBase.HTMLAttributes<HTMLNoiCheckboxElement>;
+            /**
+             * (INTERNAL) render a checkbox group
+             */
+            "noi-checkbox-group": LocalJSX.IntrinsicElements["noi-checkbox-group"] & JSXBase.HTMLAttributes<HTMLNoiCheckboxGroupElement>;
             /**
              * Consolidated web-component to show Open Data Hub data imported within the Digiway project
              */
@@ -525,6 +660,14 @@ declare module "@stencil/core" {
              * (INTERNAL) render map layer
              */
             "noi-map-layer-announcements": LocalJSX.IntrinsicElements["noi-map-layer-announcements"] & JSXBase.HTMLAttributes<HTMLNoiMapLayerAnnouncementsElement>;
+            /**
+             * (INTERNAL) render map layer
+             */
+            "noi-map-layer-base-odh": LocalJSX.IntrinsicElements["noi-map-layer-base-odh"] & JSXBase.HTMLAttributes<HTMLNoiMapLayerBaseOdhElement>;
+            /**
+             * (INTERNAL) render map layer
+             */
+            "noi-map-layer-cycling-roads": LocalJSX.IntrinsicElements["noi-map-layer-cycling-roads"] & JSXBase.HTMLAttributes<HTMLNoiMapLayerCyclingRoadsElement>;
             /**
              * (INTERNAL) render map layer
              */

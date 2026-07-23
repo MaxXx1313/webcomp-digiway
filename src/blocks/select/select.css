@@ -41,6 +41,11 @@
   background-color: var(--select-background-hover-color);
 }
 
+.ss-main .ss-arrow {
+  flex: 0 0 24px;
+}
+
+
 /* select - dropdown */
 .ss-content {
   padding: 0;

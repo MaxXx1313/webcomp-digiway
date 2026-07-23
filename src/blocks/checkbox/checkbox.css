@@ -5,6 +5,7 @@
  */
 
 :host {
+  box-sizing: border-box;
   display: grid;
   align-items: center;
   grid-template-columns: 1fr 24px;
@@ -45,4 +46,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  /* spinner and checkbox is not scalable*/
+  height: 24px;
+  width: 24px;
+  font-size: 24px;
 }

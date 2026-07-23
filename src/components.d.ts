@@ -59,7 +59,7 @@ export namespace Components {
         /**
           * Pass latitude, longitude and zoomlevel separated by "," if map should be centered an a specific gps point
          */
-        "centermap": string;
+        "centermap"?: string;
         /**
           * Language
           * @default 'en'
@@ -80,7 +80,7 @@ export namespace Components {
         /**
           * icon name
          */
-        "name": IconName | string;
+        "name"?: IconName | string;
     }
     /**
      * (INTERNAL) render a basic map with no layouts

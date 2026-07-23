@@ -39,7 +39,7 @@ export class LanguageDataService {
     let langNormalized = lang?.toLowerCase();
 
     if (langNormalized === this.currentLanguage) {
-      return;
+      return Promise.resolve();
     }
 
     if ( !langNormalized || langNormalized === 'auto') {

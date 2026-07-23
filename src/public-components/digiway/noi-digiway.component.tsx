@@ -53,7 +53,7 @@ export class NoiDigiwayComponent implements StencilComponent {
    * Pass latitude, longitude and zoomlevel separated by "," if map should be centered an a specific gps point
    */
   @Prop({mutable: true})
-  centermap: string;
+  centermap?: string;
 
   /**
    * Language
@@ -63,10 +63,10 @@ export class NoiDigiwayComponent implements StencilComponent {
   language = 'en';
 
   @State()
-  layoutResolved: ViewLayout;
+  layoutResolved!: ViewLayout;
 
   @Element()
-  el: HTMLElement;
+  el!: HTMLElement;
 
   @State()
   isMenuOpened = false;
@@ -106,14 +106,14 @@ export class NoiDigiwayComponent implements StencilComponent {
   mapMode: MapSourceOption = this.modes[0];
 
   @State()
-  layersActive = [];
+  layersActive: string[] = [];
 
   @State()
-  layersLoading = [];
+  layersLoading: string[] = [];
 
   private _isGrayscaleMap = false;
 
-  private sizeObserver: ResizeObserver = null;
+  private sizeObserver: ResizeObserver | null = null;
   readonly languageService = LanguageDataService.getInstance();
 
   @Watch('layout')
@@ -194,7 +194,7 @@ export class NoiDigiwayComponent implements StencilComponent {
       this._setLayerLoading(layer, false);
 
       // TODO: deactivate nested layers
-      let layersNested = [];
+      let layersNested: string[] = [];
       if (layer === 'layer-cycling') {
         layersNested = this.cyclingDataLayers.map(dl => dl.value);
       }
@@ -210,7 +210,7 @@ export class NoiDigiwayComponent implements StencilComponent {
     }
 
     // recalculate _isGrayscaleMap
-    this._isGrayscaleMap = this.layersActive.find(l => !!this.dataLayers.find(dl => dl.value === l)?.forceGrayscale);
+    this._isGrayscaleMap = !!this.layersActive.find(l => !!this.dataLayers.find(dl => dl.value === l)?.forceGrayscale);
   }
 
   _setLayerLoading(layer: string, isLoading: boolean) {

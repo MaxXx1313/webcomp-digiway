@@ -12,7 +12,7 @@ import {
   RequestTransformFunction,
   Subscription
 } from "maplibre-gl";
-import { listenLayerReady } from "../../utils/maplibre";
+import { enableHoverEffect, listenLayerReady } from "../../utils/maplibre";
 import { sanitizeText } from "../../utils/html";
 import { base64String } from "./icon-font";
 
@@ -472,65 +472,13 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     this._subscriptions.push(_clusterClick);
 
 
-    const hoveredIds: { [event: string]: string | null } = {
-      lines: null,
-      unclusteredpoints: null,
-      polygons: null,
-      clusters: null,
-    };
-
     // Hover effects
     let hoverTargets = ['unclusteredpoints', 'polygons', 'clusters'];
     if (this.config.isLineInteractive) {
       hoverTargets = ['unclusteredpoints', 'polygons', 'lines', 'clusters'];
     }
-    // ['unclusteredpoints', 'polygons', 'lines', 'clusters'].forEach(layerName => {
-    // ['unclusteredpoints', 'polygons', 'clusters'].forEach(layerName => {
-    hoverTargets.forEach(layerName => {
-      const layer = this.uid(layerName);
-      const source = this.uid('vector-tiles');
-
-      //
-      const _layerEnter = this.map.on('mouseenter', layer, (e) => {
-        this.map.getCanvas().style.cursor = 'pointer';
-
-        const featureId = e.features![0]?.id as string;
-        // console.log('mouseenter', featureId, e);
-
-        if (featureId == null) return; // guard
-
-        // Clear previous hover on this layer
-        if (hoveredIds[layerName] !== null) {
-          this.map.setFeatureState(
-            {source: source, sourceLayer: sourceLayer, id: hoveredIds[layerName]},
-            {hover: false}
-          );
-        }
-
-        // Set new hover
-        hoveredIds[layerName] = featureId;
-        this.map.setFeatureState(
-          {source: source, sourceLayer: sourceLayer, id: hoveredIds[layerName]},
-          {hover: true}
-        );
-      });
-      this._subscriptions.push(_layerEnter);
-
-      //
-      const _layerLeave = this.map.on('mouseleave', layer, () => {
-        this.map.getCanvas().style.cursor = '';
-
-        // Clear hover on this layer
-        if (hoveredIds[layerName] !== null) {
-          this.map.setFeatureState(
-            {source: source, sourceLayer: sourceLayer, id: hoveredIds[layerName]},
-            {hover: false}
-          );
-          hoveredIds[layerName] = null;
-        }
-      });
-      this._subscriptions.push(_layerLeave);
-    });
+    const layerHover = enableHoverEffect(this.map, hoverTargets.map(layerName => this.uid(layerName)));
+    this._subscriptions.push(layerHover);
 
     // Click anywhere for debug
     const _debugClick = this.map.on('click', (e) => {

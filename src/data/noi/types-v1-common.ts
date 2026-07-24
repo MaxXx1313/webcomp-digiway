@@ -18,8 +18,8 @@ export interface FlatDataResponse<T> {
 }
 
 
-export interface Measurement {
-  mvalue: string | number | any;
+export interface Measurement<M = string | number | any> {
+  mvalue: M;
   mvalidtime: DateTimeString;
   mtransactiontime: DateTimeString;
   /**
@@ -32,12 +32,12 @@ export interface Measurement {
 // export interface Provenance {
 //
 // }
-export interface Datatype {
+export interface Datatype<MeasurementType = string | number | any> {
   tname: string;
   tunit: string;
   ttype: string;
   tdescription: string;
-  tmeasurements: Measurement[];
+  tmeasurements: Measurement<MeasurementType>[];
 }
 
 

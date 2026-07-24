@@ -4,21 +4,37 @@
 
 import { Component, Element, Event, EventEmitter, Prop } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
+import { Map, MapGeoJSONFeature, MapMouseEvent, Popup, RequestTransformFunction, Subscription } from "maplibre-gl";
 import {
-  Map,
-  MapGeoJSONFeature,
-  MapMouseEvent,
-  Popup,
-  RequestTransformFunction,
-  Subscription
-} from "maplibre-gl";
-import { enableHoverEffect, listenLayerReady } from "../../utils/maplibre";
+  enableHoverEffect,
+  FontIconPaintParams,
+  getFontIconData,
+  listenLayerReady,
+  loadIconFont
+} from "../../utils/maplibre";
 import { base64String } from "./icon-font";
 import { createPopupBodyHTML, PopupDefinitionFn } from "../../utils/maplibre-popup";
 
 const HOST = 'https://geo.api.opendatahub.testingmachine.eu';
 
 const ICON_FONT_NAME = 'noi-digiway-map-icons';
+const ICON_FONT_URL = `url(${base64String}) format('woff')`;
+
+
+const ICON_FONT_ICONS = {
+  'bicycle': '\ue800',
+  'closure': '\ue801',
+  'frequency': '\ue802',
+  'weather-prediction': '\ue803',
+  'weather-real-time': '\ue804',
+  'poi': '\ue805',
+  'transport': '\ue806',
+  'gastronomy': '\ue807',
+  'map': '\ue808',
+  'mountain-trails': '\ue809',
+  'hiking': '\ue80a',
+  'trekking': '\ue80b',
+} as const;
 
 // Default styles
 const defaultStyles = {
@@ -67,29 +83,19 @@ const defaultStyles = {
     'circle-stroke-color': '#FFFFFF',
     'circle-opacity': 0.8
   },
-  icon: {
-    // You can now pass any color dynamically here!
-    'icon-color': '#FFFFFF',
-  },
 };
 
-const _icons = {
-  'bicycle': '\ue800',
-  'closure': '\ue801',
-  'frequency': '\ue802',
-  'weather-prediction': '\ue803',
-  'weather-real-time': '\ue804',
-  'poi': '\ue805',
-  'transport': '\ue806',
-  'gastronomy': '\ue807',
-  'map': '\ue808',
-  'mountain-trails': '\ue809',
-  'hiking': '\ue80a',
-  'trekking': '\ue80b',
-} as const;
+
+// 'iconFontStyles' is not a part of maplibre
+const iconFontStyles: FontIconPaintParams = {
+  "icon-font": ICON_FONT_NAME,
+  'icon-color': '#FFFFFF',
+  "icon-size": 16,
+  "icon-text": '',
+};
 
 export interface LayerConfig {
-  markerIcon?: keyof typeof _icons,
+  markerIcon?: keyof typeof ICON_FONT_ICONS,
   isLineInteractive?: boolean;
   sourceLayer: string;
   additional: string;
@@ -98,6 +104,7 @@ export interface LayerConfig {
 
   requestTransform?: RequestTransformFunction;
 }
+
 let _uid_seed = 0;
 
 /**
@@ -350,44 +357,16 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
 
     // ICON LAYER ON TOP OF CIRCLES
     if (this.config.markerIcon) {
-      this._loadIconFont().then(() => {
-        // Layout target boundaries
-        const targetWidth = 16;
-        const targetHeight = 16;
-        const scale = 1; // 4x multiplier ensures sharp sub-pixel anti-aliasing
+      loadIconFont(ICON_FONT_NAME, ICON_FONT_URL).then(() => {
+        const imageData = getFontIconData({
+          ...iconFontStyles,
+          "icon-text": ICON_FONT_ICONS[this.config.markerIcon!],
+        });
 
-        // Create an offscreen rendering surface
-        const canvas = document.createElement('canvas');
-        canvas.width = targetWidth * scale;
-        canvas.height = targetHeight * scale;
-        const ctx = canvas.getContext('2d');
-
-        if (ctx) {
-          // FORCE CRITICAL BROWSER ANTI-ALIASING ENGINE HINTS
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = 'high';
-
-          // Clear background canvas space completely
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-          // Apply scaling and text rendering layout details
-          ctx.font = `${16 * scale}px "${ICON_FONT_NAME}"`;
-          ctx.fillStyle = defaultStyles.icon["icon-color"];  // '#FFFFFF'; // Target paint color
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-
-          // Render the exact hex string character ('\ue0c8' = Material Pin Marker)
-          ctx.fillText(_icons[this.config.markerIcon!], canvas.width / 2, canvas.height / 2);
-
-          // 4. FIX: Safely extract ImageData from the canvas.
-          // This bypasses type errors and ensures MapLibre gets pure pixel data.
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-
+        if (imageData) {
           // 3. Register the crisp canvas bitmap straight into MapLibre
           this.map.addImage(this.uid('marker-icon'), imageData as any, {
             sdf: false,
-            pixelRatio: scale  // Shrinks the 4x vector rendering smoothly down onto screen
           });
         }
 
@@ -407,7 +386,6 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
             'icon-allow-overlap': true,
             'icon-ignore-placement': true
           },
-          paint: defaultStyles.icon as any,
         });
 
         console.log(`[noi-map-layer-base-odh] layer added: ${this.uid('unclustered-icons')}`);
@@ -494,35 +472,4 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
       this._popupFeatureId = undefined;
     });
   }
-
-  async _loadIconFont() {
-
-    // TypeScript's internal DOM type definitions have a historical gap regarding the FontFaceSet interface, so we use 'any'
-    const documentFonts = document.fonts as any;
-
-    // 1. Check if another instance of your icon component already registered this font
-    const isAlreadyLoaded = Array.from(documentFonts.values()).some(
-      (font: any) => font.family === ICON_FONT_NAME
-    );
-
-    if (isAlreadyLoaded) {
-      console.debug(`[noi-map-layer-base-odh] _loadIconFont - already loaded`);
-      return;
-    }
-
-    console.log(`[noi-map-layer-base-odh] _loadIconFont`);
-
-    // 2. Instantiate and load the font directly into memory
-    const iconFontFace = new FontFace(
-      ICON_FONT_NAME,
-      `url(${base64String}) format('woff')`
-    );
-
-    const fontLoadResult = await iconFontFace.load();
-    console.debug(`[noi-map-layer-base-odh] icon font loaded`, fontLoadResult);
-
-    // Inject it into document.fonts so the entire page (and all shadow roots) can use it
-    documentFonts.add(iconFontFace);
-  }
-
 }

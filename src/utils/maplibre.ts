@@ -3,8 +3,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { Map, Subscription } from "maplibre-gl";
-import { Component } from "@stencil/core";
-import { StencilComponent } from "./StencilComponent";
 
 /**
  *
@@ -97,4 +95,84 @@ export function enableHoverEffect(map: Map, hoverLayerId: string | string[], hov
       }
     },
   } as Subscription;
+}
+
+/**
+ */
+export interface FontIconPaintParams {
+  'icon-text': string,
+  'icon-font': string,
+  'icon-size': number, // in px
+  'icon-color': string,
+  // 'scale'?: number,
+}
+
+/**
+ */
+export function getFontIconData(paint: FontIconPaintParams) {
+  const iconSize = paint["icon-size"];
+  // Layout target boundaries
+  const scale = 1; // 4x multiplier ensures sharp sub-pixel anti-aliasing
+
+  // Create an offscreen rendering surface
+  const canvas = document.createElement('canvas');
+  canvas.width = iconSize * scale;
+  canvas.height = iconSize * scale;
+  const ctx = canvas.getContext('2d');
+
+  if (ctx) {
+    // FORCE CRITICAL BROWSER ANTI-ALIASING ENGINE HINTS
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
+    // Clear background canvas space completely
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Apply scaling and text rendering layout details
+    ctx.font = `${iconSize * scale}px "${paint["icon-font"]}"`;
+    ctx.fillStyle = paint["icon-color"];  // '#FFFFFF'; // Target paint color
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // Render the exact hex string character ('\ue0c8' = Material Pin Marker)
+    ctx.fillText(paint["icon-text"], canvas.width / 2, canvas.height / 2);
+
+    // 4. FIX: Safely extract ImageData from the canvas.
+    // This bypasses type errors and ensures MapLibre gets pure pixel data.
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    return imageData as ImageData;
+  } else {
+    return null
+  }
+}
+
+/**
+ *
+ */
+export async function loadIconFont(fontName: string, url: string) {
+
+  // TypeScript's internal DOM type definitions have a historical gap regarding the FontFaceSet interface, so we use 'any'
+  const documentFonts = document.fonts as any;
+
+  // 1. Check if another instance of your icon component already registered this font
+  const isAlreadyLoaded = Array.from(documentFonts.values()).some(
+    (font: any) => font.family === fontName
+  );
+
+  if (isAlreadyLoaded) {
+    console.debug(`[loadIconFont] - already loaded:`, fontName);
+    return;
+  }
+
+  console.log(`[loadIconFont] loading font:`, fontName);
+
+  // 2. Instantiate and load the font directly into memory
+  const iconFontFace = new FontFace(fontName, url);
+
+  const fontLoadResult = await iconFontFace.load();
+  console.debug(`[loadIconFont] loaded:`, fontName, fontLoadResult);
+
+  // Inject it into document.fonts so the entire page (and all shadow roots) can use it
+  documentFonts.add(iconFontFace);
 }

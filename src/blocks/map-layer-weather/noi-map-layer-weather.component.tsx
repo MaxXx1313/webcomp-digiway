@@ -7,7 +7,9 @@ import { StencilComponent } from "../../utils/StencilComponent";
 import { Map, Subscription } from "maplibre-gl";
 import { enableHoverEffect, listenLayerReady } from "../../utils/maplibre";
 import { WeatherForecastService } from "../../data/noi/weather-forecast-service";
-import { GeoJSON } from "geojson";
+import { GeoJSON, GeoJsonProperties } from "geojson";
+import { WeatherForecast } from "../../data/noi/WeatherForecase";
+import { Measurement } from "../../data/noi/types-v1-common";
 
 
 // Default styles
@@ -105,18 +107,19 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
 
     // fetch weather forecast
     const forecastData = await this.weatherService.getWeatherForecastForDay(new Date());
+    const forecastDataTmp = forecastData.slice(0, 1); // FIXME: debug
 
     // Convert your 2000 points into a GeoJSON FeatureCollection
     const geojsonPoints: GeoJSON = {
       type: 'FeatureCollection',
-      features: forecastData.map(point => ({
+      features: forecastDataTmp.map(point => ({
         id: point.scode,
         type: 'Feature',
         geometry: {
           type: 'Point',
           coordinates: [point.scoordinate.x, point.scoordinate.y] // Ensure longitude is FIRST
         },
-        properties: point.sdatatypes,
+        properties: _preparePointProperties(point),
       })),
     };
 
@@ -160,4 +163,47 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
       this.map.removeSource('source-weather-data');
     }
   }
+}
+
+
+/**
+ *
+ */
+function _preparePointProperties(point: WeatherForecast): GeoJsonProperties {
+  const now = new Date();
+  return {
+    temperature: __getRelevantMeasurement(point.sdatatypes["forecast-air-temperature"]?.tmeasurements || [], now)?.mvalue,
+    icon: __getDailyMeasurement(point.sdatatypes["qualitative-forecast"]?.tmeasurements || [])?.mvalue,
+  };
+}
+
+/**
+ */
+function __getRelevantMeasurement(measurements: Measurement[], now: Date = new Date()) {
+
+  // sort in 'desc' order
+  // note: date is JS-date format which is sorted correctly as a string
+  const measurementSorted = measurements
+    .filter(m => m.mperiod !== 86400) // filter-out daily measurements
+    .sort((a, b) => b.mvalidtime.localeCompare(a.mvalidtime));
+
+  // find first record having less than current time
+  return measurementSorted.find(m => {
+    const d = new Date(m.mvalidtime);
+    return d < now;
+  }) || null;
+}
+
+
+/**
+ */
+function __getDailyMeasurement(measurements: Measurement[]) {
+
+  const measurementDaily = measurements
+    .filter(m => m.mperiod === 86400);
+
+  if (measurementDaily.length > 1) {
+    console.warn('Too many daily measurements:', measurements);
+  }
+  return measurementDaily[0];
 }

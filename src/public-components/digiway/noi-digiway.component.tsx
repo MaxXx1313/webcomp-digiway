@@ -53,7 +53,7 @@ export class NoiDigiwayComponent implements StencilComponent {
    * Pass latitude, longitude and zoomlevel separated by "," if map should be centered an a specific gps point
    */
   @Prop({mutable: true})
-  centermap: string;
+  centermap?: string;
 
   /**
    * Language
@@ -63,10 +63,10 @@ export class NoiDigiwayComponent implements StencilComponent {
   language = 'en';
 
   @State()
-  layoutResolved: ViewLayout;
+  layoutResolved!: ViewLayout;
 
   @Element()
-  el: HTMLElement;
+  el!: HTMLElement;
 
   @State()
   isMenuOpened = false;
@@ -101,19 +101,24 @@ export class NoiDigiwayComponent implements StencilComponent {
     {value: 'layer-mountain-trento', text: 'map.layer.mountain-trento', forceGrayscale: false},
   ];
 
+  private hikingDataLayers: DataLayerOption[] = [
+    {value: 'layer-hiking-bolzano', text: 'map.layer.hiking-bolzano', forceGrayscale: false},
+    {value: 'layer-hiking-trento', text: 'map.layer.hiking-trento', forceGrayscale: false},
+  ];
+
 
   @State()
   mapMode: MapSourceOption = this.modes[0];
 
   @State()
-  layersActive = [];
+  layersActive: string[] = [];
 
   @State()
-  layersLoading = [];
+  layersLoading: string[] = [];
 
   private _isGrayscaleMap = false;
 
-  private sizeObserver: ResizeObserver = null;
+  private sizeObserver: ResizeObserver | null = null;
   readonly languageService = LanguageDataService.getInstance();
 
   @Watch('layout')
@@ -194,13 +199,16 @@ export class NoiDigiwayComponent implements StencilComponent {
       this._setLayerLoading(layer, false);
 
       // TODO: deactivate nested layers
-      let layersNested = [];
+      let layersNested: string[] = [];
       if (layer === 'layer-cycling') {
         layersNested = this.cyclingDataLayers.map(dl => dl.value);
       }
 
       if (layer === 'layer-mountain') {
         layersNested = this.mountainDataLayers.map(dl => dl.value);
+      }
+      if (layer === 'layer-hiking') {
+        layersNested = this.hikingDataLayers.map(dl => dl.value);
       }
 
       this.layersActive = this.layersActive.filter(l => !layersNested.includes(l));
@@ -210,7 +218,7 @@ export class NoiDigiwayComponent implements StencilComponent {
     }
 
     // recalculate _isGrayscaleMap
-    this._isGrayscaleMap = this.layersActive.find(l => !!this.dataLayers.find(dl => dl.value === l)?.forceGrayscale);
+    this._isGrayscaleMap = !!this.layersActive.find(l => !!this.dataLayers.find(dl => dl.value === l)?.forceGrayscale);
   }
 
   _setLayerLoading(layer: string, isLoading: boolean) {
@@ -304,6 +312,24 @@ export class NoiDigiwayComponent implements StencilComponent {
               onLayerLoading={(e) => this._setLayerLoading('layer-mountain-trento', e.detail)}></noi-map-layer-cycling-roads>
             : ''}
 
+          {this.layersActive.includes('layer-hiking-bolzano')
+            ? <noi-map-layer-cycling-roads
+              key="layer-hiking-bolzano"
+              region="hiking-bolzano"
+              titleIcon="trekking"
+              titleText={this.languageService.translate('map.layer.hiking')}
+              onLayerLoading={(e) => this._setLayerLoading('layer-hiking-bolzano', e.detail)}></noi-map-layer-cycling-roads>
+            : ''}
+
+          {this.layersActive.includes('layer-hiking-trento')
+            ? <noi-map-layer-cycling-roads
+              key="layer-hiking-trento"
+              region="hiking-trento"
+              titleIcon="trekking"
+              titleText={this.languageService.translate('map.layer.hiking')}
+              onLayerLoading={(e) => this._setLayerLoading('layer-hiking-trento', e.detail)}></noi-map-layer-cycling-roads>
+            : ''}
+
         </noi-map>
         {this._renderLegend()}
         <div class={this.isMenuOpened ? "sidebar-backdrop open" : "sidebar-backdrop"}
@@ -388,6 +414,28 @@ export class NoiDigiwayComponent implements StencilComponent {
             </noi-checkbox>
 
             {this.mountainDataLayers.map(layer =>
+              <noi-checkbox loading={this.layersLoading.includes(layer.value)}
+                            checked={this.layersActive.includes(layer.value)}
+                            onCheckedChange={(event) => this.activateLayer(layer.value, event.detail.checked)}>
+                <div class="checkbox-content">
+                  <span>{this.languageService.translate(layer.text)}</span>
+                </div>
+              </noi-checkbox>
+            )}
+          </noi-checkbox-group>
+
+
+          <noi-checkbox-group class="p-bottom-small" open={this.layersActive.includes('layer-hiking')}>
+            <noi-checkbox slot="main"
+                          checked={this.layersActive.includes('layer-hiking')}
+                          onCheckedChange={(event) => this.activateLayer('layer-hiking', event.detail.checked)}>
+              <div class="checkbox-content">
+                <noi-icon name="trekking"></noi-icon>
+                <span>{this.languageService.translate('map.layer.hiking')}</span>
+              </div>
+            </noi-checkbox>
+
+            {this.hikingDataLayers.map(layer =>
               <noi-checkbox loading={this.layersLoading.includes(layer.value)}
                             checked={this.layersActive.includes(layer.value)}
                             onCheckedChange={(event) => this.activateLayer(layer.value, event.detail.checked)}>

@@ -84,6 +84,8 @@ const _icons = {
   'gastronomy': '\ue807',
   'map': '\ue808',
   'mountain-trails': '\ue809',
+  'hiking': '\ue80a',
+  'trekking': '\ue80b',
 } as const;
 
 export interface LayerConfig {
@@ -594,7 +596,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     // 2. Instantiate and load the font directly into memory
     const iconFontFace = new FontFace(
       ICON_FONT_NAME,
-      `url(${base64String}) format('woff2')`
+      `url(${base64String}) format('woff')`
     );
 
     const fontLoadResult = await iconFontFace.load();

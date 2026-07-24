@@ -330,6 +330,8 @@ export class NoiDigiwayComponent implements StencilComponent {
               onLayerLoading={(e) => this._setLayerLoading('layer-hiking-trento', e.detail)}></noi-map-layer-cycling-roads>
             : ''}
 
+          <noi-map-layer-weather></noi-map-layer-weather>
+
         </noi-map>
         {this._renderLegend()}
         <div class={this.isMenuOpened ? "sidebar-backdrop open" : "sidebar-backdrop"}

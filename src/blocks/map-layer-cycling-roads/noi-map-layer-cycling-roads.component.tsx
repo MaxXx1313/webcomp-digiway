@@ -4,8 +4,9 @@
 
 import { Component, Event, EventEmitter, h, Prop } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
-import { LayerConfig, PopupDefinition } from "../map-layer-base-odh/noi-map-layer-base-odh.component";
+import { LayerConfig } from "../map-layer-base-odh/noi-map-layer-base-odh.component";
 import { MapGeoJSONFeature } from "maplibre-gl";
+import { PopupDefinition } from "../../utils/maplibre-popup";
 
 /**
  * (INTERNAL) render map layer

@@ -3,6 +3,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { Map, Subscription } from "maplibre-gl";
+import { Component } from "@stencil/core";
+import { StencilComponent } from "./StencilComponent";
 
 /**
  *

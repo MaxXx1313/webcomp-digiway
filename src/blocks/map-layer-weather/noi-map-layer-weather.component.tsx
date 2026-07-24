@@ -4,12 +4,13 @@
 
 import { Component, Element, Event, EventEmitter } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
-import { Map, Subscription } from "maplibre-gl";
+import { Map, MapGeoJSONFeature, MapMouseEvent, Popup, Subscription } from "maplibre-gl";
 import { enableHoverEffect, listenLayerReady } from "../../utils/maplibre";
 import { WeatherForecastService } from "../../data/noi/weather-forecast-service";
 import { GeoJSON, GeoJsonProperties } from "geojson";
 import { WeatherForecast } from "../../data/noi/WeatherForecase";
 import { Measurement } from "../../data/noi/types-v1-common";
+import { createPopupBodyHTML } from "../../utils/maplibre-popup";
 
 
 // Default styles
@@ -61,10 +62,11 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
 
   private weatherService = new WeatherForecastService();
 
-  constructor() {
-  }
+  private _popup?: Popup;
+  private _popupFeatureId?: string | number;
 
-
+  /**
+   */
   async connectedCallback() {
     // 1. Find the parent map element in the DOM tree
     const mapParent = this.el.closest('noi-map') as HTMLNoiMapElement;
@@ -141,6 +143,14 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
     const layerHover = enableHoverEffect(this.map, 'layer-weather-data');
     this._subscriptions.push(layerHover);
 
+    ///////// Click handlers
+    const _pointClick = this.map.on('click', 'layer-weather-data', (e) => {
+      const feature = e.features![0];
+      console.log('(debug) Clicked polygons:', feature);
+      this.createFeaturePopup(feature, e.lngLat);
+    });
+    this._subscriptions.push(_pointClick);
+
     // Click anywhere for debug
     const _debugClick = this.map.on('click', (e) => {
       const features = this.map.queryRenderedFeatures(e.point);
@@ -149,8 +159,12 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
     this._subscriptions.push(_debugClick);
   }
 
+  /**
+   */
   destroyLayer() {
     console.log('[noi-map-layer-weather] Removing layer from map');
+
+    this._popup?.remove();
 
     for (const subscription of this._subscriptions) {
       subscription.unsubscribe();
@@ -163,6 +177,23 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
       this.map.removeSource('source-weather-data');
     }
   }
+
+
+  createFeaturePopup(feature: MapGeoJSONFeature, lngLat: MapMouseEvent['lngLat']) {
+    const featureId = feature.id;
+    if (this._popupFeatureId === featureId) {
+      return; // same popup is already opened by another event
+    }
+    this._popupFeatureId = featureId;
+    this._popup = new Popup()
+      .setLngLat(lngLat)
+      .setHTML(createPopupBodyHTML(null, feature, feature.layer.type))
+      .addTo(this.map);
+    this._popup.on('close', () => {
+      this._popupFeatureId = undefined;
+    });
+  }
+
 }
 
 

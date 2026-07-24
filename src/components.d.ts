@@ -7,13 +7,15 @@
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { ViewLayout } from "./utils/breakpoints";
 import { IconName } from "./blocks/icon/icon.component";
-import { Map, MapGeoJSONFeature, RequestTransformFunction } from "maplibre-gl";
-import { LayerConfig, PopupDefinition } from "./blocks/map-layer-base-odh/noi-map-layer-base-odh.component";
+import { Map, RequestTransformFunction } from "maplibre-gl";
+import { LayerConfig } from "./blocks/map-layer-base-odh/noi-map-layer-base-odh.component";
+import { PopupDefinitionFn } from "./utils/maplibre-popup";
 import { SelectOption } from "./blocks/select/select.component";
 export { ViewLayout } from "./utils/breakpoints";
 export { IconName } from "./blocks/icon/icon.component";
-export { Map, MapGeoJSONFeature, RequestTransformFunction } from "maplibre-gl";
-export { LayerConfig, PopupDefinition } from "./blocks/map-layer-base-odh/noi-map-layer-base-odh.component";
+export { Map, RequestTransformFunction } from "maplibre-gl";
+export { LayerConfig } from "./blocks/map-layer-base-odh/noi-map-layer-base-odh.component";
+export { PopupDefinitionFn } from "./utils/maplibre-popup";
 export { SelectOption } from "./blocks/select/select.component";
 export namespace Components {
     /**
@@ -117,7 +119,7 @@ export namespace Components {
      */
     interface NoiMapLayerBaseOdh {
         "config": LayerConfig;
-        "popupStructure"?: ((feature: MapGeoJSONFeature, featureType: string) => PopupDefinition | string);
+        "popupStructure"?: PopupDefinitionFn;
     }
     /**
      * (INTERNAL) render map layer
@@ -553,7 +555,7 @@ declare namespace LocalJSX {
           * Emitted when layer data is loading
          */
         "onLayerLoading"?: (event: NoiMapLayerBaseOdhCustomEvent<boolean>) => void;
-        "popupStructure"?: ((feature: MapGeoJSONFeature, featureType: string) => PopupDefinition | string);
+        "popupStructure"?: PopupDefinitionFn;
     }
     /**
      * (INTERNAL) render map layer

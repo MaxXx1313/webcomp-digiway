@@ -13,8 +13,8 @@ import {
   Subscription
 } from "maplibre-gl";
 import { enableHoverEffect, listenLayerReady } from "../../utils/maplibre";
-import { sanitizeText } from "../../utils/html";
 import { base64String } from "./icon-font";
+import { createPopupBodyHTML, PopupDefinitionFn } from "../../utils/maplibre-popup";
 
 const HOST = 'https://geo.api.opendatahub.testingmachine.eu';
 
@@ -98,24 +98,6 @@ export interface LayerConfig {
 
   requestTransform?: RequestTransformFunction;
 }
-
-export interface PopupDefinition {
-  title?: {
-    icon?: string;
-    text?: string;
-  },
-  body: Array<{
-    type: 'name' | 'description' | 'section';
-    // 'text' is for 'name' and 'description'
-    text?: string;
-    // 'section' is for 'section'
-    section?: {
-      name: string;
-      value: string;
-    };
-  }>;
-}
-
 let _uid_seed = 0;
 
 /**
@@ -144,7 +126,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
   /**
    */
   @Prop({mutable: false})
-  popupStructure?: ((feature: MapGeoJSONFeature, featureType: string) => PopupDefinition | string);
+  popupStructure?: PopupDefinitionFn;
 
   /**
    * Emitted when layer data is loading
@@ -506,22 +488,11 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     this._popupFeatureId = featureId;
     this._popup = new Popup()
       .setLngLat(lngLat)
-      .setHTML(this._createPopupBodyHTML(feature, feature.layer.type))
+      .setHTML(createPopupBodyHTML(this.popupStructure, feature, feature.layer.type))
       .addTo(this.map);
     this._popup.on('close', () => {
       this._popupFeatureId = undefined;
     });
-  }
-
-  // Feature popup helper
-  _createPopupBodyHTML(feature: MapGeoJSONFeature, featureType: string) {
-    const fn = this.popupStructure || debugPopupStructure;
-    const structure = fn(feature, featureType);
-    if (typeof structure === 'string') {
-      return structure;
-    } else {
-      return _popupBuilder(structure);
-    }
   }
 
   async _loadIconFont() {
@@ -554,77 +525,4 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     documentFonts.add(iconFontFace);
   }
 
-}
-
-/**
- */
-function _popupBuilder(def: PopupDefinition): string {
-
-  let popupContent = '';
-  if (def.title) {
-
-    let popupTitleContent = '';
-    if (def.title?.icon) {
-      popupTitleContent += `<noi-icon class="popup__header-icon" name="${def.title.icon}" alt="icon"></noi-icon>`;
-    }
-    if (def.title?.text) {
-      popupTitleContent += `<div>${def.title.text}</div>`;
-    }
-
-    popupContent += `<div class="popup__header">${popupTitleContent}</div>`;
-  }
-
-  for (const bDef of def.body) {
-
-    if (bDef.type === 'name') {
-      popupContent += `<div class="popup__name">${bDef.text}</div>`;
-    }
-    if (bDef.type === 'description') {
-      if (bDef.text) {
-        popupContent += `<div class="popup__description">${sanitizeText(bDef.text)}</div>`;
-      }
-      continue;
-    }
-    if (bDef.type === 'section') {
-      if (bDef.section?.value === null || bDef.section?.value === undefined) {
-        continue;
-      }
-      popupContent += `<div class="popup__section">
-          <div class="popup__section-name">${bDef.section.name}</div>
-          <div class="popup__section-value">${bDef.section.value}</div>
-        </div>`;
-    }
-  }
-  return `<div class="noi-map-popup" part="popup">${popupContent}</div>`;
-}
-
-// Feature popup helper
-function debugPopupStructure(feature: MapGeoJSONFeature, featureType: string) {
-  const props = feature.properties;
-  let html = `<strong>${featureType} Feature</strong><br>`;
-  html += `<strong>ID:</strong> ${props.id}<br>`;
-
-  if (featureType === 'Line') {
-    html += `<strong>Type:</strong> ${feature.geometry.type}<br>`;
-  }
-
-  // Alle flachen Properties auÃŸer count & cluster
-  Object.keys(props).forEach(key => {
-    if (['id', 'count', 'cluster'].includes(key)) return;
-    // Wenn es die 'data' Spalte ist, dann parse JSON
-    if (key === 'data' && props.data) {
-      try {
-        const data = JSON.parse(props.data);
-        Object.keys(data).forEach(k => {
-          html += `<strong>${k}:</strong> ${data[k]}<br>`;
-        });
-      } catch (e) {
-        html += `<strong>Data:</strong> ${props.data}<br>`;
-      }
-    } else {
-      html += `<strong>${key}:</strong> ${props[key]}<br>`;
-    }
-  });
-
-  return html;
 }

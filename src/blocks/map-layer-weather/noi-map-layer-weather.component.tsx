@@ -5,9 +5,36 @@
 import { Component, Element, Event, EventEmitter } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
 import { Map, Subscription } from "maplibre-gl";
-import { listenLayerReady } from "../../utils/maplibre";
+import { enableHoverEffect, listenLayerReady } from "../../utils/maplibre";
 import { WeatherForecastService } from "../../data/noi/weather-forecast-service";
 import { GeoJSON } from "geojson";
+
+
+// Default styles
+const defaultStyles = {
+  unclusteredpoints: {
+    'circle-radius': [
+      'interpolate', ['linear'], ['zoom'],
+      0, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 9],
+      10, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 10],
+      14, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 12],
+      18, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 14]
+    ],
+    'circle-color': [
+      'case', ['boolean', ['feature-state', 'hover'], false],
+      '#FF6600',   // hovered
+      '#004D71'    // normal
+    ],
+    'circle-stroke-width': 2,
+    'circle-stroke-color': '#FFFFFF',
+    'circle-opacity': 0.8
+  },
+  icon: {
+    // You can now pass any color dynamically here!
+    'icon-color': '#FFFFFF',
+  },
+} as const;
+
 
 /**
  * (INTERNAL) render map layer
@@ -83,6 +110,7 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
     const geojsonPoints: GeoJSON = {
       type: 'FeatureCollection',
       features: forecastData.map(point => ({
+        id: point.scode,
         type: 'Feature',
         geometry: {
           type: 'Point',
@@ -103,21 +131,19 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
       id: 'layer-weather-data',
       type: 'circle',
       source: 'source-weather-data',
-      paint: {
-        'circle-radius': 6,
-        // Color circles dynamically based on temperature data
-        'circle-color': [
-          'step',
-          ['get', 'temperature'],
-          '#2196F3', 0,  // Blue if below 0°C
-          '#4CAF50', 20, // Green if between 0°C and 20°C
-          '#F44336'      // Red if above 20°C
-        ],
-        'circle-stroke-width': 1,
-        'circle-stroke-color': '#ffffff'
-      }
+      paint: defaultStyles.unclusteredpoints as any,
     });
 
+    // Hover effects
+    const layerHover = enableHoverEffect(this.map, 'layer-weather-data');
+    this._subscriptions.push(layerHover);
+
+    // Click anywhere for debug
+    const _debugClick = this.map.on('click', (e) => {
+      const features = this.map.queryRenderedFeatures(e.point);
+      console.log('[DEBUG] All features at click:', features);
+    });
+    this._subscriptions.push(_debugClick);
   }
 
   destroyLayer() {

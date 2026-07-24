@@ -7,6 +7,7 @@ import { StencilComponent } from "../../utils/StencilComponent";
 import { Map, Subscription } from "maplibre-gl";
 import { listenLayerReady } from "../../utils/maplibre";
 import { WeatherForecastService } from "../../data/noi/weather-forecast-service";
+import { GeoJSON } from "geojson";
 
 /**
  * (INTERNAL) render map layer
@@ -78,45 +79,59 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
     // fetch weather forecast
     const forecastData = await this.weatherService.getWeatherForecastForDay(new Date());
 
+    // Convert your 2000 points into a GeoJSON FeatureCollection
+    const geojsonPoints: GeoJSON = {
+      type: 'FeatureCollection',
+      features: forecastData.map(point => ({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [point.scoordinate.x, point.scoordinate.y] // Ensure longitude is FIRST
+        },
+        properties: point.sdatatypes,
+      })),
+    };
 
-    ////// DATA
-    // this.map.addSource('source-euregio-data', {
-    //   type: 'raster',
-    //   tiles: [euregioLinesUrl],
-    //   tileSize: 512,
-    //   attribution: '© Land Tirol, Südtirol, Trentino',
-    // });
-    //
-    // this.map.addLayer({
-    //   id: 'layer-euregio-background-data',
-    //   type: 'raster',
-    //   source: 'source-euregio-data',
-    //   minzoom: 0,
-    //   maxzoom: 22
-    // });
-    //
+    this.map.addSource('source-weather-data', {
+      type: 'geojson',
+      data: geojsonPoints
+    });
+
+
+    // Add a visual layer
+    this.map.addLayer({
+      id: 'layer-weather-data',
+      type: 'circle',
+      source: 'source-weather-data',
+      paint: {
+        'circle-radius': 6,
+        // Color circles dynamically based on temperature data
+        'circle-color': [
+          'step',
+          ['get', 'temperature'],
+          '#2196F3', 0,  // Blue if below 0°C
+          '#4CAF50', 20, // Green if between 0°C and 20°C
+          '#F44336'      // Red if above 20°C
+        ],
+        'circle-stroke-width': 1,
+        'circle-stroke-color': '#ffffff'
+      }
+    });
 
   }
 
   destroyLayer() {
     console.log('[noi-map-layer-weather] Removing layer from map');
 
-
     for (const subscription of this._subscriptions) {
       subscription.unsubscribe();
     }
     this._subscriptions = [];
 
-    // Must remove dependent layers first before removing the source
-    // if (this.map && this.map.getSource('source-euregio')) {
-    //   this.map.removeLayer('layer-euregio-background');
-    //
-    //   this.map.removeSource('source-euregio');
-    // }
-    if (this.map && this.map.getSource('source-euregio-data')) {
-      this.map.removeLayer('layer-euregio-background-data');
+    if (this.map && this.map.getSource('source-weather-data')) {
+      this.map.removeLayer('layer-weather-data');
 
-      this.map.removeSource('source-euregio-data');
+      this.map.removeSource('source-weather-data');
     }
   }
 }

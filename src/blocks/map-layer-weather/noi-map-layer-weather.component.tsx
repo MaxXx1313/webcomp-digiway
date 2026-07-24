@@ -5,12 +5,39 @@
 import { Component, Element, Event, EventEmitter } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
 import { Map, MapGeoJSONFeature, MapMouseEvent, Popup, Subscription } from "maplibre-gl";
-import { enableHoverEffect, listenLayerReady } from "../../utils/maplibre";
+import {
+  enableHoverEffect,
+  FontIconPaintParams,
+  getFontIconData,
+  listenLayerReady,
+  loadIconFont
+} from "../../utils/maplibre";
 import { WeatherForecastService } from "../../data/noi/weather-forecast-service";
 import { GeoJSON, GeoJsonProperties } from "geojson";
 import { WeatherForecast } from "../../data/noi/WeatherForecase";
 import { Measurement } from "../../data/noi/types-v1-common";
 import { createPopupBodyHTML } from "../../utils/maplibre-popup";
+import { base64String } from "../map-layer-base-odh/icon-font";
+
+
+const ICON_FONT_NAME = 'noi-digiway-weather-icons';
+const ICON_FONT_URL = `url(${base64String}) format('woff')`;
+
+// TODO: icons is not finished for this component
+const ICON_FONT_ICONS = {
+  'bicycle': '\ue800',
+  'closure': '\ue801',
+  'frequency': '\ue802',
+  'weather-prediction': '\ue803',
+  'weather-real-time': '\ue804',
+  'poi': '\ue805',
+  'transport': '\ue806',
+  'gastronomy': '\ue807',
+  'map': '\ue808',
+  'mountain-trails': '\ue809',
+  'hiking': '\ue80a',
+  'trekking': '\ue80b',
+} as const;
 
 
 // Default styles
@@ -32,11 +59,16 @@ const defaultStyles = {
     'circle-stroke-color': '#FFFFFF',
     'circle-opacity': 0.8
   },
-  icon: {
-    // You can now pass any color dynamically here!
-    'icon-color': '#FFFFFF',
-  },
 } as const;
+
+
+// 'iconFontStyles' is not a part of maplibre
+const iconFontStyles: FontIconPaintParams = {
+  "icon-font": ICON_FONT_NAME,
+  'icon-color': '#FFFFFF',
+  "icon-size": 18,
+  "icon-text": '',
+};
 
 
 /**
@@ -139,6 +171,35 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
       paint: defaultStyles.unclusteredpoints as any,
     });
 
+    loadIconFont(ICON_FONT_NAME, ICON_FONT_URL).then(() => {
+      const imageData = getFontIconData({
+        ...iconFontStyles,
+        // "icon-text": _icons[this.config.markerIcon!],
+        "icon-text": 'AAA',
+      });
+
+      if (imageData) {
+        // 3. Register the crisp canvas bitmap straight into MapLibre
+        this.map.addImage('weather-icon', imageData, {
+          sdf: false,
+        });
+      }
+
+      this.map.addLayer({
+        id: 'layer-weather-icon',
+        type: 'symbol',
+        source: 'source-weather-data',
+
+        layout: {
+          'icon-image': 'weather-icon', // Pointing to the generated canvas
+          'icon-size': 1.0,
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true
+        },
+      });
+
+    });
+
     // Hover effects
     const layerHover = enableHoverEffect(this.map, 'layer-weather-data');
     this._subscriptions.push(layerHover);
@@ -173,6 +234,8 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
 
     if (this.map && this.map.getSource('source-weather-data')) {
       this.map.removeLayer('layer-weather-data');
+      this.map.removeLayer('layer-weather-icon');
+      this.map.removeImage('weather-icon');
 
       this.map.removeSource('source-weather-data');
     }
@@ -202,9 +265,20 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
  */
 function _preparePointProperties(point: WeatherForecast): GeoJsonProperties {
   const now = new Date();
+  const description = __getDailyMeasurement(point.sdatatypes["qualitative-forecast"]?.tmeasurements || [])?.mvalue;
   return {
-    temperature: __getRelevantMeasurement(point.sdatatypes["forecast-air-temperature"]?.tmeasurements || [], now)?.mvalue,
-    icon: __getDailyMeasurement(point.sdatatypes["qualitative-forecast"]?.tmeasurements || [])?.mvalue,
+    'air-temperature-current': __getRelevantMeasurement(point.sdatatypes["forecast-air-temperature"]?.tmeasurements || [], now)?.mvalue,
+    'air-temperature-min': __getDailyMeasurement(point.sdatatypes["forecast-air-temperature-min"]?.tmeasurements || [])?.mvalue,
+    'air-temperature-max': __getDailyMeasurement(point.sdatatypes["forecast-air-temperature-max"]?.tmeasurements || [])?.mvalue,
+    'wind-direction-current': __getRelevantMeasurement(point.sdatatypes["forecast-wind-direction"]?.tmeasurements || [], now)?.mvalue,
+    'wind-speed-current': __getRelevantMeasurement(point.sdatatypes["forecast-wind-speed"]?.tmeasurements || [], now)?.mvalue,
+    'precipitation-probability-current': __getRelevantMeasurement(point.sdatatypes["forecast-precipitation-probability"]?.tmeasurements || [], now)?.mvalue,
+    'precipitation-probability-daily': __getDailyMeasurement(point.sdatatypes["forecast-precipitation-probability"]?.tmeasurements || [])?.mvalue,
+    'precipitation-current': __getRelevantMeasurement(point.sdatatypes["forecast-precipitation-sum"]?.tmeasurements || [], now)?.mvalue,
+    'precipitation-daliy': __getDailyMeasurement(point.sdatatypes["forecast-precipitation-sum"]?.tmeasurements || [])?.mvalue,
+    'sunshine-duration': __getDailyMeasurement(point.sdatatypes["forecast-sunshine-duration"]?.tmeasurements || [])?.mvalue,
+    icon: description, // TODO: get by description
+    // data: point.sdatatypes, // TODO: add later?
   };
 }
 
@@ -238,3 +312,7 @@ function __getDailyMeasurement(measurements: Measurement[]) {
   }
   return measurementDaily[0];
 }
+//
+// function _getIcon(description: string) {
+//   ICON_FONT_ICONS
+// }

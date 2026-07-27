@@ -304,10 +304,13 @@ function weatherPopupStructure(feature: MapGeoJSONFeature) {
   const dayPoints = _getPointProperties(data);
   let dpHtml = '';
   for (const dp of dayPoints) {
+
+    const type = getClearSkyType(new Date(dp.time), sunshineDuration);
+
     dpHtml += `
       <div class="popup__table-cell">
       <div>${formatTimeCustom(dp.time)}</div>
-      <div>${dp["qualitative-forecast"]}</div>
+      <div>${dp["qualitative-forecast"]} (${type})</div>
       <div>${dp["air-temperature"]}</div>
       <div>${dp["wind-direction"]}</div>
       <div>${dp["wind-speed"]}</div>
@@ -428,4 +431,29 @@ function __getDailyMeasurement<T>(measurements: Measurement<T>[]) {
     console.warn('Too many daily measurements:', measurements);
   }
   return measurementDaily[0];
+}
+
+/**
+ * NOTE: this is not reliable way to calculate sunrize and sundown
+ */
+function getClearSkyType(now: Date, sunshineHours: number) {
+  // 1. Establish Solar Noon for Italy based on the season
+  // Summer (CEST) solar noon is around 13.25 (1:15 PM). Winter (CET) is around 12.25 (12:15 PM).
+  // const solarNoon = isSummerTime ? 13.25 : 12.25;
+  const solarNoon = 13.75;
+
+  // 2. Calculate approximate sunrise and sunset using the duration
+  const halfDaylight = sunshineHours / 2;
+  const sunrise = solarNoon - halfDaylight;
+  const sunset = solarNoon + halfDaylight;
+
+  // 3. Get the current local hour in Italy (expressed as a decimal, e.g., 14.5 for 14:30)
+  const currentHour = now.getHours() + (now.getMinutes() / 60);
+
+  // 4. Determine if it is currently day or night
+  if (currentHour >= sunrise && currentHour < sunset) {
+    return 'day';
+  } else {
+    return 'night';
+  }
 }

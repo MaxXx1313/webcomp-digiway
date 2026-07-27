@@ -253,6 +253,7 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
       // .setLngLat(lngLat) // < on mouse click point
       .setLngLat((feature.geometry as Point).coordinates as [number, number]) // < on feature center
       .setHTML(weatherPopupStructure(feature))
+      .setMaxWidth('380px')
       .addTo(this.map);
     this._popup.on('close', () => {
       this._popupFeatureId = undefined;
@@ -285,9 +286,9 @@ function weatherPopupStructure(feature: MapGeoJSONFeature) {
 
   const airTemperatureMin = __getDailyMeasurement(data.sdatatypes["forecast-air-temperature-min"]?.tmeasurements || [])?.mvalue;
   const airTemperatureMax = __getDailyMeasurement(data.sdatatypes["forecast-air-temperature-max"]?.tmeasurements || [])?.mvalue;
-  html += `<div class="popup__section">Min: ${airTemperatureMin}℃ - Max: ${airTemperatureMax}℃</div>`;
+  html += `<div class="popup__section popup__section--background">Min: ${airTemperatureMin}℃ - Max: ${airTemperatureMax}℃</div>`;
 
-  html += `<div class="popup__section">${formatDateCustom(feature.properties?.day)}</div>`;
+  html += `<div class="popup__section popup__section--hero">${formatDateCustom(feature.properties?.day)}</div>`;
 
   const precipitationProbabilityDaily = __getDailyMeasurement(data.sdatatypes["forecast-precipitation-probability"]?.tmeasurements || [])?.mvalue;
   html += `<div class="popup__section">Precipitation probability: ${precipitationProbabilityDaily}%</div>`;
@@ -303,21 +304,38 @@ function weatherPopupStructure(feature: MapGeoJSONFeature) {
 
   const dayPoints = _getPointProperties(data);
   let dpHtml = '';
+
+  dpHtml += `
+      <div class="popup__table-labels">
+      <div class="popup__table-labels-top-1">Air temperature</div>
+      <div class="popup__table-labels-top-2">Wind</div>
+      <div class="popup__table-labels-top-3">Precipitation</div>
+    </div>`;
+
   for (const dp of dayPoints) {
 
     const type = getClearSkyType(new Date(dp.time), sunshineDuration);
 
-    dpHtml += `
-      <div class="popup__table-cell">
-      <div>${formatTimeCustom(dp.time)}</div>
-      <div>${dp["qualitative-forecast"]} (${type})</div>
-      <div>${dp["air-temperature"]}</div>
-      <div>${dp["wind-direction"]}</div>
-      <div>${dp["wind-speed"]}</div>
-      <div>${dp["precipitation-probability"]}</div>
-      <div>${dp["precipitation-sum"]}</div>
-</div>
-    `;
+    dpHtml += `<div class="popup__table-cell">
+
+      <div class="popup__values-group popup__values-group--no-margin">
+        <div>${formatTimeCustom(dp.time)}</div>
+        <div>${dp["qualitative-forecast"]} (${type})</div>
+      </div>
+
+      <div class="popup__values-group">
+        <div>${dp["air-temperature"]}℃</div>
+      </div>
+
+      <div class="popup__values-group">
+        <div>${dp["wind-direction"]}° (${getWindDirectionLabel(dp["wind-direction"])})</div>
+        <div>${dp["wind-speed"]}m/s</div>
+      </div>
+      <div class="popup__values-group">
+        <div>${dp["precipitation-probability"]}%</div>
+        <div>${dp["precipitation-sum"]}mm</div>
+      </div>
+    </div>`;
   }
   html += `<div class="popup__table">${dpHtml}</div>`;
 
@@ -456,4 +474,24 @@ function getClearSkyType(now: Date, sunshineHours: number) {
   } else {
     return 'night';
   }
+}
+
+/**
+ *
+ */
+function getWindDirectionLabel(degrees: number | null | undefined) {
+  if (degrees === null || degrees === undefined) {
+    return '';
+  }
+  // 1. Normalize the degrees to keep them strictly between 0 and 359
+  const normalizedDegrees = (degrees % 360 + 360) % 360;
+
+  // 2. Define the 8 directions in clockwise order starting from North
+  const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+
+  // 3. Divide by 45 degrees per segment, and shift by half a segment (22.5°)
+  // so that North centers perfectly around 0° / 360°
+  const index = Math.round(normalizedDegrees / 45) % 8;
+
+  return directions[index];
 }

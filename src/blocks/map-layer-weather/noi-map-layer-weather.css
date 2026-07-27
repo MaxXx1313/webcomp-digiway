@@ -23,6 +23,19 @@
   height: 1.5em;
 }
 
+.noi-weather-popup .popup__section {
+  padding: 4px 16px;
+}
+
+.noi-weather-popup .popup__section.popup__section--hero {
+  font-weight: bold;
+  text-transform: capitalize;
+}
+.noi-weather-popup .popup__section.popup__section--background {
+  padding: 8px 16px;
+  background: #f0f0f0;
+}
+
 .noi-weather-popup .popup__table {
   display: flex;
   gap: 16px;
@@ -30,13 +43,54 @@
   padding: 16px;
   white-space: nowrap;
   scroll-behavior: smooth;
+  position: relative;
 }
 
 .noi-weather-popup .popup__table-cell {
   flex: 0 0 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.noi-weather-popup .popup__values-group {
+  margin-top: 1.5em;
+
   background: #f0f0f0;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.noi-weather-popup .popup__values-group.popup__values-group--no-margin {
+  margin-top: 0;
+}
+
+
+.noi-weather-popup .popup__table-labels {
+  position: fixed;
+  opacity: .6;
+  font-size: 0.9em;
+}
+
+.noi-weather-popup .popup__table-labels-top-1 {
+  position: absolute;
+  left: 0;
+  top: 2.5rem;
+  z-index: 1;
+}
+
+.noi-weather-popup .popup__table-labels-top-2 {
+  position: absolute;
+  left: 0;
+  top: 5.5rem;
+  z-index: 1;
+}
+
+.noi-weather-popup .popup__table-labels-top-3 {
+  position: absolute;
+  left: 0;
+  top: 9.5rem;
+  z-index: 1;
 }

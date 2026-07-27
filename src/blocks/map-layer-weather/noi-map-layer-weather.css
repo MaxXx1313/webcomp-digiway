@@ -3,3 +3,40 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+
+/* POPUP */
+.noi-weather-popup {
+  font-size: initial;
+}
+
+/* HEADER */
+.noi-weather-popup .popup__header {
+  padding: 0 32px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 0.5ch;
+  min-height: 32px;
+  font-weight: bold;
+}
+
+.noi-weather-popup .popup__header-icon {
+  height: 1.5em;
+}
+
+.noi-weather-popup .popup__table {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 16px;
+  white-space: nowrap;
+  scroll-behavior: smooth;
+}
+
+.noi-weather-popup .popup__table-cell {
+  flex: 0 0 80px;
+  background: #f0f0f0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

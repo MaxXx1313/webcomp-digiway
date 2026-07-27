@@ -41,14 +41,14 @@ export interface Datatype<MeasurementType = string | number | any> {
 }
 
 
-export interface Station {
+export interface Station<Metadata = any> {
   sname: string;
   stype: string;
   scode: string;
   sorigin: string;
   sactive: string;
   scoordinate: Coordinate;
-  smetadata: any;
+  smetadata: Metadata;
 // sparent:Parent;
 }
 

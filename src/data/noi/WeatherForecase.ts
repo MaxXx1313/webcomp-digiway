@@ -58,12 +58,12 @@ export type WeatherForecastIconValueType = ''
 
   | 'cloudy, thunderstorms with moderate showers'
   | 'cloudy with rain and snow'
-;
+  ;
 
 /**
  *
  */
-export interface WeatherForecast extends Station {
+export interface WeatherForecast extends Station<{ nameEn: string }> {
   sdatatypes: {
     [key in WeatherForecastMeasurementType]: Datatype<number>;
   } & {

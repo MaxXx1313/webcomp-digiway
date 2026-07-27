@@ -4,7 +4,7 @@
 
 import { Component, Element, Event, EventEmitter } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
-import { Map, MapGeoJSONFeature, MapMouseEvent, Popup, Subscription } from "maplibre-gl";
+import { Map, MapGeoJSONFeature, Popup, Subscription } from "maplibre-gl";
 import {
   enableHoverEffect,
   FontIconPaintParams,
@@ -13,10 +13,9 @@ import {
   loadIconFont
 } from "../../utils/maplibre";
 import { WeatherForecastService } from "../../data/noi/weather-forecast-service";
-import { GeoJSON, GeoJsonProperties } from "geojson";
-import { WeatherForecast } from "../../data/noi/WeatherForecase";
+import { GeoJSON, Point } from "geojson";
+import { WeatherForecast, WeatherForecastMeasurementType } from "../../data/noi/WeatherForecase";
 import { Measurement } from "../../data/noi/types-v1-common";
-import { createPopupBodyHTML } from "../../utils/maplibre-popup";
 import { base64String } from "../map-layer-base-odh/icon-font";
 
 
@@ -45,10 +44,10 @@ const defaultStyles = {
   unclusteredpoints: {
     'circle-radius': [
       'interpolate', ['linear'], ['zoom'],
-      0, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 9],
-      10, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 10],
-      14, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 12],
-      18, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 14]
+      0, ['case', ['boolean', ['feature-state', 'hover'], false], 16, 14],
+      10, ['case', ['boolean', ['feature-state', 'hover'], false], 17, 15],
+      14, ['case', ['boolean', ['feature-state', 'hover'], false], 19, 17],
+      18, ['case', ['boolean', ['feature-state', 'hover'], false], 21, 19]
     ],
     'circle-color': [
       'case', ['boolean', ['feature-state', 'hover'], false],
@@ -141,7 +140,7 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
 
     // fetch weather forecast
     const forecastData = await this.weatherService.getWeatherForecastForDay(new Date());
-    const forecastDataTmp = forecastData.slice(0, 1); // FIXME: debug
+    const forecastDataTmp = forecastData.values.slice(0, 1); // FIXME: debug
 
     // Convert your 2000 points into a GeoJSON FeatureCollection
     const geojsonPoints: GeoJSON = {
@@ -153,7 +152,7 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
           type: 'Point',
           coordinates: [point.scoordinate.x, point.scoordinate.y] // Ensure longitude is FIRST
         },
-        properties: _preparePointProperties(point),
+        properties: {data: point, day: forecastData.dateFrom.toISOString()},
       })),
     };
 
@@ -207,8 +206,9 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
     ///////// Click handlers
     const _pointClick = this.map.on('click', 'layer-weather-data', (e) => {
       const feature = e.features![0];
-      console.log('(debug) Clicked polygons:', feature);
-      this.createFeaturePopup(feature, e.lngLat);
+      console.log('(debug) Clicked point:', feature);
+      // this.createFeaturePopup(feature, e.lngLat);
+      this.createFeaturePopup(feature);
     });
     this._subscriptions.push(_pointClick);
 
@@ -242,15 +242,17 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
   }
 
 
-  createFeaturePopup(feature: MapGeoJSONFeature, lngLat: MapMouseEvent['lngLat']) {
+  // createFeaturePopup(feature: MapGeoJSONFeature, lngLat: MapMouseEvent['lngLat']) {
+  createFeaturePopup(feature: MapGeoJSONFeature) {
     const featureId = feature.id;
     if (this._popupFeatureId === featureId) {
       return; // same popup is already opened by another event
     }
     this._popupFeatureId = featureId;
     this._popup = new Popup()
-      .setLngLat(lngLat)
-      .setHTML(createPopupBodyHTML(null, feature, feature.layer.type))
+      // .setLngLat(lngLat) // < on mouse click point
+      .setLngLat((feature.geometry as Point).coordinates as [number, number]) // < on feature center
+      .setHTML(weatherPopupStructure(feature))
       .addTo(this.map);
     this._popup.on('close', () => {
       this._popupFeatureId = undefined;
@@ -260,49 +262,164 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
 }
 
 
-/**
- *
- */
-function _preparePointProperties(point: WeatherForecast): GeoJsonProperties {
-  const now = new Date();
-  const description = __getDailyMeasurement(point.sdatatypes["qualitative-forecast"]?.tmeasurements || [])?.mvalue;
-  return {
-    'air-temperature-current': __getRelevantMeasurement(point.sdatatypes["forecast-air-temperature"]?.tmeasurements || [], now)?.mvalue,
-    'air-temperature-min': __getDailyMeasurement(point.sdatatypes["forecast-air-temperature-min"]?.tmeasurements || [])?.mvalue,
-    'air-temperature-max': __getDailyMeasurement(point.sdatatypes["forecast-air-temperature-max"]?.tmeasurements || [])?.mvalue,
-    'wind-direction-current': __getRelevantMeasurement(point.sdatatypes["forecast-wind-direction"]?.tmeasurements || [], now)?.mvalue,
-    'wind-speed-current': __getRelevantMeasurement(point.sdatatypes["forecast-wind-speed"]?.tmeasurements || [], now)?.mvalue,
-    'precipitation-probability-current': __getRelevantMeasurement(point.sdatatypes["forecast-precipitation-probability"]?.tmeasurements || [], now)?.mvalue,
-    'precipitation-probability-daily': __getDailyMeasurement(point.sdatatypes["forecast-precipitation-probability"]?.tmeasurements || [])?.mvalue,
-    'precipitation-current': __getRelevantMeasurement(point.sdatatypes["forecast-precipitation-sum"]?.tmeasurements || [], now)?.mvalue,
-    'precipitation-daliy': __getDailyMeasurement(point.sdatatypes["forecast-precipitation-sum"]?.tmeasurements || [])?.mvalue,
-    'sunshine-duration': __getDailyMeasurement(point.sdatatypes["forecast-sunshine-duration"]?.tmeasurements || [])?.mvalue,
-    icon: description, // TODO: get by description
-    // data: point.sdatatypes, // TODO: add later?
-  };
+//
+// function _getIcon(description: string) {
+//   ICON_FONT_ICONS
+// }
+
+
+// Feature popup helper
+function weatherPopupStructure(feature: MapGeoJSONFeature) {
+  const data = JSON.parse(feature.properties?.data) as WeatherForecast;
+  let html = '';
+
+  const pointDescription = __getDailyMeasurement(data.sdatatypes["qualitative-forecast"]?.tmeasurements || [])?.mvalue;
+  const pointName = data.smetadata.nameEn;
+
+  // TODO: use icon:  <noi-icon className="popup__header-icon" name="${props.icon}" alt="icon"></noi-icon>
+  html += `<div class="popup__header">
+    <div>${pointDescription}</div>
+    <div>${pointName}</div>
+  </div>`;
+
+
+  const airTemperatureMin = __getDailyMeasurement(data.sdatatypes["forecast-air-temperature-min"]?.tmeasurements || [])?.mvalue;
+  const airTemperatureMax = __getDailyMeasurement(data.sdatatypes["forecast-air-temperature-max"]?.tmeasurements || [])?.mvalue;
+  html += `<div class="popup__section">Min: ${airTemperatureMin}℃ - Max: ${airTemperatureMax}℃</div>`;
+
+  html += `<div class="popup__section">${formatDateCustom(feature.properties?.day)}</div>`;
+
+  const precipitationProbabilityDaily = __getDailyMeasurement(data.sdatatypes["forecast-precipitation-probability"]?.tmeasurements || [])?.mvalue;
+  html += `<div class="popup__section">Precipitation probability: ${precipitationProbabilityDaily}%</div>`;
+
+  const precipitationAmountDaily = __getDailyMeasurement(data.sdatatypes["forecast-precipitation-sum"]?.tmeasurements || [])?.mvalue;
+  html += `<div class="popup__section">Cumulated precipitation: ${precipitationAmountDaily}mm</div>`;
+
+  // html += `<div class="popup__section">Wind speed: ${props["wind-speed-current"]}m/s</div>`;
+  // html += `<div class="popup__section">Wind direction: ${props["wind-direction-current"]}°</div>`;
+
+  const sunshineDuration = __getDailyMeasurement(data.sdatatypes["forecast-sunshine-duration"]?.tmeasurements || [])?.mvalue;
+  html += `<div class="popup__section">Sunshine duration: ${sunshineDuration}h</div>`;
+
+  const dayPoints = _getPointProperties(data);
+  let dpHtml = '';
+  for (const dp of dayPoints) {
+    dpHtml += `
+      <div class="popup__table-cell">
+      <div>${formatTimeCustom(dp.time)}</div>
+      <div>${dp["qualitative-forecast"]}</div>
+      <div>${dp["air-temperature"]}</div>
+      <div>${dp["wind-direction"]}</div>
+      <div>${dp["wind-speed"]}</div>
+      <div>${dp["precipitation-probability"]}</div>
+      <div>${dp["precipitation-sum"]}</div>
+</div>
+    `;
+  }
+  html += `<div class="popup__table">${dpHtml}</div>`;
+
+  return `<div class="noi-weather-popup" part="popup">${html}</div>`;
 }
 
 /**
  */
-function __getRelevantMeasurement(measurements: Measurement[], now: Date = new Date()) {
+function formatDateCustom(dateStr: string, locale = 'en-US') {
+  if (!dateStr) {
+    return '';
+  }
+  const date = new Date(dateStr);
 
-  // sort in 'desc' order
-  // note: date is JS-date format which is sorted correctly as a string
-  const measurementSorted = measurements
-    .filter(m => m.mperiod !== 86400) // filter-out daily measurements
-    .sort((a, b) => b.mvalidtime.localeCompare(a.mvalidtime));
+  // 1. Extract the day number string
+  const day = date.getDate();
 
-  // find first record having less than current time
-  return measurementSorted.find(m => {
-    const d = new Date(m.mvalidtime);
-    return d < now;
-  }) || null;
+  // 2. Extract the lowercase long weekday name
+  const weekdayFormatter = new Intl.DateTimeFormat(locale, {weekday: 'long'});
+  const weekdayName = weekdayFormatter.format(date).toLowerCase();
+
+  // 3. Extract the lowercase long month name
+  const monthFormatter = new Intl.DateTimeFormat(locale, {month: 'long'});
+  const monthName = monthFormatter.format(date).toLowerCase();
+
+  // 4. Force the precise order: [Weekday] [Day] [Month]
+  return `${weekdayName} ${day} ${monthName}`;
+}
+
+/**
+ */
+function formatTimeCustom(dateStr: string) {
+  if (!dateStr) {
+    return '';
+  }
+  const date = new Date(dateStr);
+
+  const hours = date.getHours();
+
+  const minutes = ('0' + date.getMinutes()).slice(-2);
+
+  return `${hours}:${minutes}`;
+}
+
+
+interface DayPointForecast {
+  'time': string;
+  'air-temperature'?: number;
+  'wind-direction'?: number;
+  'wind-speed'?: number;
+  'precipitation-probability'?: number;
+  'precipitation-sum'?: number;
+  'qualitative-forecast'?: number;
+}
+
+/**
+ */
+function _getPointProperties(point: WeatherForecast) {
+  const _uniqueDayPoints: string[] = [];
+
+  function __collectTime(type: WeatherForecastMeasurementType) {
+    for (const m of point.sdatatypes[type]?.tmeasurements) {
+      if (m.mperiod === 86400) {
+        // skip daily points
+        continue;
+      }
+      if (!_uniqueDayPoints.includes(m.mvalidtime)) {
+        _uniqueDayPoints.push(m.mvalidtime);
+      }
+    }
+  }
+
+  __collectTime('forecast-air-temperature');
+  __collectTime('forecast-wind-direction');
+  __collectTime('forecast-wind-speed');
+  __collectTime('forecast-precipitation-probability');
+  __collectTime('forecast-precipitation-sum');
+  __collectTime('qualitative-forecast');
+
+  const _uniqueDayPointsSorted = _uniqueDayPoints.sort((a, b) => a.localeCompare(b));
+
+  function __getPointMeasurement(type: WeatherForecastMeasurementType, dp: string) {
+    return (point.sdatatypes[type]?.tmeasurements || [])?.find(m => m.mvalidtime === dp);
+  }
+
+  const points: DayPointForecast[] = [];
+  for (const dp of _uniqueDayPointsSorted) {
+    const pointData: DayPointForecast = {
+      'time': dp,
+      'air-temperature': __getPointMeasurement('forecast-air-temperature', dp)?.mvalue,
+      'wind-direction': __getPointMeasurement('forecast-wind-direction', dp)?.mvalue,
+      'wind-speed': __getPointMeasurement('forecast-wind-speed', dp)?.mvalue,
+      'precipitation-probability': __getPointMeasurement('forecast-precipitation-probability', dp)?.mvalue,
+      'precipitation-sum': __getPointMeasurement('forecast-precipitation-sum', dp)?.mvalue,
+      'qualitative-forecast': __getPointMeasurement('qualitative-forecast', dp)?.mvalue,
+    };
+    points.push(pointData);
+  }
+  return points;
 }
 
 
 /**
  */
-function __getDailyMeasurement(measurements: Measurement[]) {
+function __getDailyMeasurement<T>(measurements: Measurement<T>[]) {
 
   const measurementDaily = measurements
     .filter(m => m.mperiod === 86400);
@@ -312,7 +429,3 @@ function __getDailyMeasurement(measurements: Measurement[]) {
   }
   return measurementDaily[0];
 }
-//
-// function _getIcon(description: string) {
-//   ICON_FONT_ICONS
-// }

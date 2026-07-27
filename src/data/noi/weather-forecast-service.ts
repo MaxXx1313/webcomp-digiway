@@ -45,7 +45,11 @@ export class WeatherForecastService {
     }));
     const predictionData = await (predictionResponse.json() as Promise<WeatherForecastResponse>);
 
-    return Object.values(predictionData?.data?.WeatherForecast?.stations || {}) as WeatherForecast[];
+    return {
+      dateFrom,
+      dateTo,
+      values: Object.values(predictionData?.data?.WeatherForecast?.stations || {}) as WeatherForecast[],
+    };
   }
 
 }

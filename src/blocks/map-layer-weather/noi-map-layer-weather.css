@@ -4,6 +4,19 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
+.noi-weather-icon {
+  font-family: "noi-digiway-weather-icons";
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  speak: never;
+  user-select: none;
+
+  display: inline-block;
+  margin-top: -2px;
+}
+
 /* POPUP */
 .noi-weather-popup {
   font-size: initial;
@@ -31,6 +44,7 @@
   font-weight: bold;
   text-transform: capitalize;
 }
+
 .noi-weather-popup .popup__section.popup__section--background {
   padding: 8px 16px;
   background: #f0f0f0;

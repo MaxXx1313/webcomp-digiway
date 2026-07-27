@@ -16,7 +16,7 @@ import { WeatherForecastService } from "../../data/noi/weather-forecast-service"
 import { GeoJSON, Point } from "geojson";
 import { WeatherForecast, WeatherForecastMeasurementType } from "../../data/noi/WeatherForecase";
 import { Measurement } from "../../data/noi/types-v1-common";
-import { base64String } from "../map-layer-base-odh/icon-font";
+import { base64String } from "./icon-font";
 
 
 const ICON_FONT_NAME = 'noi-digiway-weather-icons';
@@ -24,20 +24,29 @@ const ICON_FONT_URL = `url(${base64String}) format('woff')`;
 
 // TODO: icons is not finished for this component
 const ICON_FONT_ICONS = {
-  'bicycle': '\ue800',
-  'closure': '\ue801',
-  'frequency': '\ue802',
-  'weather-prediction': '\ue803',
-  'weather-real-time': '\ue804',
-  'poi': '\ue805',
-  'transport': '\ue806',
-  'gastronomy': '\ue807',
-  'map': '\ue808',
-  'mountain-trails': '\ue809',
-  'hiking': '\ue80a',
-  'trekking': '\ue80b',
+  '': '', // no icon
+  'icon-cloudy': '\ue80c',
+  'icon-cloudy-day': '\ue80d',
+  'icon-cloudy-night': '\ue80e',
+  'icon-rain-1': '\ue80f',
+  'icon-rain-2': '\ue810',
+  'icon-rain-3': '\ue811',
+  'icon-rain-bolt-1': '\ue812',
+  'icon-rain-bolt-2': '\ue813',
+  'icon-rain-day': '\ue814',
+  'icon-rain-night': '\ue815',
+  'icon-rain-snow': '\ue816',
+  'icon-snow-1': '\ue817',
+  'icon-snow-2': '\ue818',
+  'icon-snow-3': '\ue819',
+  'icon-snow-day': '\ue81a',
+  'icon-snowflake': '\ue81b',
+  'icon-snow-night': '\ue81c',
+  'icon-sunny': '\ue81d',
+  'icon-moon': '\uf186',
 } as const;
 
+// type IconName = keyof typeof ICON_FONT_NAME;
 
 // Default styles
 const defaultStyles = {
@@ -129,6 +138,8 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
   async initLayer() {
     console.log(`[noi-map-layer-weather] Adding layer to map`);
 
+    const now = new Date();
+
     //
     const _loadEvent = listenLayerReady(this.map, 'source-weather-data', () => {
       this.layerLoading.emit(false);
@@ -141,19 +152,30 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
     // fetch weather forecast
     const forecastData = await this.weatherService.getWeatherForecastForDay(new Date());
     const forecastDataTmp = forecastData.values.slice(0, 1); // FIXME: debug
+    // const forecastDataTmp = forecastData.values;
 
     // Convert your 2000 points into a GeoJSON FeatureCollection
     const geojsonPoints: GeoJSON = {
       type: 'FeatureCollection',
-      features: forecastDataTmp.map(point => ({
-        id: point.scode,
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [point.scoordinate.x, point.scoordinate.y] // Ensure longitude is FIRST
-        },
-        properties: {data: point, day: forecastData.dateFrom.toISOString()},
-      })),
+      features: forecastDataTmp.map(point => {
+        const pointDescription = __getDailyMeasurement(point.sdatatypes["qualitative-forecast"]?.tmeasurements || [])?.mvalue;
+        const sunshineDuration = __getDailyMeasurement(point.sdatatypes["forecast-sunshine-duration"]?.tmeasurements || [])?.mvalue;
+
+        const skyType = getClearSkyType(now, sunshineDuration);
+        return {
+          id: point.scode,
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [point.scoordinate.x, point.scoordinate.y] // Ensure longitude is FIRST
+          },
+          properties: {
+            data: point,
+            day: forecastData.dateFrom.toISOString(),
+            icon_name: getIconName(pointDescription, skyType),
+          },
+        };
+      }),
     };
 
     this.map.addSource('source-weather-data', {
@@ -171,17 +193,24 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
     });
 
     loadIconFont(ICON_FONT_NAME, ICON_FONT_URL).then(() => {
-      const imageData = getFontIconData({
-        ...iconFontStyles,
-        // "icon-text": _icons[this.config.markerIcon!],
-        "icon-text": 'AAA',
-      });
 
-      if (imageData) {
-        // 3. Register the crisp canvas bitmap straight into MapLibre
-        this.map.addImage('weather-icon', imageData, {
-          sdf: false,
+      for (const iconName in ICON_FONT_ICONS) {
+        if (!iconName) {
+          continue;
+        }
+        const imageData = getFontIconData({
+          ...iconFontStyles,
+          // "icon-text": _icons[this.config.markerIcon!],
+          // "icon-text": 'AAA',
+          "icon-text": ICON_FONT_ICONS[iconName as keyof typeof ICON_FONT_ICONS],
         });
+
+        if (imageData) {
+          // 3. Register the crisp canvas bitmap straight into MapLibre
+          this.map.addImage(iconName, imageData, {
+            sdf: false,
+          });
+        }
       }
 
       this.map.addLayer({
@@ -190,7 +219,7 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
         source: 'source-weather-data',
 
         layout: {
-          'icon-image': 'weather-icon', // Pointing to the generated canvas
+          'icon-image': ['get', 'icon_name'],
           'icon-size': 1.0,
           'icon-allow-overlap': true,
           'icon-ignore-placement': true
@@ -274,12 +303,13 @@ function weatherPopupStructure(feature: MapGeoJSONFeature) {
   const data = JSON.parse(feature.properties?.data) as WeatherForecast;
   let html = '';
 
+  const iconName = feature.properties['icon_name'] as keyof typeof ICON_FONT_ICONS;
   const pointDescription = __getDailyMeasurement(data.sdatatypes["qualitative-forecast"]?.tmeasurements || [])?.mvalue;
   const pointName = data.smetadata.nameEn;
 
   // TODO: use icon:  <noi-icon className="popup__header-icon" name="${props.icon}" alt="icon"></noi-icon>
   html += `<div class="popup__header">
-    <div>${pointDescription}</div>
+    <div class="noi-weather-icon" title="${pointDescription}">${ICON_FONT_ICONS[iconName]}</div>
     <div>${pointName}</div>
   </div>`;
 
@@ -314,13 +344,13 @@ function weatherPopupStructure(feature: MapGeoJSONFeature) {
 
   for (const dp of dayPoints) {
 
-    const type = getClearSkyType(new Date(dp.time), sunshineDuration);
+    const skyType = getClearSkyType(new Date(dp.time), sunshineDuration);
 
     dpHtml += `<div class="popup__table-cell">
 
       <div class="popup__values-group popup__values-group--no-margin">
         <div>${formatTimeCustom(dp.time)}</div>
-        <div>${dp["qualitative-forecast"]} (${type})</div>
+        <div class="noi-weather-icon" title="${dp["qualitative-forecast"]}">${getIcon(dp["qualitative-forecast"] as any, skyType)}</div>
       </div>
 
       <div class="popup__values-group">
@@ -452,7 +482,7 @@ function __getDailyMeasurement<T>(measurements: Measurement<T>[]) {
 }
 
 /**
- * NOTE: this is not reliable way to calculate sunrize and sundown
+ * NOTE: this is not a reliable way to calculate sunrise and sundown
  */
 function getClearSkyType(now: Date, sunshineHours: number) {
   // 1. Establish Solar Noon for Italy based on the season
@@ -494,4 +524,87 @@ function getWindDirectionLabel(degrees: number | null | undefined) {
   const index = Math.round(normalizedDegrees / 45) % 8;
 
   return directions[index];
+}
+
+
+/**
+ * examples:
+ // overall
+ | 'sunny'
+ | 'partly cloudy'
+ | 'cloudy'
+ | 'very cloudy'
+
+ // overcast
+ | 'overcast'
+ | 'overcast with light rain'
+ | 'overcast with moderate rain'
+ | 'overcast with heavy rain' // never appeared yet
+
+ | 'overcast with light snow'
+ | 'overcast with moderate snow'
+ | 'overcast with heavy snow' // never appeared yet
+
+ | 'overcast with rain and snow'
+
+ // cloudy
+ | 'cloudy with light rain' // never appeared yet
+ | 'cloudy with moderate rain'
+ | 'cloudy with heavy rain' // never appeared yet
+ | 'cloudy with light snow'
+ | 'cloudy with moderate snow' // never appeared yet
+ | 'cloudy with heavy snow'
+
+ | 'cloudy, thunderstorms with moderate showers'
+ | 'cloudy with rain and snow'
+ */
+function getIconName(description: string, type: 'day' | 'night'): keyof typeof ICON_FONT_ICONS {
+  if (!description) {
+    return '';
+  }
+  const lc = (description + '').toLowerCase();
+
+  if (lc === 'sunny') {
+    return type === 'night' ? 'icon-moon' : 'icon-sunny';
+  }
+  if (lc === 'partly cloudy') {
+    return type === 'night' ? 'icon-cloudy-night' : 'icon-cloudy-day';
+  }
+  if (lc === 'cloudy' || lc === 'very cloudy') {
+    return 'icon-cloudy';
+  }
+  if (lc.includes('rain and snow')) {
+    return 'icon-rain-snow';
+  }
+  if (lc.includes('thunderstorms')) {
+    if (lc.includes('moderate')) {
+      return 'icon-rain-bolt-2';
+    } else {
+      return 'icon-rain-bolt-1';
+    }
+  }
+
+  const isCloudy = lc.includes('cloudy') || lc.includes('overcast');
+  const isSnow = lc.includes('snow');
+  const isRain = lc.includes('rain');
+  let level = 2; // moderate
+  if (lc.includes('light')) {
+    level = 1;
+  }
+  if (lc.includes('heavy')) {
+    level = 3;
+  }
+  if (isCloudy) {
+    if (isRain) {
+      return 'icon-rain-' + level as any;
+    }
+    if (isSnow) {
+      return 'icon-snow-' + level as any;
+    }
+  }
+  return '';
+}
+
+function getIcon(description: string, type: 'day' | 'night'): string {
+  return ICON_FONT_ICONS[getIconName(description, type)];
 }

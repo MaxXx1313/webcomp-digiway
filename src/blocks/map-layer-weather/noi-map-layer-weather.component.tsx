@@ -269,7 +269,13 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
     if (this.map && this.map.getSource('source-weather-data')) {
       this.map.removeLayer('layer-weather-data');
       this.map.removeLayer('layer-weather-icon');
-      this.map.removeImage('weather-icon');
+
+      for (const iconName in ICON_FONT_ICONS) {
+        if (!iconName) {
+          continue;
+        }
+        this.map.removeImage(iconName);
+      }
 
       this.map.removeSource('source-weather-data');
     }

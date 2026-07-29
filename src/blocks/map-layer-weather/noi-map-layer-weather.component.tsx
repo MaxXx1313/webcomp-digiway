@@ -17,6 +17,7 @@ import { GeoJSON, Point } from "geojson";
 import { WeatherForecast, WeatherForecastMeasurementType } from "../../data/noi/WeatherForecase";
 import { Measurement } from "../../data/noi/types-v1-common";
 import { base64String } from "./icon-font";
+import { LanguageDataService } from "../../data/language/language-data-service";
 
 
 const ICON_FONT_NAME = 'noi-digiway-weather-icons';
@@ -104,6 +105,8 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
 
   private _popup?: Popup;
   private _popupFeatureId?: string | number;
+
+  private languageService = LanguageDataService.getInstance();
 
   private config = {
     center: [11.35, 46.5] as LngLatLike,
@@ -300,7 +303,7 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
     this._popup = new Popup()
       // .setLngLat(lngLat) // < on mouse click point
       .setLngLat((feature.geometry as Point).coordinates as [number, number]) // < on feature center
-      .setHTML(weatherPopupStructure(feature))
+      .setHTML(weatherPopupStructure(feature, this.languageService))
       .setMaxWidth('380px')
       .addTo(this.map);
     this._popup.on('close', () => {
@@ -318,7 +321,7 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
 
 
 // Feature popup helper
-function weatherPopupStructure(feature: MapGeoJSONFeature) {
+function weatherPopupStructure(feature: MapGeoJSONFeature, languageService: LanguageDataService) {
   const data = JSON.parse(feature.properties?.data) as WeatherForecast;
   let html = '';
 
@@ -335,30 +338,32 @@ function weatherPopupStructure(feature: MapGeoJSONFeature) {
 
   const airTemperatureMin = __getDailyMeasurement(data.sdatatypes["forecast-air-temperature-min"]?.tmeasurements || [])?.mvalue;
   const airTemperatureMax = __getDailyMeasurement(data.sdatatypes["forecast-air-temperature-max"]?.tmeasurements || [])?.mvalue;
-  html += `<div class="popup__section popup__section--background">Min: ${airTemperatureMin}℃ - Max: ${airTemperatureMax}℃</div>`;
+  html += `<div class="popup__section popup__section--background">
+        ${languageService.translate('weather.air-temperature-min')}: ${airTemperatureMin}℃ - ${languageService.translate('weather.air-temperature-max')}: ${airTemperatureMax}℃
+  </div>`;
 
-  html += `<div class="popup__section popup__section--hero">${formatDateCustom(feature.properties?.day)}</div>`;
+  html += `<div class="popup__section popup__section--hero">${formatDateCustom(feature.properties?.day, languageService.currentLanguage)}</div>`;
 
   const precipitationProbabilityDaily = __getDailyMeasurement(data.sdatatypes["forecast-precipitation-probability"]?.tmeasurements || [])?.mvalue;
-  html += `<div class="popup__section">Precipitation probability: ${precipitationProbabilityDaily}%</div>`;
+  html += `<div class="popup__section">${languageService.translate('weather.precipitation-probability')}: ${precipitationProbabilityDaily}%</div>`;
 
   const precipitationAmountDaily = __getDailyMeasurement(data.sdatatypes["forecast-precipitation-sum"]?.tmeasurements || [])?.mvalue;
-  html += `<div class="popup__section">Cumulated precipitation: ${precipitationAmountDaily}mm</div>`;
+  html += `<div class="popup__section">${languageService.translate('weather.precipitation-amount')}: ${precipitationAmountDaily}mm</div>`;
 
   // html += `<div class="popup__section">Wind speed: ${props["wind-speed-current"]}m/s</div>`;
   // html += `<div class="popup__section">Wind direction: ${props["wind-direction-current"]}°</div>`;
 
   const sunshineDuration = __getDailyMeasurement(data.sdatatypes["forecast-sunshine-duration"]?.tmeasurements || [])?.mvalue;
-  html += `<div class="popup__section">Sunshine duration: ${sunshineDuration}h</div>`;
+  html += `<div class="popup__section">${languageService.translate('weather.sunshine-duration')}: ${sunshineDuration}h</div>`;
 
   const dayPoints = _getPointProperties(data);
   let dpHtml = '';
 
   dpHtml += `
       <div class="popup__table-labels">
-      <div class="popup__table-labels-top-1">Air temperature</div>
-      <div class="popup__table-labels-top-2">Wind</div>
-      <div class="popup__table-labels-top-3">Precipitation</div>
+      <div class="popup__table-labels-top-1">${languageService.translate('weather.hours.air-temperature')}</div>
+      <div class="popup__table-labels-top-2">${languageService.translate('weather.hours.wind')}</div>
+      <div class="popup__table-labels-top-3">${languageService.translate('weather.hours.precipitation')}</div>
     </div>`;
 
   for (const dp of dayPoints) {
@@ -377,7 +382,7 @@ function weatherPopupStructure(feature: MapGeoJSONFeature) {
       </div>
 
       <div class="popup__values-group">
-        <div>${dp["wind-direction"]}° (${getWindDirectionLabel(dp["wind-direction"])})</div>
+        <div>${dp["wind-direction"]}° (${getWindDirectionLabel(dp["wind-direction"], languageService.translate('weather.wind-directions'))})</div>
         <div>${dp["wind-speed"]}m/s</div>
       </div>
       <div class="popup__values-group">
@@ -528,7 +533,7 @@ function getClearSkyType(now: Date, sunshineHours: number) {
 /**
  *
  */
-function getWindDirectionLabel(degrees: number | null | undefined) {
+function getWindDirectionLabel(degrees: number | null | undefined, intlLabels?: string) {
   if (degrees === null || degrees === undefined) {
     return '';
   }
@@ -536,7 +541,7 @@ function getWindDirectionLabel(degrees: number | null | undefined) {
   const normalizedDegrees = (degrees % 360 + 360) % 360;
 
   // 2. Define the 8 directions in clockwise order starting from North
-  const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  const directions = intlLabels ? intlLabels.split(',') : ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
 
   // 3. Divide by 45 degrees per segment, and shift by half a segment (22.5°)
   // so that North centers perfectly around 0° / 360°

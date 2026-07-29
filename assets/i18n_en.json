@@ -24,5 +24,14 @@
   "risk-exposure.high": "high",
   "risk-exposure.veryhigh": "very high",
   "risk-exposure.extreme": "immediate drop-off zone",
+  "weather.air-temperature-min": "Min",
+  "weather.air-temperature-max": "Max",
+  "weather.precipitation-probability": "Precipitation probability",
+  "weather.precipitation-amount": "Cumulated precipitation",
+  "weather.sunshine-duration": "Sunshine duration",
+  "weather.hours.air-temperature": "Air temperature",
+  "weather.hours.wind": "Wind",
+  "weather.hours.precipitation": "Precipitation",
+  "weather.wind-directions": "N,NE,E,SE,S,SW,W,NW",
   "": ""
 }

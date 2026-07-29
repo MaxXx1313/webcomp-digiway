@@ -207,8 +207,7 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
         }
         const imageData = getFontIconData({
           ...iconFontStyles,
-          // "icon-text": _icons[this.config.markerIcon!],
-          // "icon-text": 'AAA',
+          // "icon-text": 'A',
           "icon-text": ICON_FONT_ICONS[iconName as keyof typeof ICON_FONT_ICONS],
         });
 
@@ -303,7 +302,7 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
     this._popupFeatureId = featureId;
     this._popup = new Popup()
       // .setLngLat(lngLat) // < on mouse click point
-      .setLngLat((feature.geometry as Point).coordinates as [number, number]) // < on feature center
+      .setLngLat((feature.geometry as Point).coordinates as LngLatLike) // < on feature center
       .setHTML(weatherPopupStructure(feature, this.languageService))
       .setMaxWidth('380px')
       .addTo(this.map);
@@ -315,13 +314,9 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
 }
 
 
-//
-// function _getIcon(description: string) {
-//   ICON_FONT_ICONS
-// }
-
-
-// Feature popup helper
+/**
+ *
+ */
 function weatherPopupStructure(feature: MapGeoJSONFeature, languageService: LanguageDataService) {
   const data = JSON.parse(feature.properties?.data) as WeatherForecast;
   let html = '';
@@ -330,7 +325,6 @@ function weatherPopupStructure(feature: MapGeoJSONFeature, languageService: Lang
   const pointDescription = __getDailyMeasurement(data.sdatatypes["qualitative-forecast"]?.tmeasurements || [])?.mvalue;
   const pointName = data.smetadata.nameEn;
 
-  // TODO: use icon:  <noi-icon className="popup__header-icon" name="${props.icon}" alt="icon"></noi-icon>
   html += `<div class="popup__header">
     <div class="noi-weather-icon" title="${pointDescription}">${ICON_FONT_ICONS[iconName]}</div>
     <div>${pointName}</div>
@@ -375,7 +369,7 @@ function weatherPopupStructure(feature: MapGeoJSONFeature, languageService: Lang
 
       <div class="popup__values-group popup__values-group--no-margin">
         <div>${formatTime(dp.time, languageService.currentLanguage)}</div>
-        <div class="noi-weather-icon" title="${dp["qualitative-forecast"]}">${getIcon(dp["qualitative-forecast"] as any, skyType)}</div>
+        <div class="noi-weather-icon" title="${dp["qualitative-forecast"]}">${getIconText(dp["qualitative-forecast"] as any, skyType)}</div>
       </div>
 
       <div class="popup__values-group">
@@ -455,6 +449,7 @@ function _getPointProperties(point: WeatherForecast) {
   __collectTime('forecast-precipitation-sum');
   __collectTime('qualitative-forecast');
 
+  // sort by time
   const _uniqueDayPointsSorted = _uniqueDayPoints.sort((a, b) => a.localeCompare(b));
 
   function __getPointMeasurement(type: WeatherForecastMeasurementType, dp: string) {
@@ -615,6 +610,6 @@ function getIconName(description: string, type: 'day' | 'night'): keyof typeof I
   return '';
 }
 
-function getIcon(description: string, type: 'day' | 'night'): string {
+function getIconText(description: string, type: 'day' | 'night'): string {
   return ICON_FONT_ICONS[getIconName(description, type)];
 }

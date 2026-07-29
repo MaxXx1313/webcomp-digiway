@@ -19,3 +19,22 @@ export function formatNumber(num: number | string | undefined, language: string)
     }).format(numSafe);
   }
 }
+
+export function formatTime(date: Date | string | undefined, language: string): string {
+  if (date === undefined || date === null) {
+    return '';
+  }
+  const dateSafe = (typeof date === 'string') ? new Date(date) : date;
+  try {
+    return new Intl.DateTimeFormat(language, {
+      hour: 'numeric',
+      minute: '2-digit'
+    }).format(dateSafe);
+  } catch (error) {
+    // Safe fallback to English format
+    return new Intl.DateTimeFormat('en', {
+      hour: 'numeric',
+      minute: '2-digit'
+    }).format(dateSafe);
+  }
+}

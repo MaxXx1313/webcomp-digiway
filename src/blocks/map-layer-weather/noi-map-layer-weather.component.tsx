@@ -18,7 +18,7 @@ import { WeatherForecast, WeatherForecastMeasurementType } from "../../data/noi/
 import { Measurement } from "../../data/noi/types-v1-common";
 import { base64String } from "./icon-font";
 import { LanguageDataService } from "../../data/language/language-data-service";
-import { formatNumber } from "../../utils/intl";
+import { formatNumber, formatTime } from "../../utils/intl";
 
 
 const ICON_FONT_NAME = 'noi-digiway-weather-icons';
@@ -340,7 +340,7 @@ function weatherPopupStructure(feature: MapGeoJSONFeature, languageService: Lang
   const airTemperatureMin = __getDailyMeasurement(data.sdatatypes["forecast-air-temperature-min"]?.tmeasurements || [])?.mvalue;
   const airTemperatureMax = __getDailyMeasurement(data.sdatatypes["forecast-air-temperature-max"]?.tmeasurements || [])?.mvalue;
   html += `<div class="popup__section popup__section--background">
-        ${languageService.translate('weather.air-temperature-min')}: ${airTemperatureMin}℃ - ${languageService.translate('weather.air-temperature-max')}: ${airTemperatureMax}℃
+        ${languageService.translate('weather.air-temperature-min')}: ${formatNumber(airTemperatureMin, languageService.currentLanguage)}℃ - ${languageService.translate('weather.air-temperature-max')}: ${formatNumber(airTemperatureMax, languageService.currentLanguage)}℃
   </div>`;
 
   html += `<div class="popup__section popup__section--hero">${formatDateCustom(feature.properties?.day, languageService.currentLanguage)}</div>`;
@@ -374,12 +374,12 @@ function weatherPopupStructure(feature: MapGeoJSONFeature, languageService: Lang
     dpHtml += `<div class="popup__table-cell">
 
       <div class="popup__values-group popup__values-group--no-margin">
-        <div>${formatTimeCustom(dp.time)}</div>
+        <div>${formatTime(dp.time, languageService.currentLanguage)}</div>
         <div class="noi-weather-icon" title="${dp["qualitative-forecast"]}">${getIcon(dp["qualitative-forecast"] as any, skyType)}</div>
       </div>
 
       <div class="popup__values-group">
-        <div>${dp["air-temperature"]}℃</div>
+        <div>${formatNumber(dp["air-temperature"], languageService.currentLanguage)}℃</div>
       </div>
 
       <div class="popup__values-group">
@@ -418,21 +418,6 @@ function formatDateCustom(dateStr: string, locale = 'en-US') {
 
   // 4. Force the precise order: [Weekday] [Day] [Month]
   return `${weekdayName} ${day} ${monthName}`;
-}
-
-/**
- */
-function formatTimeCustom(dateStr: string) {
-  if (!dateStr) {
-    return '';
-  }
-  const date = new Date(dateStr);
-
-  const hours = date.getHours();
-
-  const minutes = ('0' + date.getMinutes()).slice(-2);
-
-  return `${hours}:${minutes}`;
 }
 
 

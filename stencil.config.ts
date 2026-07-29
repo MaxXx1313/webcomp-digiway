@@ -33,11 +33,6 @@ export const config: Config = {
           src: "../assets",
           dest: ".",
           warn: true,
-        },
-        {
-          src: "../node_modules/leaflet/dist/images",
-          dest: "images",
-          warn: true,
         }
       ],
     },

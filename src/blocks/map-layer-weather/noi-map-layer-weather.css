@@ -69,6 +69,7 @@
 
 .noi-weather-popup .popup__values-group {
   margin-top: 1.5em;
+  padding: 0.15em 0.1em;
 
   background: #f0f0f0;
   border-radius: 8px;
@@ -91,20 +92,20 @@
 .noi-weather-popup .popup__table-labels-top-1 {
   position: absolute;
   left: 0;
-  top: 2.5rem;
+  top: 2.8rem;
   z-index: 1;
 }
 
 .noi-weather-popup .popup__table-labels-top-2 {
   position: absolute;
   left: 0;
-  top: 5.5rem;
+  top: 5.95rem;
   z-index: 1;
 }
 
 .noi-weather-popup .popup__table-labels-top-3 {
   position: absolute;
   left: 0;
-  top: 9.5rem;
+  top: 10.1rem;
   z-index: 1;
 }

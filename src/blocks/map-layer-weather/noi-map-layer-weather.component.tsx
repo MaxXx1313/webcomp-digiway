@@ -151,13 +151,11 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
 
     // fetch weather forecast
     const forecastData = await this.weatherService.getWeatherForecastForDay(new Date());
-    const forecastDataTmp = forecastData.values.slice(0, 1); // FIXME: debug
-    // const forecastDataTmp = forecastData.values;
 
     // Convert your 2000 points into a GeoJSON FeatureCollection
     const geojsonPoints: GeoJSON = {
       type: 'FeatureCollection',
-      features: forecastDataTmp.map(point => {
+      features: forecastData.values.map(point => {
         const pointDescription = __getDailyMeasurement(point.sdatatypes["qualitative-forecast"]?.tmeasurements || [])?.mvalue;
         const sunshineDuration = __getDailyMeasurement(point.sdatatypes["forecast-sunshine-duration"]?.tmeasurements || [])?.mvalue;
 

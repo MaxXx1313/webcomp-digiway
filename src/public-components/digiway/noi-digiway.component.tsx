@@ -330,7 +330,12 @@ export class NoiDigiwayComponent implements StencilComponent {
               onLayerLoading={(e) => this._setLayerLoading('layer-hiking-trento', e.detail)}></noi-map-layer-cycling-roads>
             : ''}
 
-          <noi-map-layer-weather></noi-map-layer-weather>
+
+          {this.layersActive.includes('layer-weather')
+            ? <noi-map-layer-weather
+              key="layer-weather"
+              onLayerLoading={(e) => this._setLayerLoading('layer-weather', e.detail)}></noi-map-layer-weather>
+            : ''}
 
         </noi-map>
         {this._renderLegend()}
@@ -447,6 +452,16 @@ export class NoiDigiwayComponent implements StencilComponent {
               </noi-checkbox>
             )}
           </noi-checkbox-group>
+
+          <noi-checkbox class="p-bottom-small"
+                        loading={this.layersLoading.includes('layer-weather')}
+                        checked={this.layersActive.includes('layer-weather')}
+                        onCheckedChange={(event) => this.activateLayer('layer-weather', event.detail.checked)}>
+            <div class="checkbox-content">
+              <noi-icon name="weather-alert"></noi-icon>
+              <span>{this.languageService.translate('map.layer.weather')}</span>
+            </div>
+          </noi-checkbox>
 
           {/*
           <div class="menu-section-header p-top p-bottom">

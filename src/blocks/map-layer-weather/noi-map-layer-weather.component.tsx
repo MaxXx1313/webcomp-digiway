@@ -4,7 +4,7 @@
 
 import { Component, Element, Event, EventEmitter } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
-import { Map, MapGeoJSONFeature, Popup, Subscription } from "maplibre-gl";
+import { LngLatLike, Map, MapGeoJSONFeature, Popup, Subscription } from "maplibre-gl";
 import {
   enableHoverEffect,
   FontIconPaintParams,
@@ -104,6 +104,11 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
 
   private _popup?: Popup;
   private _popupFeatureId?: string | number;
+
+  private config = {
+    center: [11.35, 46.5] as LngLatLike,
+    zoom: 10,
+  };
 
   /**
    */
@@ -245,6 +250,8 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
       console.log('[DEBUG] All features at click:', features);
     });
     this._subscriptions.push(_debugClick);
+
+    this.resetPosition();
   }
 
   /**
@@ -268,6 +275,14 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
     }
   }
 
+  resetPosition() {
+    if (this.config.center || this.config.zoom) {
+      this.map.flyTo({
+        center: this.config.center ?? undefined,
+        zoom: this.config.zoom ?? undefined,
+      });
+    }
+  }
 
   // createFeaturePopup(feature: MapGeoJSONFeature, lngLat: MapMouseEvent['lngLat']) {
   createFeaturePopup(feature: MapGeoJSONFeature) {

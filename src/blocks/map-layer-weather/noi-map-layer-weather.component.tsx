@@ -18,6 +18,7 @@ import { WeatherForecast, WeatherForecastMeasurementType } from "../../data/noi/
 import { Measurement } from "../../data/noi/types-v1-common";
 import { base64String } from "./icon-font";
 import { LanguageDataService } from "../../data/language/language-data-service";
+import { formatNumber } from "../../utils/intl";
 
 
 const ICON_FONT_NAME = 'noi-digiway-weather-icons';
@@ -348,7 +349,7 @@ function weatherPopupStructure(feature: MapGeoJSONFeature, languageService: Lang
   html += `<div class="popup__section">${languageService.translate('weather.precipitation-probability')}: ${precipitationProbabilityDaily}%</div>`;
 
   const precipitationAmountDaily = __getDailyMeasurement(data.sdatatypes["forecast-precipitation-sum"]?.tmeasurements || [])?.mvalue;
-  html += `<div class="popup__section">${languageService.translate('weather.precipitation-amount')}: ${precipitationAmountDaily}mm</div>`;
+  html += `<div class="popup__section">${languageService.translate('weather.precipitation-amount')}: ${formatNumber(precipitationAmountDaily, languageService.currentLanguage)}mm</div>`;
 
   // html += `<div class="popup__section">Wind speed: ${props["wind-speed-current"]}m/s</div>`;
   // html += `<div class="popup__section">Wind direction: ${props["wind-direction-current"]}°</div>`;
@@ -387,7 +388,7 @@ function weatherPopupStructure(feature: MapGeoJSONFeature, languageService: Lang
       </div>
       <div class="popup__values-group">
         <div>${dp["precipitation-probability"]}%</div>
-        <div>${dp["precipitation-sum"]}mm</div>
+        <div>${formatNumber(dp["precipitation-sum"], languageService.currentLanguage)}mm</div>
       </div>
     </div>`;
   }

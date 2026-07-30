@@ -325,6 +325,10 @@ function weatherPopupStructure(feature: MapGeoJSONFeature, languageService: Lang
   const pointDescription = __getDailyMeasurement(data.sdatatypes["qualitative-forecast"]?.tmeasurements || [])?.mvalue;
   const pointName = data.smetadata.nameEn;
 
+  // helpers, to make template more clear
+  const t = languageService.translate.bind(languageService);
+  const num = (_num: | number | undefined) => formatNumber(_num, languageService.currentLanguage);
+
   html += `<div class="popup__header">
     <div class="noi-weather-icon" title="${pointDescription}">${ICON_FONT_ICONS[iconName]}</div>
     <div>${pointName}</div>
@@ -334,31 +338,33 @@ function weatherPopupStructure(feature: MapGeoJSONFeature, languageService: Lang
   const airTemperatureMin = __getDailyMeasurement(data.sdatatypes["forecast-air-temperature-min"]?.tmeasurements || [])?.mvalue;
   const airTemperatureMax = __getDailyMeasurement(data.sdatatypes["forecast-air-temperature-max"]?.tmeasurements || [])?.mvalue;
   html += `<div class="popup__section popup__section--background">
-        ${languageService.translate('weather.air-temperature-min')}: ${formatNumber(airTemperatureMin, languageService.currentLanguage)}℃ - ${languageService.translate('weather.air-temperature-max')}: ${formatNumber(airTemperatureMax, languageService.currentLanguage)}℃
+        ${t('weather.air-temperature-min')}: ${num(airTemperatureMin)}℃
+        -
+        ${t('weather.air-temperature-max')}: ${num(airTemperatureMax)}℃
   </div>`;
 
   html += `<div class="popup__section popup__section--hero">${formatDateCustom(feature.properties?.day, languageService.currentLanguage)}</div>`;
 
   const precipitationProbabilityDaily = __getDailyMeasurement(data.sdatatypes["forecast-precipitation-probability"]?.tmeasurements || [])?.mvalue;
-  html += `<div class="popup__section">${languageService.translate('weather.precipitation-probability')}: ${precipitationProbabilityDaily}%</div>`;
+  html += `<div class="popup__section">${t('weather.precipitation-probability')}: ${num(precipitationProbabilityDaily)}%</div>`;
 
   const precipitationAmountDaily = __getDailyMeasurement(data.sdatatypes["forecast-precipitation-sum"]?.tmeasurements || [])?.mvalue;
-  html += `<div class="popup__section">${languageService.translate('weather.precipitation-amount')}: ${formatNumber(precipitationAmountDaily, languageService.currentLanguage)}mm</div>`;
+  html += `<div class="popup__section">${t('weather.precipitation-amount')}: ${num(precipitationAmountDaily)}mm</div>`;
 
   // html += `<div class="popup__section">Wind speed: ${props["wind-speed-current"]}m/s</div>`;
   // html += `<div class="popup__section">Wind direction: ${props["wind-direction-current"]}°</div>`;
 
   const sunshineDuration = __getDailyMeasurement(data.sdatatypes["forecast-sunshine-duration"]?.tmeasurements || [])?.mvalue;
-  html += `<div class="popup__section">${languageService.translate('weather.sunshine-duration')}: ${sunshineDuration}h</div>`;
+  html += `<div class="popup__section">${t('weather.sunshine-duration')}: ${num(sunshineDuration)}h</div>`;
 
   const dayPoints = _getPointProperties(data);
   let dpHtml = '';
 
   dpHtml += `
       <div class="popup__table-labels">
-      <div class="popup__table-labels-top-1">${languageService.translate('weather.hours.air-temperature')}</div>
-      <div class="popup__table-labels-top-2">${languageService.translate('weather.hours.wind')}</div>
-      <div class="popup__table-labels-top-3">${languageService.translate('weather.hours.precipitation')}</div>
+      <div class="popup__table-labels-top-1">${t('weather.hours.air-temperature')}</div>
+      <div class="popup__table-labels-top-2">${t('weather.hours.wind')}</div>
+      <div class="popup__table-labels-top-3">${t('weather.hours.precipitation')}</div>
     </div>`;
 
   for (const dp of dayPoints) {
@@ -373,16 +379,16 @@ function weatherPopupStructure(feature: MapGeoJSONFeature, languageService: Lang
       </div>
 
       <div class="popup__values-group">
-        <div>${formatNumber(dp["air-temperature"], languageService.currentLanguage)}℃</div>
+        <div>${num(dp["air-temperature"])}℃</div>
       </div>
 
       <div class="popup__values-group">
-        <div>${dp["wind-direction"]}° (${getWindDirectionLabel(dp["wind-direction"], languageService.translate('weather.wind-directions'))})</div>
-        <div>${dp["wind-speed"]}m/s</div>
+        <div>${dp["wind-direction"]}° (${getWindDirectionLabel(dp["wind-direction"], t('weather.wind-directions'))})</div>
+        <div>${num(dp["wind-speed"])}m/s</div>
       </div>
       <div class="popup__values-group">
         <div>${dp["precipitation-probability"]}%</div>
-        <div>${formatNumber(dp["precipitation-sum"], languageService.currentLanguage)}mm</div>
+        <div>${num(dp["precipitation-sum"])}mm</div>
       </div>
     </div>`;
   }

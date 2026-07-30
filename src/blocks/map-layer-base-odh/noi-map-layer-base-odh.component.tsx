@@ -4,21 +4,37 @@
 
 import { Component, Element, Event, EventEmitter, Prop } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
+import { Map, MapGeoJSONFeature, MapMouseEvent, Popup, RequestTransformFunction, Subscription } from "maplibre-gl";
 import {
-  Map,
-  MapGeoJSONFeature,
-  MapMouseEvent,
-  Popup,
-  RequestTransformFunction,
-  Subscription
-} from "maplibre-gl";
-import { listenLayerReady } from "../../utils/maplibre";
-import { sanitizeText } from "../../utils/html";
+  enableHoverEffect,
+  FontIconPaintParams,
+  getFontIconData,
+  listenLayerReady,
+  loadIconFont
+} from "../../utils/maplibre";
 import { base64String } from "./icon-font";
+import { createPopupBodyHTML, PopupDefinitionFn } from "../../utils/maplibre-popup";
 
 const HOST = 'https://geo.api.opendatahub.testingmachine.eu';
 
 const ICON_FONT_NAME = 'noi-digiway-map-icons';
+const ICON_FONT_URL = `url(${base64String}) format('woff')`;
+
+
+const ICON_FONT_ICONS = {
+  'bicycle': '\ue800',
+  'closure': '\ue801',
+  'frequency': '\ue802',
+  'weather-prediction': '\ue803',
+  'weather-real-time': '\ue804',
+  'poi': '\ue805',
+  'transport': '\ue806',
+  'gastronomy': '\ue807',
+  'map': '\ue808',
+  'mountain-trails': '\ue809',
+  'hiking': '\ue80a',
+  'trekking': '\ue80b',
+} as const;
 
 // Default styles
 const defaultStyles = {
@@ -67,29 +83,19 @@ const defaultStyles = {
     'circle-stroke-color': '#FFFFFF',
     'circle-opacity': 0.8
   },
-  icon: {
-    // You can now pass any color dynamically here!
-    'icon-color': '#FFFFFF',
-  },
 };
 
-const _icons = {
-  'bicycle': '\ue800',
-  'closure': '\ue801',
-  'frequency': '\ue802',
-  'weather-prediction': '\ue803',
-  'weather-real-time': '\ue804',
-  'poi': '\ue805',
-  'transport': '\ue806',
-  'gastronomy': '\ue807',
-  'map': '\ue808',
-  'mountain-trails': '\ue809',
-  'hiking': '\ue80a',
-  'trekking': '\ue80b',
-} as const;
+
+// 'iconFontStyles' is not a part of maplibre
+const iconFontStyles: FontIconPaintParams = {
+  "icon-font": ICON_FONT_NAME,
+  'icon-color': '#FFFFFF',
+  "icon-size": 16,
+  "icon-text": '',
+};
 
 export interface LayerConfig {
-  markerIcon?: keyof typeof _icons,
+  markerIcon?: keyof typeof ICON_FONT_ICONS,
   isLineInteractive?: boolean;
   sourceLayer: string;
   additional: string;
@@ -97,23 +103,6 @@ export interface LayerConfig {
   zoom?: number;
 
   requestTransform?: RequestTransformFunction;
-}
-
-export interface PopupDefinition {
-  title?: {
-    icon?: string;
-    text?: string;
-  },
-  body: Array<{
-    type: 'name' | 'description' | 'section';
-    // 'text' is for 'name' and 'description'
-    text?: string;
-    // 'section' is for 'section'
-    section?: {
-      name: string;
-      value: string;
-    };
-  }>;
 }
 
 let _uid_seed = 0;
@@ -144,7 +133,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
   /**
    */
   @Prop({mutable: false})
-  popupStructure?: ((feature: MapGeoJSONFeature, featureType: string) => PopupDefinition | string);
+  popupStructure?: PopupDefinitionFn;
 
   /**
    * Emitted when layer data is loading
@@ -368,44 +357,16 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
 
     // ICON LAYER ON TOP OF CIRCLES
     if (this.config.markerIcon) {
-      this._loadIconFont().then(() => {
-        // Layout target boundaries
-        const targetWidth = 16;
-        const targetHeight = 16;
-        const scale = 1; // 4x multiplier ensures sharp sub-pixel anti-aliasing
+      loadIconFont(ICON_FONT_NAME, ICON_FONT_URL).then(() => {
+        const imageData = getFontIconData({
+          ...iconFontStyles,
+          "icon-text": ICON_FONT_ICONS[this.config.markerIcon!],
+        });
 
-        // Create an offscreen rendering surface
-        const canvas = document.createElement('canvas');
-        canvas.width = targetWidth * scale;
-        canvas.height = targetHeight * scale;
-        const ctx = canvas.getContext('2d');
-
-        if (ctx) {
-          // FORCE CRITICAL BROWSER ANTI-ALIASING ENGINE HINTS
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = 'high';
-
-          // Clear background canvas space completely
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-          // Apply scaling and text rendering layout details
-          ctx.font = `${16 * scale}px "${ICON_FONT_NAME}"`;
-          ctx.fillStyle = defaultStyles.icon["icon-color"];  // '#FFFFFF'; // Target paint color
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-
-          // Render the exact hex string character ('\ue0c8' = Material Pin Marker)
-          ctx.fillText(_icons[this.config.markerIcon!], canvas.width / 2, canvas.height / 2);
-
-          // 4. FIX: Safely extract ImageData from the canvas.
-          // This bypasses type errors and ensures MapLibre gets pure pixel data.
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-
+        if (imageData) {
           // 3. Register the crisp canvas bitmap straight into MapLibre
           this.map.addImage(this.uid('marker-icon'), imageData as any, {
             sdf: false,
-            pixelRatio: scale  // Shrinks the 4x vector rendering smoothly down onto screen
           });
         }
 
@@ -425,7 +386,6 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
             'icon-allow-overlap': true,
             'icon-ignore-placement': true
           },
-          paint: defaultStyles.icon as any,
         });
 
         console.log(`[noi-map-layer-base-odh] layer added: ${this.uid('unclustered-icons')}`);
@@ -472,65 +432,13 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     this._subscriptions.push(_clusterClick);
 
 
-    const hoveredIds: { [event: string]: string | null } = {
-      lines: null,
-      unclusteredpoints: null,
-      polygons: null,
-      clusters: null,
-    };
-
     // Hover effects
     let hoverTargets = ['unclusteredpoints', 'polygons', 'clusters'];
     if (this.config.isLineInteractive) {
       hoverTargets = ['unclusteredpoints', 'polygons', 'lines', 'clusters'];
     }
-    // ['unclusteredpoints', 'polygons', 'lines', 'clusters'].forEach(layerName => {
-    // ['unclusteredpoints', 'polygons', 'clusters'].forEach(layerName => {
-    hoverTargets.forEach(layerName => {
-      const layer = this.uid(layerName);
-      const source = this.uid('vector-tiles');
-
-      //
-      const _layerEnter = this.map.on('mouseenter', layer, (e) => {
-        this.map.getCanvas().style.cursor = 'pointer';
-
-        const featureId = e.features![0]?.id as string;
-        // console.log('mouseenter', featureId, e);
-
-        if (featureId == null) return; // guard
-
-        // Clear previous hover on this layer
-        if (hoveredIds[layerName] !== null) {
-          this.map.setFeatureState(
-            {source: source, sourceLayer: sourceLayer, id: hoveredIds[layerName]},
-            {hover: false}
-          );
-        }
-
-        // Set new hover
-        hoveredIds[layerName] = featureId;
-        this.map.setFeatureState(
-          {source: source, sourceLayer: sourceLayer, id: hoveredIds[layerName]},
-          {hover: true}
-        );
-      });
-      this._subscriptions.push(_layerEnter);
-
-      //
-      const _layerLeave = this.map.on('mouseleave', layer, () => {
-        this.map.getCanvas().style.cursor = '';
-
-        // Clear hover on this layer
-        if (hoveredIds[layerName] !== null) {
-          this.map.setFeatureState(
-            {source: source, sourceLayer: sourceLayer, id: hoveredIds[layerName]},
-            {hover: false}
-          );
-          hoveredIds[layerName] = null;
-        }
-      });
-      this._subscriptions.push(_layerLeave);
-    });
+    const layerHover = enableHoverEffect(this.map, hoverTargets.map(layerName => this.uid(layerName)));
+    this._subscriptions.push(layerHover);
 
     // Click anywhere for debug
     const _debugClick = this.map.on('click', (e) => {
@@ -558,125 +466,10 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     this._popupFeatureId = featureId;
     this._popup = new Popup()
       .setLngLat(lngLat)
-      .setHTML(this._createPopupBodyHTML(feature, feature.layer.type))
+      .setHTML(createPopupBodyHTML(this.popupStructure, feature, feature.layer.type))
       .addTo(this.map);
     this._popup.on('close', () => {
       this._popupFeatureId = undefined;
     });
   }
-
-  // Feature popup helper
-  _createPopupBodyHTML(feature: MapGeoJSONFeature, featureType: string) {
-    const fn = this.popupStructure || debugPopupStructure;
-    const structure = fn(feature, featureType);
-    if (typeof structure === 'string') {
-      return structure;
-    } else {
-      return _popupBuilder(structure);
-    }
-  }
-
-  async _loadIconFont() {
-
-    // TypeScript's internal DOM type definitions have a historical gap regarding the FontFaceSet interface, so we use 'any'
-    const documentFonts = document.fonts as any;
-
-    // 1. Check if another instance of your icon component already registered this font
-    const isAlreadyLoaded = Array.from(documentFonts.values()).some(
-      (font: any) => font.family === ICON_FONT_NAME
-    );
-
-    if (isAlreadyLoaded) {
-      console.debug(`[noi-map-layer-base-odh] _loadIconFont - already loaded`);
-      return;
-    }
-
-    console.log(`[noi-map-layer-base-odh] _loadIconFont`);
-
-    // 2. Instantiate and load the font directly into memory
-    const iconFontFace = new FontFace(
-      ICON_FONT_NAME,
-      `url(${base64String}) format('woff')`
-    );
-
-    const fontLoadResult = await iconFontFace.load();
-    console.debug(`[noi-map-layer-base-odh] icon font loaded`, fontLoadResult);
-
-    // Inject it into document.fonts so the entire page (and all shadow roots) can use it
-    documentFonts.add(iconFontFace);
-  }
-
-}
-
-/**
- */
-function _popupBuilder(def: PopupDefinition): string {
-
-  let popupContent = '';
-  if (def.title) {
-
-    let popupTitleContent = '';
-    if (def.title?.icon) {
-      popupTitleContent += `<noi-icon class="popup__header-icon" name="${def.title.icon}" alt="icon"></noi-icon>`;
-    }
-    if (def.title?.text) {
-      popupTitleContent += `<div>${def.title.text}</div>`;
-    }
-
-    popupContent += `<div class="popup__header">${popupTitleContent}</div>`;
-  }
-
-  for (const bDef of def.body) {
-
-    if (bDef.type === 'name') {
-      popupContent += `<div class="popup__name">${bDef.text}</div>`;
-    }
-    if (bDef.type === 'description') {
-      if (bDef.text) {
-        popupContent += `<div class="popup__description">${sanitizeText(bDef.text)}</div>`;
-      }
-      continue;
-    }
-    if (bDef.type === 'section') {
-      if (bDef.section?.value === null || bDef.section?.value === undefined) {
-        continue;
-      }
-      popupContent += `<div class="popup__section">
-          <div class="popup__section-name">${bDef.section.name}</div>
-          <div class="popup__section-value">${bDef.section.value}</div>
-        </div>`;
-    }
-  }
-  return `<div class="noi-map-popup" part="popup">${popupContent}</div>`;
-}
-
-// Feature popup helper
-function debugPopupStructure(feature: MapGeoJSONFeature, featureType: string) {
-  const props = feature.properties;
-  let html = `<strong>${featureType} Feature</strong><br>`;
-  html += `<strong>ID:</strong> ${props.id}<br>`;
-
-  if (featureType === 'Line') {
-    html += `<strong>Type:</strong> ${feature.geometry.type}<br>`;
-  }
-
-  // Alle flachen Properties auÃŸer count & cluster
-  Object.keys(props).forEach(key => {
-    if (['id', 'count', 'cluster'].includes(key)) return;
-    // Wenn es die 'data' Spalte ist, dann parse JSON
-    if (key === 'data' && props.data) {
-      try {
-        const data = JSON.parse(props.data);
-        Object.keys(data).forEach(k => {
-          html += `<strong>${k}:</strong> ${data[k]}<br>`;
-        });
-      } catch (e) {
-        html += `<strong>Data:</strong> ${props.data}<br>`;
-      }
-    } else {
-      html += `<strong>${key}:</strong> ${props[key]}<br>`;
-    }
-  });
-
-  return html;
 }

@@ -12,5 +12,6 @@
   "risk-exposure.high": "hoch",
   "risk-exposure.veryhigh": "sehr hoch",
   "risk-exposure.extreme": "unmittelbarer absturzbereich",
+  "weather.wind-directions": "N,NO,O,SO,S,SW,W,NW",
   "": ""
 }

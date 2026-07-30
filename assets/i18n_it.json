@@ -12,5 +12,8 @@
   "risk-exposure.high": "elevata",
   "risk-exposure.veryhigh": "molto elevata",
   "risk-exposure.extreme": "zona di precipizio",
+  "weather.precipitation-probability": "Probabilità precipitazioni",
+  "weather.precipitation-amount": "Precipitazioni",
+  "weather.wind-directions": "N,NE,E,SE,S,SO,O,NO",
   "": ""
 }

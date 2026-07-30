@@ -16,6 +16,7 @@
   "map.layer.hiking": "Hiking trails",
   "map.layer.hiking-bolzano": "Province of Bolzano",
   "map.layer.hiking-trento": "Province of Trento",
+  "map.layer.weather": "Weather forecast",
   "route-closures.start-time": "Start Time",
   "route-closures.end-time": "End Time",
   "risk-exposure.low": "minor",
@@ -23,5 +24,14 @@
   "risk-exposure.high": "high",
   "risk-exposure.veryhigh": "very high",
   "risk-exposure.extreme": "immediate drop-off zone",
+  "weather.air-temperature-min": "Min",
+  "weather.air-temperature-max": "Max",
+  "weather.precipitation-probability": "Precipitation probability",
+  "weather.precipitation-amount": "Cumulated precipitation",
+  "weather.sunshine-duration": "Sunshine duration",
+  "weather.hours.air-temperature": "Air temperature",
+  "weather.hours.wind": "Wind",
+  "weather.hours.precipitation": "Precipitation",
+  "weather.wind-directions": "N,NE,E,SE,S,SW,W,NW",
   "": ""
 }

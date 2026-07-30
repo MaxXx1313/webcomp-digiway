@@ -5,7 +5,8 @@
 import { Component, Event, EventEmitter, h, State } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
 import { LanguageDataService } from "../../data/language/language-data-service";
-import { LayerConfig, PopupDefinition } from "../map-layer-base-odh/noi-map-layer-base-odh.component";
+import { LayerConfig } from "../map-layer-base-odh/noi-map-layer-base-odh.component";
+import { PopupDefinition } from "../../utils/maplibre-popup";
 
 
 /**
@@ -22,7 +23,7 @@ export class NoiMapLayerAnnouncementsComponent implements StencilComponent {
   /**
    * Emitted when layer data is loading
    */
-  @Event() layerLoading: EventEmitter<boolean>;
+  @Event() layerLoading!: EventEmitter<boolean>;
 
 
   private languageService = LanguageDataService.getInstance();

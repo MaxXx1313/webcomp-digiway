@@ -28,4 +28,5 @@ noi-map {
   font-size: 32px;
   padding: 0;
   color: var(--color-text);
+  line-height: 0;
 }

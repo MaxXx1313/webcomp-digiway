@@ -11,13 +11,15 @@
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { ViewLayout } from "./utils/breakpoints";
 import { IconName } from "./blocks/icon/icon.component";
-import { Map, MapGeoJSONFeature, RequestTransformFunction } from "maplibre-gl";
-import { LayerConfig, PopupDefinition } from "./blocks/map-layer-base-odh/noi-map-layer-base-odh.component";
+import { Map, RequestTransformFunction } from "maplibre-gl";
+import { LayerConfig } from "./blocks/map-layer-base-odh/noi-map-layer-base-odh.component";
+import { PopupDefinitionFn } from "./utils/maplibre-popup";
 import { SelectOption } from "./blocks/select/select.component";
 export { ViewLayout } from "./utils/breakpoints";
 export { IconName } from "./blocks/icon/icon.component";
-export { Map, MapGeoJSONFeature, RequestTransformFunction } from "maplibre-gl";
-export { LayerConfig, PopupDefinition } from "./blocks/map-layer-base-odh/noi-map-layer-base-odh.component";
+export { Map, RequestTransformFunction } from "maplibre-gl";
+export { LayerConfig } from "./blocks/map-layer-base-odh/noi-map-layer-base-odh.component";
+export { PopupDefinitionFn } from "./utils/maplibre-popup";
 export { SelectOption } from "./blocks/select/select.component";
 export namespace Components {
     /**
@@ -121,7 +123,7 @@ export namespace Components {
      */
     interface NoiMapLayerBaseOdh {
         "config": LayerConfig;
-        "popupStructure"?: ((feature: MapGeoJSONFeature, featureType: string) => PopupDefinition | string);
+        "popupStructure"?: PopupDefinitionFn;
     }
     /**
      * (INTERNAL) render map layer
@@ -142,6 +144,11 @@ export namespace Components {
      * (INTERNAL) render map layer
      */
     interface NoiMapLayerRiskExposure {
+    }
+    /**
+     * (INTERNAL) render map layer
+     */
+    interface NoiMapLayerWeather {
     }
     /**
      * (INTERNAL) render a select box
@@ -189,6 +196,10 @@ export interface NoiMapLayerCyclingRoadsCustomEvent<T> extends CustomEvent<T> {
 export interface NoiMapLayerRiskExposureCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLNoiMapLayerRiskExposureElement;
+}
+export interface NoiMapLayerWeatherCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLNoiMapLayerWeatherElement;
 }
 export interface NoiSelectCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -362,6 +373,26 @@ declare global {
         prototype: HTMLNoiMapLayerRiskExposureElement;
         new (): HTMLNoiMapLayerRiskExposureElement;
     };
+    interface HTMLNoiMapLayerWeatherElementEventMap {
+        "layerLoading": boolean;
+    }
+    /**
+     * (INTERNAL) render map layer
+     */
+    interface HTMLNoiMapLayerWeatherElement extends Components.NoiMapLayerWeather, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLNoiMapLayerWeatherElementEventMap>(type: K, listener: (this: HTMLNoiMapLayerWeatherElement, ev: NoiMapLayerWeatherCustomEvent<HTMLNoiMapLayerWeatherElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLNoiMapLayerWeatherElementEventMap>(type: K, listener: (this: HTMLNoiMapLayerWeatherElement, ev: NoiMapLayerWeatherCustomEvent<HTMLNoiMapLayerWeatherElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLNoiMapLayerWeatherElement: {
+        prototype: HTMLNoiMapLayerWeatherElement;
+        new (): HTMLNoiMapLayerWeatherElement;
+    };
     interface HTMLNoiSelectElementEventMap {
         "selectChange": string;
     }
@@ -405,6 +436,7 @@ declare global {
         "noi-map-layer-base-odh": HTMLNoiMapLayerBaseOdhElement;
         "noi-map-layer-cycling-roads": HTMLNoiMapLayerCyclingRoadsElement;
         "noi-map-layer-risk-exposure": HTMLNoiMapLayerRiskExposureElement;
+        "noi-map-layer-weather": HTMLNoiMapLayerWeatherElement;
         "noi-select": HTMLNoiSelectElement;
         "noi-spinner": HTMLNoiSpinnerElement;
     }
@@ -527,7 +559,7 @@ declare namespace LocalJSX {
           * Emitted when layer data is loading
          */
         "onLayerLoading"?: (event: NoiMapLayerBaseOdhCustomEvent<boolean>) => void;
-        "popupStructure"?: ((feature: MapGeoJSONFeature, featureType: string) => PopupDefinition | string);
+        "popupStructure"?: PopupDefinitionFn;
     }
     /**
      * (INTERNAL) render map layer
@@ -556,6 +588,15 @@ declare namespace LocalJSX {
           * Emitted when layer data is loading
          */
         "onLayerLoading"?: (event: NoiMapLayerRiskExposureCustomEvent<boolean>) => void;
+    }
+    /**
+     * (INTERNAL) render map layer
+     */
+    interface NoiMapLayerWeather {
+        /**
+          * Emitted when layer data is loading
+         */
+        "onLayerLoading"?: (event: NoiMapLayerWeatherCustomEvent<boolean>) => void;
     }
     /**
      * (INTERNAL) render a select box
@@ -639,6 +680,7 @@ declare namespace LocalJSX {
         "noi-map-layer-base-odh": NoiMapLayerBaseOdh;
         "noi-map-layer-cycling-roads": Omit<NoiMapLayerCyclingRoads, keyof NoiMapLayerCyclingRoadsAttributes> & { [K in keyof NoiMapLayerCyclingRoads & keyof NoiMapLayerCyclingRoadsAttributes]?: NoiMapLayerCyclingRoads[K] } & { [K in keyof NoiMapLayerCyclingRoads & keyof NoiMapLayerCyclingRoadsAttributes as `attr:${K}`]?: NoiMapLayerCyclingRoadsAttributes[K] } & { [K in keyof NoiMapLayerCyclingRoads & keyof NoiMapLayerCyclingRoadsAttributes as `prop:${K}`]?: NoiMapLayerCyclingRoads[K] } & OneOf<"region", NoiMapLayerCyclingRoads["region"], NoiMapLayerCyclingRoadsAttributes["region"]>;
         "noi-map-layer-risk-exposure": NoiMapLayerRiskExposure;
+        "noi-map-layer-weather": NoiMapLayerWeather;
         "noi-select": Omit<NoiSelect, keyof NoiSelectAttributes> & { [K in keyof NoiSelect & keyof NoiSelectAttributes]?: NoiSelect[K] } & { [K in keyof NoiSelect & keyof NoiSelectAttributes as `attr:${K}`]?: NoiSelectAttributes[K] } & { [K in keyof NoiSelect & keyof NoiSelectAttributes as `prop:${K}`]?: NoiSelect[K] };
         "noi-spinner": NoiSpinner;
     }
@@ -693,6 +735,10 @@ declare module "@stencil/core" {
              * (INTERNAL) render map layer
              */
             "noi-map-layer-risk-exposure": LocalJSX.IntrinsicElements["noi-map-layer-risk-exposure"] & JSXBase.HTMLAttributes<HTMLNoiMapLayerRiskExposureElement>;
+            /**
+             * (INTERNAL) render map layer
+             */
+            "noi-map-layer-weather": LocalJSX.IntrinsicElements["noi-map-layer-weather"] & JSXBase.HTMLAttributes<HTMLNoiMapLayerWeatherElement>;
             /**
              * (INTERNAL) render a select box
              */

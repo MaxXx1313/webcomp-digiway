@@ -370,82 +370,84 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
  */
 function weatherPopupStructure(feature: MapGeoJSONFeature, languageService: LanguageDataService) {
   const data = JSON.parse(feature.properties?.data) as WeatherForecast;
-  let html = '';
 
-  const iconName = feature.properties['icon_name'] as keyof typeof ICON_FONT_ICONS;
-  const pointDescription = __getDailyMeasurement(data.sdatatypes["qualitative-forecast"]?.tmeasurements || [])?.mvalue;
-  const pointName = data.smetadata.nameEn;
-
-  // helpers, to make template more clear
-  const t = languageService.translate.bind(languageService);
-  const num = (_num: | number | undefined) => formatNumber(_num, languageService.currentLanguage);
-
-  html += `<div class="popup__header">
-    <div class="noi-weather-icon" title="${pointDescription}">${ICON_FONT_ICONS[iconName]}</div>
-    <div>${pointName}</div>
-  </div>`;
-
-
-  const airTemperatureMin = __getDailyMeasurement(data.sdatatypes["forecast-air-temperature-min"]?.tmeasurements || [])?.mvalue;
-  const airTemperatureMax = __getDailyMeasurement(data.sdatatypes["forecast-air-temperature-max"]?.tmeasurements || [])?.mvalue;
-  html += `<div class="popup__section popup__section--background">
-        ${t('weather.air-temperature-min')}: ${num(airTemperatureMin)}℃
-        -
-        ${t('weather.air-temperature-max')}: ${num(airTemperatureMax)}℃
-  </div>`;
-
-  html += `<div class="popup__section popup__section--hero">${formatDateCustom(feature.properties?.day, languageService.currentLanguage)}</div>`;
-
-  const precipitationProbabilityDaily = __getDailyMeasurement(data.sdatatypes["forecast-precipitation-probability"]?.tmeasurements || [])?.mvalue;
-  html += `<div class="popup__section">${t('weather.precipitation-probability')}: ${num(precipitationProbabilityDaily)}%</div>`;
-
-  const precipitationAmountDaily = __getDailyMeasurement(data.sdatatypes["forecast-precipitation-sum"]?.tmeasurements || [])?.mvalue;
-  html += `<div class="popup__section">${t('weather.precipitation-amount')}: ${num(precipitationAmountDaily)}mm</div>`;
-
-  // html += `<div class="popup__section">Wind speed: ${props["wind-speed-current"]}m/s</div>`;
-  // html += `<div class="popup__section">Wind direction: ${props["wind-direction-current"]}°</div>`;
-
-  const sunshineDuration = __getDailyMeasurement(data.sdatatypes["forecast-sunshine-duration"]?.tmeasurements || [])?.mvalue;
-  html += `<div class="popup__section">${t('weather.sunshine-duration')}: ${num(sunshineDuration)}h</div>`;
-
-  const dayPoints = _getPointProperties(data);
-  let dpHtml = '';
-
-  dpHtml += `
-      <div class="popup__table-labels">
-      <div class="popup__table-labels-top-1">${t('weather.hours.air-temperature')}</div>
-      <div class="popup__table-labels-top-2">${t('weather.hours.wind')}</div>
-      <div class="popup__table-labels-top-3">${t('weather.hours.precipitation')}</div>
-    </div>`;
-
-  for (const dp of dayPoints) {
-
-    const skyType = getClearSkyType(new Date(dp.time), sunshineDuration);
-
-    dpHtml += `<div class="popup__table-cell">
-
-      <div class="popup__values-group popup__values-group--no-margin">
-        <div>${formatTime(dp.time, languageService.currentLanguage)}</div>
-        <div class="noi-weather-icon" title="${dp["qualitative-forecast"]}">${getIconText(dp["qualitative-forecast"] as any, skyType)}</div>
-      </div>
-
-      <div class="popup__values-group">
-        <div>${num(dp["air-temperature"])}℃</div>
-      </div>
-
-      <div class="popup__values-group">
-        <div>${dp["wind-direction"]}° (${getWindDirectionLabel(dp["wind-direction"], t('weather.wind-directions'))})</div>
-        <div>${num(dp["wind-speed"])}m/s</div>
-      </div>
-      <div class="popup__values-group">
-        <div>${dp["precipitation-probability"]}%</div>
-        <div>${num(dp["precipitation-sum"])}mm</div>
-      </div>
-    </div>`;
-  }
-  html += `<div class="popup__table">${dpHtml}</div>`;
-
+  let html = '<noi-map-layer-weather-popup></noi-map-layer-weather-popup>';
   return `<div class="noi-weather-popup" part="popup">${html}</div>`;
+  //
+  // const iconName = feature.properties['icon_name'] as keyof typeof ICON_FONT_ICONS;
+  // const pointDescription = __getDailyMeasurement(data.sdatatypes["qualitative-forecast"]?.tmeasurements || [])?.mvalue;
+  // const pointName = data.smetadata.nameEn;
+  //
+  // // helpers, to make template more clear
+  // const t = languageService.translate.bind(languageService);
+  // const num = (_num: | number | undefined) => formatNumber(_num, languageService.currentLanguage);
+  //
+  // html += `<div class="popup__header">
+  //   <div class="noi-weather-icon" title="${pointDescription}">${ICON_FONT_ICONS[iconName]}</div>
+  //   <div>${pointName}</div>
+  // </div>`;
+  //
+  //
+  // const airTemperatureMin = __getDailyMeasurement(data.sdatatypes["forecast-air-temperature-min"]?.tmeasurements || [])?.mvalue;
+  // const airTemperatureMax = __getDailyMeasurement(data.sdatatypes["forecast-air-temperature-max"]?.tmeasurements || [])?.mvalue;
+  // html += `<div class="popup__section popup__section--background">
+  //       ${t('weather.air-temperature-min')}: ${num(airTemperatureMin)}℃
+  //       -
+  //       ${t('weather.air-temperature-max')}: ${num(airTemperatureMax)}℃
+  // </div>`;
+  //
+  // html += `<div class="popup__section popup__section--hero">${formatDateCustom(feature.properties?.day, languageService.currentLanguage)}</div>`;
+  //
+  // const precipitationProbabilityDaily = __getDailyMeasurement(data.sdatatypes["forecast-precipitation-probability"]?.tmeasurements || [])?.mvalue;
+  // html += `<div class="popup__section">${t('weather.precipitation-probability')}: ${num(precipitationProbabilityDaily)}%</div>`;
+  //
+  // const precipitationAmountDaily = __getDailyMeasurement(data.sdatatypes["forecast-precipitation-sum"]?.tmeasurements || [])?.mvalue;
+  // html += `<div class="popup__section">${t('weather.precipitation-amount')}: ${num(precipitationAmountDaily)}mm</div>`;
+  //
+  // // html += `<div class="popup__section">Wind speed: ${props["wind-speed-current"]}m/s</div>`;
+  // // html += `<div class="popup__section">Wind direction: ${props["wind-direction-current"]}°</div>`;
+  //
+  // const sunshineDuration = __getDailyMeasurement(data.sdatatypes["forecast-sunshine-duration"]?.tmeasurements || [])?.mvalue;
+  // html += `<div class="popup__section">${t('weather.sunshine-duration')}: ${num(sunshineDuration)}h</div>`;
+  //
+  // const dayPoints = _getPointProperties(data);
+  // let dpHtml = '';
+  //
+  // dpHtml += `
+  //     <div class="popup__table-labels">
+  //     <div class="popup__table-labels-top-1">${t('weather.hours.air-temperature')}</div>
+  //     <div class="popup__table-labels-top-2">${t('weather.hours.wind')}</div>
+  //     <div class="popup__table-labels-top-3">${t('weather.hours.precipitation')}</div>
+  //   </div>`;
+  //
+  // for (const dp of dayPoints) {
+  //
+  //   const skyType = getClearSkyType(new Date(dp.time), sunshineDuration);
+  //
+  //   dpHtml += `<div class="popup__table-cell">
+  //
+  //     <div class="popup__values-group popup__values-group--no-margin">
+  //       <div>${formatTime(dp.time, languageService.currentLanguage)}</div>
+  //       <div class="noi-weather-icon" title="${dp["qualitative-forecast"]}">${getIconText(dp["qualitative-forecast"] as any, skyType)}</div>
+  //     </div>
+  //
+  //     <div class="popup__values-group">
+  //       <div>${num(dp["air-temperature"])}℃</div>
+  //     </div>
+  //
+  //     <div class="popup__values-group">
+  //       <div>${dp["wind-direction"]}° (${getWindDirectionLabel(dp["wind-direction"], t('weather.wind-directions'))})</div>
+  //       <div>${num(dp["wind-speed"])}m/s</div>
+  //     </div>
+  //     <div class="popup__values-group">
+  //       <div>${dp["precipitation-probability"]}%</div>
+  //       <div>${num(dp["precipitation-sum"])}mm</div>
+  //     </div>
+  //   </div>`;
+  // }
+  // html += `<div class="popup__table">${dpHtml}</div>`;
+  //
+  // return `<div class="noi-weather-popup" part="popup">${html}</div>`;
 }
 
 /**

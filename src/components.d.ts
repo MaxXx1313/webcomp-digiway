@@ -14,12 +14,14 @@ import { IconName } from "./blocks/icon/icon.component";
 import { Map, RequestTransformFunction } from "maplibre-gl";
 import { LayerConfig } from "./blocks/map-layer-base-odh/noi-map-layer-base-odh.component";
 import { PopupDefinitionFn } from "./utils/maplibre-popup";
+import { WeatherForecast } from "./data/noi/WeatherForecase";
 import { SelectOption } from "./blocks/select/select.component";
 export { ViewLayout } from "./utils/breakpoints";
 export { IconName } from "./blocks/icon/icon.component";
 export { Map, RequestTransformFunction } from "maplibre-gl";
 export { LayerConfig } from "./blocks/map-layer-base-odh/noi-map-layer-base-odh.component";
 export { PopupDefinitionFn } from "./utils/maplibre-popup";
+export { WeatherForecast } from "./data/noi/WeatherForecase";
 export { SelectOption } from "./blocks/select/select.component";
 export namespace Components {
     /**
@@ -172,6 +174,12 @@ export namespace Components {
           * View date for weather data
          */
         "viewDate": Date | undefined;
+    }
+    /**
+     * (INTERNAL) render map popup
+     */
+    interface NoiMapLayerWeatherPopup {
+        "setFeature": (feature: MapGeoJSONFeature) => Promise<void>;
     }
     /**
      * (INTERNAL) render a select box
@@ -672,6 +680,11 @@ declare namespace LocalJSX {
           * View date for weather data
          */
         "viewDate"?: Date | undefined;
+    }
+    /**
+     * (INTERNAL) render map popup
+     */
+    interface NoiMapLayerWeatherPopup {
     }
     /**
      * (INTERNAL) render a select box

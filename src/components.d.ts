@@ -23,6 +23,21 @@ export { PopupDefinitionFn } from "./utils/maplibre-popup";
 export { SelectOption } from "./blocks/select/select.component";
 export namespace Components {
     /**
+     * (INTERNAL) Backdrop component.
+     */
+    interface NoiButton {
+        /**
+          * button 'disabled' property
+          * @default false
+         */
+        "disabled": boolean;
+        /**
+          * icon-only buttons has circle shape. The size of the button can be changed with "font-size" style
+          * @default false
+         */
+        "iconOnly": boolean;
+    }
+    /**
      * (INTERNAL) render a checkbox
      */
     interface NoiCheckbox {
@@ -72,6 +87,11 @@ export namespace Components {
           * @default 'auto'
          */
         "layout": ViewLayout;
+        /**
+          * View date for weather data
+          * @default 'en'
+         */
+        "viewDate": string | undefined;
     }
     /**
      * (INTERNAL) render an icon.
@@ -173,6 +193,10 @@ export namespace Components {
     interface NoiSpinner {
     }
 }
+export interface NoiButtonCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLNoiButtonElement;
+}
 export interface NoiCheckboxCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLNoiCheckboxElement;
@@ -206,6 +230,26 @@ export interface NoiSelectCustomEvent<T> extends CustomEvent<T> {
     target: HTMLNoiSelectElement;
 }
 declare global {
+    interface HTMLNoiButtonElementEventMap {
+        "btnClick": MouseEvent;
+    }
+    /**
+     * (INTERNAL) Backdrop component.
+     */
+    interface HTMLNoiButtonElement extends Components.NoiButton, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLNoiButtonElementEventMap>(type: K, listener: (this: HTMLNoiButtonElement, ev: NoiButtonCustomEvent<HTMLNoiButtonElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLNoiButtonElementEventMap>(type: K, listener: (this: HTMLNoiButtonElement, ev: NoiButtonCustomEvent<HTMLNoiButtonElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLNoiButtonElement: {
+        prototype: HTMLNoiButtonElement;
+        new (): HTMLNoiButtonElement;
+    };
     interface HTMLNoiCheckboxElementEventMap {
         "checkedChange": { checked: boolean };
     }
@@ -425,6 +469,7 @@ declare global {
         new (): HTMLNoiSpinnerElement;
     };
     interface HTMLElementTagNameMap {
+        "noi-button": HTMLNoiButtonElement;
         "noi-checkbox": HTMLNoiCheckboxElement;
         "noi-checkbox-group": HTMLNoiCheckboxGroupElement;
         "noi-digiway": HTMLNoiDigiwayElement;
@@ -444,6 +489,25 @@ declare global {
 declare namespace LocalJSX {
     type OneOf<K extends string, PropT, AttrT = PropT> = { [P in K]: PropT } & { [P in `attr:${K}` | `prop:${K}`]?: never } | { [P in `attr:${K}`]: AttrT } & { [P in K | `prop:${K}`]?: never } | { [P in `prop:${K}`]: PropT } & { [P in K | `attr:${K}`]?: never };
 
+    /**
+     * (INTERNAL) Backdrop component.
+     */
+    interface NoiButton {
+        /**
+          * button 'disabled' property
+          * @default false
+         */
+        "disabled"?: boolean;
+        /**
+          * icon-only buttons has circle shape. The size of the button can be changed with "font-size" style
+          * @default false
+         */
+        "iconOnly"?: boolean;
+        /**
+          * Emitted when user clicks on the button
+         */
+        "onBtnClick"?: (event: NoiButtonCustomEvent<MouseEvent>) => void;
+    }
     /**
      * (INTERNAL) render a checkbox
      */
@@ -498,6 +562,11 @@ declare namespace LocalJSX {
           * @default 'auto'
          */
         "layout"?: ViewLayout;
+        /**
+          * View date for weather data
+          * @default 'en'
+         */
+        "viewDate"?: string | undefined;
     }
     /**
      * (INTERNAL) render an icon.
@@ -625,6 +694,10 @@ declare namespace LocalJSX {
     interface NoiSpinner {
     }
 
+    interface NoiButtonAttributes {
+        "disabled": boolean;
+        "iconOnly": boolean;
+    }
     interface NoiCheckboxAttributes {
         "disabled": boolean;
         "checked": boolean;
@@ -638,6 +711,7 @@ declare namespace LocalJSX {
         "baseMap": 'osm' | 'tirol';
         "centermap": string;
         "language": string;
+        "viewDate": string | undefined;
     }
     interface NoiIconAttributes {
         "name": IconName | string;
@@ -669,6 +743,7 @@ declare namespace LocalJSX {
     }
 
     interface IntrinsicElements {
+        "noi-button": Omit<NoiButton, keyof NoiButtonAttributes> & { [K in keyof NoiButton & keyof NoiButtonAttributes]?: NoiButton[K] } & { [K in keyof NoiButton & keyof NoiButtonAttributes as `attr:${K}`]?: NoiButtonAttributes[K] } & { [K in keyof NoiButton & keyof NoiButtonAttributes as `prop:${K}`]?: NoiButton[K] };
         "noi-checkbox": Omit<NoiCheckbox, keyof NoiCheckboxAttributes> & { [K in keyof NoiCheckbox & keyof NoiCheckboxAttributes]?: NoiCheckbox[K] } & { [K in keyof NoiCheckbox & keyof NoiCheckboxAttributes as `attr:${K}`]?: NoiCheckboxAttributes[K] } & { [K in keyof NoiCheckbox & keyof NoiCheckboxAttributes as `prop:${K}`]?: NoiCheckbox[K] };
         "noi-checkbox-group": Omit<NoiCheckboxGroup, keyof NoiCheckboxGroupAttributes> & { [K in keyof NoiCheckboxGroup & keyof NoiCheckboxGroupAttributes]?: NoiCheckboxGroup[K] } & { [K in keyof NoiCheckboxGroup & keyof NoiCheckboxGroupAttributes as `attr:${K}`]?: NoiCheckboxGroupAttributes[K] } & { [K in keyof NoiCheckboxGroup & keyof NoiCheckboxGroupAttributes as `prop:${K}`]?: NoiCheckboxGroup[K] };
         "noi-digiway": Omit<NoiDigiway, keyof NoiDigiwayAttributes> & { [K in keyof NoiDigiway & keyof NoiDigiwayAttributes]?: NoiDigiway[K] } & { [K in keyof NoiDigiway & keyof NoiDigiwayAttributes as `attr:${K}`]?: NoiDigiwayAttributes[K] } & { [K in keyof NoiDigiway & keyof NoiDigiwayAttributes as `prop:${K}`]?: NoiDigiway[K] };
@@ -689,6 +764,10 @@ export { LocalJSX as JSX };
 declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
+            /**
+             * (INTERNAL) Backdrop component.
+             */
+            "noi-button": LocalJSX.IntrinsicElements["noi-button"] & JSXBase.HTMLAttributes<HTMLNoiButtonElement>;
             /**
              * (INTERNAL) render a checkbox
              */

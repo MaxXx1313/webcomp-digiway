@@ -255,6 +255,7 @@ noi-map {
   left: 0;
   right: 0;
   bottom: 32px;
+  padding: 4px;
 
   display: flex;
   align-items: center;
@@ -276,6 +277,7 @@ noi-map {
 
   color: var(--color-text);
   background: var(--color-background);
+  box-shadow: 0 0 4px var(--color-background-hover);
   pointer-events: initial;
 }
 
@@ -285,6 +287,12 @@ noi-map {
 
 .legend__icon {
   display: flex;
+}
+
+.legend__btn {
+  --color: var(--color-text);
+  --color-hover: var(--color-primary);
+  --color-bg-hover: var(--color-background-hover);
 }
 
 .legend__item {
@@ -300,15 +308,6 @@ noi-map {
   line-height: 1em;
 }
 
-.legend__item::before {
-  content: ' ';
-  display: block;
-  height: 8px;
-  width: 8px;
-  border-radius: 50%;
-  background: var(--risk-item-color, none);
-  filter: var(--map-filter, none);
-}
 
 .legend__item--debug {
   padding: 4px 6px;
@@ -325,6 +324,16 @@ noi-map {
 
 .risk-level--medium {
   --risk-item-color: #ffff73;
+}
+
+.risk-level::before {
+  content: ' ';
+  display: block;
+  height: 8px;
+  width: 8px;
+  border-radius: 50%;
+  background: var(--risk-item-color, none);
+  filter: var(--map-filter, none);
 }
 
 .risk-level--high {

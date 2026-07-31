@@ -24,21 +24,42 @@ export function formatNumber(num: number | string | undefined, language: string)
   }
 }
 
+/**
+ */
+export function formatDay(date: Date | string | undefined, language: string): string {
+  if (date === undefined || date === null) {
+    return '';
+  }
+  const dateSafe = (typeof date === 'string') ? new Date(date) : date;
+
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric'
+  };
+
+  try {
+    return new Intl.DateTimeFormat(language, options).format(dateSafe);
+  } catch (error) {
+    // Safe fallback to English format
+    return new Intl.DateTimeFormat('en', options).format(dateSafe);
+  }
+}
+
 export function formatTime(date: Date | string | undefined, language: string): string {
   if (date === undefined || date === null) {
     return '';
   }
   const dateSafe = (typeof date === 'string') ? new Date(date) : date;
+
+  const options: Intl.DateTimeFormatOptions = {
+    hour: 'numeric',
+    minute: '2-digit'
+  };
   try {
-    return new Intl.DateTimeFormat(language, {
-      hour: 'numeric',
-      minute: '2-digit'
-    }).format(dateSafe);
+    return new Intl.DateTimeFormat(language, options).format(dateSafe);
   } catch (error) {
     // Safe fallback to English format
-    return new Intl.DateTimeFormat('en', {
-      hour: 'numeric',
-      minute: '2-digit'
-    }).format(dateSafe);
+    return new Intl.DateTimeFormat('en', options).format(dateSafe);
   }
 }

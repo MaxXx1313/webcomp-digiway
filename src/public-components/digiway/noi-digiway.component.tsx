@@ -22,6 +22,8 @@ type MapSourceOption = SelectOption;
  */
 type BaseMapType = 'tirol' | 'osm';
 
+const MAX_DAYS_AHEAD = 5;
+
 /**
  * Consolidated web-component to show Open Data Hub data imported within the Digiway project
  *
@@ -128,6 +130,8 @@ export class NoiDigiwayComponent implements StencilComponent {
 
   private _isGrayscaleMap = false;
 
+  private now = new Date();
+
   private sizeObserver: ResizeObserver | null = null;
   readonly languageService = LanguageDataService.getInstance();
 
@@ -159,6 +163,11 @@ export class NoiDigiwayComponent implements StencilComponent {
       console.error(e);
       this.viewDateObj = new Date();
     }
+  }
+
+  canChangeViewDate(daysChange: number) {
+    const daysDiff = (this.viewDateObj.getTime() - this.now.getTime()) / (24 * 60 * 60 * 1000);
+    return (daysDiff + daysChange) <= MAX_DAYS_AHEAD;
   }
 
   changeViewDate(daysChange: number) {
@@ -586,7 +595,10 @@ export class NoiDigiwayComponent implements StencilComponent {
       <div class="legend__item">
         <span>{formatDay(this.viewDateObj, this.languageService.currentLanguage)}</span>
       </div>
-      <noi-button class="legend__btn" title="Next day" onClick={() => this.changeViewDate(1)}>
+      <noi-button class="legend__btn"
+                  title="Next day"
+                  disabled={!this.canChangeViewDate(1)}
+                  onClick={() => this.changeViewDate(1)}>
         <noi-icon name="chevron-right"></noi-icon>
       </noi-button>
     </div>);

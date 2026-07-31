@@ -154,9 +154,25 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
 
   @Watch('viewDate')
   viewDateChanged() {
-    this._popup?.remove();
     setTimeout(() => { // timeout is to avoid "The state/prop "layersLoading" changed during rendering"
-      this.initLayerData();
+      this.initLayerData()
+        .then(() => {
+          const idOpened = this._popupFeatureId;
+          if (!idOpened) {
+            return;
+          }
+          this._popup?.remove();
+
+          // reopen popup of the same point
+          const features = this.map.querySourceFeatures('source-weather-data', {
+            filter: ['==', ['id'], idOpened]
+          });
+
+          const targetFeature = features[0] as MapGeoJSONFeature;
+          if (targetFeature) {
+            this.createFeaturePopup(targetFeature);
+          }
+        });
     });
   }
 
@@ -286,6 +302,10 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
 
     const source = this.map.getSource('source-weather-data') as GeoJSONSource;
     source.setData(geojsonPoints);
+
+    return new Promise<void>(resolve => {
+      listenLayerReady(this.map, 'source-weather-data', () => resolve());
+    });
   }
 
   /**

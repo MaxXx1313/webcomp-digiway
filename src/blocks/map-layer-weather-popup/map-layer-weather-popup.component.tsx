@@ -5,7 +5,6 @@
 import { Component, h, Host, Prop } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
 import { MapGeoJSONFeature } from "maplibre-gl";
-import { WeatherForecast } from "../../data/noi/WeatherForecase";
 
 
 /**
@@ -32,13 +31,16 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
   }
 
   render() {
+    if (!this.feature) {
+      return '';
+    }
     // const data = JSON.parse(this.feature.properties?.data) as WeatherForecast;
     //
     // const iconName = this.feature.properties['icon_name'];
     // const pointDescription = __getDailyMeasurement(data.sdatatypes["qualitative-forecast"]?.tmeasurements || [])?.mvalue;
     // const pointName = data.smetadata.nameEn;
 
-    const pointName  ='AAA';
+    const pointName = 'AAA';
 
     // helpers, to make template more clear
     // const t = languageService.translate.bind(languageService);

@@ -19,6 +19,7 @@ import { Measurement } from "../../data/noi/types-v1-common";
 import { base64String } from "./icon-font";
 import { LanguageDataService } from "../../data/language/language-data-service";
 import { formatNumber, formatTime } from "../../utils/intl";
+import { MapLayerWeatherPopupComponent } from "../map-layer-weather-popup/map-layer-weather-popup.component";
 
 
 const ICON_FONT_NAME = 'noi-digiway-weather-icons';
@@ -360,6 +361,10 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
     this._popup.on('close', () => {
       this._popupFeatureId = undefined;
     });
+
+    // set feature propoerty
+    const popupContent = this._popup.getElement().querySelector('noi-map-layer-weather-popup') as unknown as MapLayerWeatherPopupComponent;
+    popupContent!.feature = feature;
   }
 
 }

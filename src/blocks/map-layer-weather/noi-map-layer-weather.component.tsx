@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { Component, Element, Event, EventEmitter } from "@stencil/core";
+import { Component, Element, Event, EventEmitter, Prop, Watch } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
-import { LngLatLike, Map, MapGeoJSONFeature, Popup, Subscription } from "maplibre-gl";
+import { GeoJSONSource, LngLatLike, Map, MapGeoJSONFeature, Popup, Subscription } from "maplibre-gl";
 import {
   enableHoverEffect,
   FontIconPaintParams,
@@ -100,6 +100,12 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
    */
   @Event() layerLoading!: EventEmitter<boolean>;
 
+  /**
+   * View date for weather data
+   */
+  @Prop({mutable: true})
+  viewDate: Date | undefined;
+
   private _subscriptions: Subscription[] = [];
 
   private weatherService = new WeatherForecastService();
@@ -128,12 +134,14 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
     try {
       // 2. Safely wait for the map instance to be initialized by the parent
       this.map = await mapParent.getMapAsync();
-
-      // 3. Add this layer to the map library instance
-      this.initLayer();
     } catch (error) {
       console.error('Failed to get map instance:', error);
+      throw error;
     }
+
+    // 3. Add this layer to the map library instance
+    await this.initLayer();
+    await this.initLayerData();
   }
 
   disconnectedCallback() {
@@ -144,50 +152,32 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
   }
 
 
+  @Watch('viewDate')
+  viewDateChanged() {
+    this._popup?.remove();
+    setTimeout(() => { // timeout is to avoid "The state/prop "layersLoading" changed during rendering"
+      this.initLayerData();
+    });
+  }
+
   async initLayer() {
     console.log(`[noi-map-layer-weather] Adding layer to map`);
-
-    const now = new Date();
 
     //
     const _loadEvent = listenLayerReady(this.map, 'source-weather-data', () => {
       this.layerLoading.emit(false);
-    });
+    }, {continuous: true});
     this._subscriptions.push(_loadEvent);
 
     //
-    this.layerLoading.emit(true);
-
-    // fetch weather forecast
-    const forecastData = await this.weatherService.getWeatherForecastForDay(new Date());
-
-    // Convert your 2000 points into a GeoJSON FeatureCollection
     const geojsonPoints: GeoJSON = {
       type: 'FeatureCollection',
-      features: forecastData.values.map(point => {
-        const pointDescription = __getDailyMeasurement(point.sdatatypes["qualitative-forecast"]?.tmeasurements || [])?.mvalue;
-        const sunshineDuration = __getDailyMeasurement(point.sdatatypes["forecast-sunshine-duration"]?.tmeasurements || [])?.mvalue;
-
-        const skyType = getClearSkyType(now, sunshineDuration);
-        return {
-          id: point.scode,
-          type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: [point.scoordinate.x, point.scoordinate.y] // Ensure longitude is FIRST
-          },
-          properties: {
-            data: point,
-            day: forecastData.dateFrom.toISOString(),
-            icon_name: getIconName(pointDescription, skyType),
-          },
-        };
-      }),
+      features: [], // filled later
     };
 
     this.map.addSource('source-weather-data', {
       type: 'geojson',
-      data: geojsonPoints
+      data: geojsonPoints,
     });
 
 
@@ -255,6 +245,47 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
     this._subscriptions.push(_debugClick);
 
     this.resetPosition();
+  }
+
+
+  async initLayerData() {
+
+    const viewDate = this.viewDate || new Date();
+    console.debug(`[noi-map-layer-weather] initLayerData`, viewDate);
+
+    this.layerLoading.emit(true);
+    // fetch weather forecast
+    const forecastData = await this.weatherService.getWeatherForecastForDay(viewDate);
+
+    // Convert your 2000 points into a GeoJSON FeatureCollection
+    const dataPoints: any = forecastData.values.map(point => {
+      const pointDescription = __getDailyMeasurement(point.sdatatypes["qualitative-forecast"]?.tmeasurements || [])?.mvalue;
+      const sunshineDuration = __getDailyMeasurement(point.sdatatypes["forecast-sunshine-duration"]?.tmeasurements || [])?.mvalue;
+
+      const skyType = getClearSkyType(viewDate, sunshineDuration);
+      return {
+        id: point.scode,
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [point.scoordinate.x, point.scoordinate.y] // Ensure longitude is FIRST
+        },
+        properties: {
+          data: point,
+          day: forecastData.dateFrom.toISOString(),
+          icon_name: getIconName(pointDescription, skyType),
+        },
+      };
+    });
+
+    //
+    const geojsonPoints: GeoJSON = {
+      type: 'FeatureCollection',
+      features: dataPoints,
+    };
+
+    const source = this.map.getSource('source-weather-data') as GeoJSONSource;
+    source.setData(geojsonPoints);
   }
 
   /**

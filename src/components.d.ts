@@ -89,7 +89,6 @@ export namespace Components {
         "layout": ViewLayout;
         /**
           * View date for weather data
-          * @default 'en'
          */
         "viewDate": string | undefined;
     }
@@ -169,6 +168,10 @@ export namespace Components {
      * (INTERNAL) render map layer
      */
     interface NoiMapLayerWeather {
+        /**
+          * View date for weather data
+         */
+        "viewDate": Date | undefined;
     }
     /**
      * (INTERNAL) render a select box
@@ -564,7 +567,6 @@ declare namespace LocalJSX {
         "layout"?: ViewLayout;
         /**
           * View date for weather data
-          * @default 'en'
          */
         "viewDate"?: string | undefined;
     }
@@ -666,6 +668,10 @@ declare namespace LocalJSX {
           * Emitted when layer data is loading
          */
         "onLayerLoading"?: (event: NoiMapLayerWeatherCustomEvent<boolean>) => void;
+        /**
+          * View date for weather data
+         */
+        "viewDate"?: Date | undefined;
     }
     /**
      * (INTERNAL) render a select box

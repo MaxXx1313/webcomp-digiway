@@ -253,8 +253,10 @@ export class NoiDigiwayComponent implements StencilComponent {
 
   _setLayerLoading(layer: string, isLoading: boolean) {
     if (isLoading) {
-      this.layersLoading.push(layer);
-      this.layersLoading = [...this.layersLoading];
+      if (!this.layersLoading.includes(layer)) {
+        this.layersLoading.push(layer);
+        this.layersLoading = [...this.layersLoading];
+      }
     } else {
       this.layersLoading = this.layersLoading.filter(l => l !== layer);
     }
@@ -364,6 +366,7 @@ export class NoiDigiwayComponent implements StencilComponent {
           {this.layersActive.includes('layer-weather')
             ? <noi-map-layer-weather
               key="layer-weather"
+              viewDate={this.viewDateObj}
               onLayerLoading={(e) => this._setLayerLoading('layer-weather', e.detail)}></noi-map-layer-weather>
             : ''}
 

@@ -589,6 +589,9 @@ export class NoiDigiwayComponent implements StencilComponent {
 
   _renderLegend_weatherForecast() {
     return (<div class="legend" part="legend">
+      <div class="legend__icon" title={this.languageService.translate('map.layer.weather')}>
+        <noi-icon name="weather-alert"></noi-icon>
+      </div>
       <noi-button class="legend__btn" title="Previous day" onClick={() => this.changeViewDate(-1)}>
         <noi-icon name="chevron-left"></noi-icon>
       </noi-button>

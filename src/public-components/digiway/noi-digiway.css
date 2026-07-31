@@ -32,6 +32,11 @@
   --color-background: #FFFFFF;
 
   /**
+   * @prop --color-background-shade: Background darken color
+   */
+  --color-background-shade: #f0f0f0;
+
+  /**
    * @prop --color-background-hover: Background color on hover
    */
   --color-background-hover: #f4f4f4;
@@ -45,6 +50,15 @@
    * @prop --map-filter: 'filter' property for the map
    */
   --map-filter: none;
+
+  /**
+   * @prop --scrollbar-color: Scrollbar thumb color
+   */
+  --scrollbar-color: initial;
+  /**
+   * @prop --scrollbar-bg: Scrollbar background color
+   */
+  --scrollbar-bg: initial;
 }
 
 :host {
@@ -208,6 +222,7 @@ noi-map {
   overflow-y: scroll;
   display: flex;
   flex-direction: column;
+  scrollbar-color: var(--scrollbar-color, initial) var(--scrollbar-bg, initial);
 }
 
 .spacer {

@@ -47,7 +47,7 @@
 
 .noi-weather-popup .popup__section.popup__section--background {
   padding: 8px 16px;
-  background: #f0f0f0;
+  background: var(--color-background-shade, #f0f0f0);
 }
 
 .noi-weather-popup .popup__table {
@@ -58,6 +58,7 @@
   white-space: nowrap;
   scroll-behavior: smooth;
   position: relative;
+  scrollbar-color: var(--scrollbar-color, initial) var(--scrollbar-bg, initial);
 }
 
 .noi-weather-popup .popup__table-cell {
@@ -71,7 +72,7 @@
   margin-top: 1.5em;
   padding: 0.15em 0.1em;
 
-  background: #f0f0f0;
+  background: var(--color-background-shade, #f0f0f0);
   border-radius: 8px;
   display: flex;
   flex-direction: column;

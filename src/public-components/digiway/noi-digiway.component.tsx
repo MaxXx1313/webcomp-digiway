@@ -9,6 +9,7 @@ import { SelectOption } from "../../blocks/select/select.component";
 import { LanguageDataService } from "../../data/language/language-data-service";
 import { getAssetPath } from "../../utils/asset-path";
 import { formatDay } from "../../utils/intl";
+import { WeatherForecastService } from "../../data/noi/weather-forecast-service";
 
 
 interface DataLayerOption extends SelectOption {
@@ -21,8 +22,6 @@ type MapSourceOption = SelectOption;
  * @internal
  */
 type BaseMapType = 'tirol' | 'osm';
-
-const MAX_DAYS_AHEAD = 5;
 
 /**
  * Consolidated web-component to show Open Data Hub data imported within the Digiway project
@@ -167,7 +166,7 @@ export class NoiDigiwayComponent implements StencilComponent {
 
   canChangeViewDate(daysChange: number) {
     const daysDiff = (this.viewDateObj.getTime() - this.now.getTime()) / (24 * 60 * 60 * 1000);
-    return (daysDiff + daysChange) <= MAX_DAYS_AHEAD;
+    return (daysDiff + daysChange) <= WeatherForecastService.MAX_DAYS_AHEAD;
   }
 
   changeViewDate(daysChange: number) {

@@ -16,6 +16,7 @@ import {
   getWindDirectionLabel
 } from "../map-layer-weather/weather-forecast.util";
 import { formatNumber, formatTime } from "../../utils/intl";
+import { AbortableRequest, WeatherForecastService } from "../../data/noi/weather-forecast-service";
 
 
 /**
@@ -33,11 +34,18 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
 
   @State()
   private data?: WeatherForecast;
+
+  @State()
   private dayIso?: string;
+
+  @State()
   private dayForecast?: DayPointForecast[];
 
   @State()
   private dayForecastIndex: number = 0;
+
+  private stationId?: string;
+  private weatherService = new WeatherForecastService();
 
   /**
    */
@@ -52,14 +60,67 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
   @Method()
   async setFeature(feature: MapGeoJSONFeature) {
     this.data = JSON.parse(feature?.properties?.data) as WeatherForecast;
+    this.stationId = this.data.scode;
     this.dayIso = feature?.properties?.day as string;
     this.dayForecast = calculateDayPoints(this.data);
     this.dayForecastIndex = 0;
   }
 
+  canChangeViewTime(increment: number) {
+    const proposal = this.dayForecastIndex + increment;
+    return proposal >= 0 && proposal < (this.dayForecast?.length || 0);
+  }
+
+  changeViewTime(increment: number) {
+    this.dayForecastIndex += increment;
+  }
+
+
+  canChangeViewDay(daysChange: number) {
+    const viewDate = new Date(this.dayIso || Date.now());
+    const daysDiff = (viewDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000);
+    return (daysDiff + daysChange) <= WeatherForecastService.MAX_DAYS_AHEAD;
+  }
+
+  changeViewDay(increment: number) {
+    const d = new Date(this.dayIso || Date.now());
+    d.setDate(d.getDate() + increment);
+    this.dayIso = d.toISOString();
+
+    this._loadData();
+  }
+
+  private __requestCounter = 0;
+  private __request?: AbortableRequest<any>;
+
+  async _loadData() {
+    if (!this.dayIso || !this.stationId) {
+      console.warn('Cannot fetch data: no view day or station ID');
+      return;
+    }
+    if (this.__request) {
+      this.__request.abort();
+    }
+    const __requestCounter = ++this.__requestCounter;
+    this.__request = this.weatherService.getWeatherForecastDayStation(new Date(this.dayIso), this.stationId);
+    const forecastData = await this.__request.payload$;
+
+    if (__requestCounter !== this.__requestCounter) {
+      // skip cancelled request
+      return;
+    }
+
+    this.data = forecastData.values?.[0];
+    this.dayIso = forecastData.dateFrom.toISOString();
+    this.dayForecast = this.data ? calculateDayPoints(this.data) : [];
+    if (!this.dayForecast[this.dayForecastIndex]) {
+      // reset index if it's out of range
+      this.dayForecastIndex = 0;
+    }
+  }
 
   render() {
-    if (!this.data) {
+    if (!this.data || !this.dayForecast) {
       return '';
     }
 
@@ -87,8 +148,8 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
         <div class="panel">
           <noi-button class="panel__btn"
                       title="Previous day"
-                      disabled={!this.canChangeViewTime(-1)}
-                      onClick={() => this.changeViewTime(-1)}>
+                      disabled={!this.canChangeViewDay(-1)}
+                      onClick={() => this.changeViewDay(-1)}>
             <noi-icon name="chevron-left"></noi-icon>
           </noi-button>
           <div class="panel__body panel-date">
@@ -96,8 +157,8 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
           </div>
           <noi-button class="panel__btn"
                       title="Next day"
-                      disabled={!this.canChangeViewTime(1)}
-                      onClick={() => this.changeViewTime(1)}>
+                      disabled={!this.canChangeViewDay(1)}
+                      onClick={() => this.changeViewDay(1)}>
             <noi-icon name="chevron-right"></noi-icon>
           </noi-button>
         </div>
@@ -121,15 +182,9 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
     );
   }
 
-  canChangeViewTime(increment: number) {
-    const proposal = this.dayForecastIndex + increment;
-    return proposal >= 0 && proposal < (this.dayForecast?.length || 0);
-  }
-
-  changeViewTime(increment: number) {
-    this.dayForecastIndex += increment;
-  }
-
+  /**
+   *
+   */
   _renderTimePoint(dp: DayPointForecast, sunshineDuration: number) {
 
     // helpers, to make template more clear
@@ -142,20 +197,20 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
 
       <div class="panel">
         <noi-button class="panel__btn"
-                      title="Previous entry"
-                      disabled={!this.canChangeViewTime(-1)}
-                      onClick={() => this.changeViewTime(-1)}>
-            <noi-icon name="chevron-left"></noi-icon>
-          </noi-button>
-          <div class="panel__body">
-            <span>{formatTime(dp.time, this.languageService.currentLanguage)}</span>
-          </div>
-          <noi-button class="panel__btn"
-                      title="Next entry"
-                      disabled={!this.canChangeViewTime(1)}
-                      onClick={() => this.changeViewTime(1)}>
-            <noi-icon name="chevron-right"></noi-icon>
-          </noi-button>
+                    title="Previous entry"
+                    disabled={!this.canChangeViewTime(-1)}
+                    onClick={() => this.changeViewTime(-1)}>
+          <noi-icon name="chevron-left"></noi-icon>
+        </noi-button>
+        <div class="panel__body">
+          <span>{formatTime(dp.time, this.languageService.currentLanguage)}</span>
+        </div>
+        <noi-button class="panel__btn"
+                    title="Next entry"
+                    disabled={!this.canChangeViewTime(1)}
+                    onClick={() => this.changeViewTime(1)}>
+          <noi-icon name="chevron-right"></noi-icon>
+        </noi-button>
       </div>
       <div class="section">
         <div class="table">

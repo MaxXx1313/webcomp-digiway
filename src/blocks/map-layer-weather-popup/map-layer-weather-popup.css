@@ -102,8 +102,8 @@
   gap: 0.2em;
 
   /* 1. Apply a default right and bottom border to every cell */
-  border-right: 1px solid #ccc;
-  border-bottom: 1px solid #ccc;
+  border-right: 1px solid var(--color-background-shade, #f0f0f0);
+  border-bottom: 1px solid var(--color-background-shade, #f0f0f0);
 }
 
 /* 2. Remove right border for cells in the second column (even items) */

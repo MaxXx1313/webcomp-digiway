@@ -17,9 +17,6 @@ import { GeoJSON, Point } from "geojson";
 import { WeatherIconFont, WeatherIconName } from "./icon-font";
 import { _getDailyMeasurement, getClearSkyType, getIconName } from "./weather-forecast.util";
 
-
-// type IconName = keyof typeof ICON_FONT_NAME;
-
 // Default styles
 const defaultStyles = {
   unclusteredpoints: {
@@ -332,7 +329,7 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
     this.el.appendChild(popupContent);
 
     // Wait for component hydration & data load
-    await popupContent.componentOnReady();
+    // await popupContent.componentOnReady(); // < this breaks bundle, all the component already registered
     await popupContent.setFeature(feature);
 
     // Wait for the browser layout engine to paint the content

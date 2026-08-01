@@ -11,14 +11,14 @@
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { ViewLayout } from "./utils/breakpoints";
 import { IconName } from "./blocks/icon/icon.component";
-import { Map, RequestTransformFunction } from "maplibre-gl";
+import { Map, MapGeoJSONFeature, RequestTransformFunction } from "maplibre-gl";
 import { LayerConfig } from "./blocks/map-layer-base-odh/noi-map-layer-base-odh.component";
 import { PopupDefinitionFn } from "./utils/maplibre-popup";
 import { WeatherForecast } from "./data/noi/WeatherForecase";
 import { SelectOption } from "./blocks/select/select.component";
 export { ViewLayout } from "./utils/breakpoints";
 export { IconName } from "./blocks/icon/icon.component";
-export { Map, RequestTransformFunction } from "maplibre-gl";
+export { Map, MapGeoJSONFeature, RequestTransformFunction } from "maplibre-gl";
 export { LayerConfig } from "./blocks/map-layer-base-odh/noi-map-layer-base-odh.component";
 export { PopupDefinitionFn } from "./utils/maplibre-popup";
 export { WeatherForecast } from "./data/noi/WeatherForecase";
@@ -448,6 +448,15 @@ declare global {
         prototype: HTMLNoiMapLayerWeatherElement;
         new (): HTMLNoiMapLayerWeatherElement;
     };
+    /**
+     * (INTERNAL) render map popup
+     */
+    interface HTMLNoiMapLayerWeatherPopupElement extends Components.NoiMapLayerWeatherPopup, HTMLStencilElement {
+    }
+    var HTMLNoiMapLayerWeatherPopupElement: {
+        prototype: HTMLNoiMapLayerWeatherPopupElement;
+        new (): HTMLNoiMapLayerWeatherPopupElement;
+    };
     interface HTMLNoiSelectElementEventMap {
         "selectChange": string;
     }
@@ -493,6 +502,7 @@ declare global {
         "noi-map-layer-cycling-roads": HTMLNoiMapLayerCyclingRoadsElement;
         "noi-map-layer-risk-exposure": HTMLNoiMapLayerRiskExposureElement;
         "noi-map-layer-weather": HTMLNoiMapLayerWeatherElement;
+        "noi-map-layer-weather-popup": HTMLNoiMapLayerWeatherPopupElement;
         "noi-select": HTMLNoiSelectElement;
         "noi-spinner": HTMLNoiSpinnerElement;
     }
@@ -775,6 +785,7 @@ declare namespace LocalJSX {
         "noi-map-layer-cycling-roads": Omit<NoiMapLayerCyclingRoads, keyof NoiMapLayerCyclingRoadsAttributes> & { [K in keyof NoiMapLayerCyclingRoads & keyof NoiMapLayerCyclingRoadsAttributes]?: NoiMapLayerCyclingRoads[K] } & { [K in keyof NoiMapLayerCyclingRoads & keyof NoiMapLayerCyclingRoadsAttributes as `attr:${K}`]?: NoiMapLayerCyclingRoadsAttributes[K] } & { [K in keyof NoiMapLayerCyclingRoads & keyof NoiMapLayerCyclingRoadsAttributes as `prop:${K}`]?: NoiMapLayerCyclingRoads[K] } & OneOf<"region", NoiMapLayerCyclingRoads["region"], NoiMapLayerCyclingRoadsAttributes["region"]>;
         "noi-map-layer-risk-exposure": NoiMapLayerRiskExposure;
         "noi-map-layer-weather": NoiMapLayerWeather;
+        "noi-map-layer-weather-popup": NoiMapLayerWeatherPopup;
         "noi-select": Omit<NoiSelect, keyof NoiSelectAttributes> & { [K in keyof NoiSelect & keyof NoiSelectAttributes]?: NoiSelect[K] } & { [K in keyof NoiSelect & keyof NoiSelectAttributes as `attr:${K}`]?: NoiSelectAttributes[K] } & { [K in keyof NoiSelect & keyof NoiSelectAttributes as `prop:${K}`]?: NoiSelect[K] };
         "noi-spinner": NoiSpinner;
     }
@@ -837,6 +848,10 @@ declare module "@stencil/core" {
              * (INTERNAL) render map layer
              */
             "noi-map-layer-weather": LocalJSX.IntrinsicElements["noi-map-layer-weather"] & JSXBase.HTMLAttributes<HTMLNoiMapLayerWeatherElement>;
+            /**
+             * (INTERNAL) render map popup
+             */
+            "noi-map-layer-weather-popup": LocalJSX.IntrinsicElements["noi-map-layer-weather-popup"] & JSXBase.HTMLAttributes<HTMLNoiMapLayerWeatherPopupElement>;
             /**
              * (INTERNAL) render a select box
              */

@@ -15,9 +15,7 @@ import {
 import { WeatherForecastService } from "../../data/noi/weather-forecast-service";
 import { GeoJSON, Point } from "geojson";
 import { WeatherIconFont, WeatherIconName } from "./icon-font";
-import { MapLayerWeatherPopupComponent } from "../map-layer-weather-popup/map-layer-weather-popup.component";
 import { _getDailyMeasurement, getClearSkyType, getIconName } from "./weather-forecast.util";
-
 
 
 // type IconName = keyof typeof ICON_FONT_NAME;
@@ -269,7 +267,7 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
 
     return new Promise<void>(resolve => {
       listenLayerReady(this.map, 'source-weather-data', () => resolve());
-    }).then(()=>{
+    }).then(() => {
       this.layerLoading.emit(false);
     });
   }
@@ -311,36 +309,38 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
   }
 
   // createFeaturePopup(feature: MapGeoJSONFeature, lngLat: MapMouseEvent['lngLat']) {
-  createFeaturePopup(feature: MapGeoJSONFeature) {
+  async createFeaturePopup(feature: MapGeoJSONFeature) {
     const featureId = feature.id;
     if (this._popupFeatureId === featureId) {
       return; // same popup is already opened by another event
     }
+
+    // create popup element
+    const popupContent = document.createElement('noi-map-layer-weather-popup');
+
+    // CRUCIAL: add to dom, so Stencil can initialize it
+    this.el.appendChild(popupContent);
+
+    // Wait for component hydration & data load
+    await popupContent.componentOnReady();
+    await popupContent.setFeature(feature);
+
+    // Wait for the browser layout engine to paint the content
+    await new Promise(resolve => requestAnimationFrame(resolve));
+
+    // Append 'popupContent' to the DOM (Crucial: Stencil needs connection to initialize)
     this._popupFeatureId = featureId;
     this._popup = new Popup()
       // .setLngLat(lngLat) // < on mouse click point
       .setLngLat((feature.geometry as Point).coordinates as LngLatLike) // < on feature center
-      .setHTML(weatherPopupStructure(feature))
+      .setDOMContent(popupContent)
       .setMaxWidth('380px')
       .addTo(this.map);
     this._popup.on('close', () => {
       this._popupFeatureId = undefined;
     });
-
-    // set feature property
-    const popupContent = this._popup.getElement().querySelector('noi-map-layer-weather-popup') as unknown as MapLayerWeatherPopupComponent;
-    popupContent!.setFeature(feature);
   }
 
-}
-
-
-/**
- *
- */
-function weatherPopupStructure(_: MapGeoJSONFeature) {
-  let html = '<noi-map-layer-weather-popup></noi-map-layer-weather-popup>';
-  return `<div class="noi-weather-popup" part="popup">${html}</div>`;
 }
 
 

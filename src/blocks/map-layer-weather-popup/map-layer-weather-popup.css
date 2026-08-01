@@ -18,12 +18,12 @@
 }
 
 /* POPUP */
-noi-map-layer-weather-popup {
+.noi-weather-popup {
   font-size: initial;
 }
 
 /* HEADER */
-noi-map-layer-weather-popup .popup__header {
+.noi-weather-popup .popup__header {
   padding: 0 32px 0 16px;
   display: flex;
   align-items: center;

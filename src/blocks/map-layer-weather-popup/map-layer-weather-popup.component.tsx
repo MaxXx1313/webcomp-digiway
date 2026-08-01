@@ -47,10 +47,10 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
   }
 
   @Method()
-  setFeature(feature: MapGeoJSONFeature) {
+  async setFeature(feature: MapGeoJSONFeature) {
     this.data = JSON.parse(feature?.properties?.data) as WeatherForecast;
     this.dayIso = feature?.properties?.day as string;
-    this.dayForecast = calculateDayPoints(this.data)
+    this.dayForecast = calculateDayPoints(this.data);
   }
 
 
@@ -74,7 +74,7 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
     const sunshineDuration = _getDailyMeasurement(this.data.sdatatypes["forecast-sunshine-duration"]?.tmeasurements || [])?.mvalue;
 
     return (
-      <Host>
+      <div class="noi-weather-popup" part="popup">
         <div class="popup__header">
           <noi-icon name="map-point"></noi-icon>
           <div>{pointName}</div>
@@ -91,7 +91,7 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
         <div class="popup__section">{t('weather.precipitation-amount')}: {num(precipitationAmountDaily)}mm</div>
         <div class="popup__section">{t('weather.sunshine-duration')}: {num(sunshineDuration)}h</div>
         {this._renderTimePoint(this.dayForecast[0], sunshineDuration)}
-      </Host>
+      </div>
     );
   }
 

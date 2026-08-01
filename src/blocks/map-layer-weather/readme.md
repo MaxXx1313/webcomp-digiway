@@ -3,7 +3,7 @@ SPDX-FileCopyrightText: NOI Techpark <digital@noi.bz.it>
 
 SPDX-License-Identifier: CC0-1.0
 -->
-# noi-map-layer-announcements
+# noi-map-layer-weather
 
 
 
@@ -13,6 +13,13 @@ SPDX-License-Identifier: CC0-1.0
 ## Overview
 
 (INTERNAL) render map layer
+
+## Properties
+
+| Property   | Attribute | Description                | Type   | Default     |
+| ---------- | --------- | -------------------------- | ------ | ----------- |
+| `viewDate` | --        | View date for weather data | `Date` | `undefined` |
+
 
 ## Events
 
@@ -29,14 +36,17 @@ SPDX-License-Identifier: CC0-1.0
 
 ### Depends on
 
-- [noi-map-layer-base-odh](../map-layer-base-odh)
+- [noi-map-layer-weather-popup](../map-layer-weather-popup)
 
 ### Graph
 ```mermaid
 graph TD;
-  noi-map-layer-announcements --> noi-map-layer-base-odh
-  noi-digiway --> noi-map-layer-announcements
-  style noi-map-layer-announcements fill:#f9f,stroke:#333,stroke-width:4px
+  noi-map-layer-weather --> noi-map-layer-weather-popup
+  noi-map-layer-weather-popup --> noi-icon
+  noi-map-layer-weather-popup --> noi-button
+  noi-map-layer-weather-popup --> noi-spinner
+  noi-digiway --> noi-map-layer-weather
+  style noi-map-layer-weather fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
 ----------------------------------------------

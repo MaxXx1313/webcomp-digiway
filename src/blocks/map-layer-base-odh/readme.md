@@ -14,6 +14,14 @@ SPDX-License-Identifier: CC0-1.0
 
 (INTERNAL) render map layer
 
+## Properties
+
+| Property              | Attribute | Description | Type                                                                             | Default     |
+| --------------------- | --------- | ----------- | -------------------------------------------------------------------------------- | ----------- |
+| `config` _(required)_ | --        |             | `LayerConfig`                                                                    | `undefined` |
+| `popupStructure`      | --        |             | `(feature: MapGeoJSONFeature, featureType: string) => string \| PopupDefinition` | `undefined` |
+
+
 ## Events
 
 | Event          | Description                        | Type                   |
@@ -25,13 +33,15 @@ SPDX-License-Identifier: CC0-1.0
 
 ### Used by
 
- - [noi-digiway](../../public-components/digiway)
+ - [noi-map-layer-announcements](../map-layer-announcements)
+ - [noi-map-layer-cycling-roads](../map-layer-cycling-roads)
 
 ### Graph
 ```mermaid
 graph TD;
-  noi-digiway --> noi-map-layer-announcements
-  style noi-map-layer-announcements fill:#f9f,stroke:#333,stroke-width:4px
+  noi-map-layer-announcements --> noi-map-layer-base-odh
+  noi-map-layer-cycling-roads --> noi-map-layer-base-odh
+  style noi-map-layer-base-odh fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
 ----------------------------------------------

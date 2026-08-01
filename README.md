@@ -112,6 +112,15 @@ Default
 Options
 : "osm", "tirol"
 
+
+#### view-date
+
+View date for weather data (weather layer only)
+
+Type
+: string (any js-compatible date format)
+
+
 ### CSS variables
 
 This is regular CSS styles for the component, but specific adjustment is supported.
@@ -120,12 +129,15 @@ This is regular CSS styles for the component, but specific adjustment is support
 | -------------------------- | -------------------------------------------- |
 | `--color-background`       | Background color                             |
 | `--color-background-hover` | Background color on hover                    |
+| `--color-background-shade` | Background darken color                      |
 | `--color-border`           | Border color                                 |
 | `--color-primary`          | Primary color                                |
 | `--color-secondary`        | Secondary color                              |
 | `--color-text`             | Text color                                   |
 | `--map-filter`             | 'filter' property for the map                |
 | `--sidebar-width`          | Sidebar with (for desktop and tablet layout) |
+| `--scrollbar-bg`           | Scrollbar background color                   |
+| `--scrollbar-color`        | Scrollbar thumb color                        |
 
 Shadow Parts:
 

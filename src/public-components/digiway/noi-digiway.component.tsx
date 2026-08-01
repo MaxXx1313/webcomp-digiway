@@ -65,7 +65,7 @@ export class NoiDigiwayComponent implements StencilComponent {
   language = 'en';
 
   /**
-   * View date for weather data
+   * View date for weather data (weather layer only)
    */
   @Prop({mutable: true})
   viewDate: string | undefined;

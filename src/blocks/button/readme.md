@@ -50,12 +50,14 @@ SPDX-License-Identifier: CC0-1.0
 
 ### Used by
 
- - [noi-a22-road-events](../../a22-road-events)
+ - [noi-digiway](../../public-components/digiway)
+ - [noi-map-layer-weather-popup](../map-layer-weather-popup)
 
 ### Graph
 ```mermaid
 graph TD;
-  noi-a22-road-events --> noi-button
+  noi-digiway --> noi-button
+  noi-map-layer-weather-popup --> noi-button
   style noi-button fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

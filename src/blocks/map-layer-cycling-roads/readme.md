@@ -14,6 +14,15 @@ SPDX-License-Identifier: CC0-1.0
 
 (INTERNAL) render map layer
 
+## Properties
+
+| Property              | Attribute    | Description | Type                                                                                                                                        | Default     |
+| --------------------- | ------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `region` _(required)_ | `region`     |             | `"bolzano-int" \| "bolzano-prov" \| "hiking-bolzano" \| "hiking-trento" \| "mountainbikeroutes" \| "mtb_percorsi_v" \| "trento" \| "tyrol"` | `undefined` |
+| `titleIcon`           | `title-icon` |             | `string`                                                                                                                                    | `undefined` |
+| `titleText`           | `title-text` |             | `string`                                                                                                                                    | `undefined` |
+
+
 ## Events
 
 | Event          | Description                        | Type                   |
@@ -27,11 +36,16 @@ SPDX-License-Identifier: CC0-1.0
 
  - [noi-digiway](../../public-components/digiway)
 
+### Depends on
+
+- [noi-map-layer-base-odh](../map-layer-base-odh)
+
 ### Graph
 ```mermaid
 graph TD;
-  noi-digiway --> noi-map-layer-announcements
-  style noi-map-layer-announcements fill:#f9f,stroke:#333,stroke-width:4px
+  noi-map-layer-cycling-roads --> noi-map-layer-base-odh
+  noi-digiway --> noi-map-layer-cycling-roads
+  style noi-map-layer-cycling-roads fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
 ----------------------------------------------

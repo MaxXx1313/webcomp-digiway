@@ -95,16 +95,19 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
 
   private __request?: AbortHandler;
 
-  async _loadData() {
+  _loadData() {
     if (!this.dayIso || !this.stationId) {
       console.warn('Cannot fetch data: no view day or station ID');
       return;
     }
+
+    this.isLoading = true;
     if (this.__request) {
       this.__request.abort();
     }
-    this.__request = this.weatherService.getWeatherForecastDayStation(new Date(this.dayIso), this.stationId, (forecastData)=>{
+    this.__request = this.weatherService.getWeatherForecastDayStation(new Date(this.dayIso), this.stationId, (forecastData) => {
       this.__request = undefined; // avoid cancelling finished request later
+      this.isLoading = false;
 
       this.data = forecastData.values?.[0];
       this.dayIso = forecastData.dateFrom.toISOString();
@@ -160,21 +163,30 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
           </noi-button>
         </div>
 
-        <div class="section section--background">
-          {t('weather.air-temperature-min')}: {num(airTemperatureMin)}℃
-          &nbsp;-&nbsp;
-          {t('weather.air-temperature-max')}: {num(airTemperatureMax)}℃
+        <div class={'day-content' + (this.isLoading ? ' loading' : '')}>
+          {this.isLoading? (
+            <div class="day-content__loader">
+              <noi-spinner></noi-spinner>
+            </div>
+          ) : ''}
+          <div class="day-content__main">
+            <div class="section section--background">
+              {t('weather.air-temperature-min')}: {num(airTemperatureMin)}℃
+              &nbsp;-&nbsp;
+              {t('weather.air-temperature-max')}: {num(airTemperatureMax)}℃
+            </div>
+            <div class="section">
+              {t('weather.precipitation-probability')}: {num(precipitationProbabilityDaily)}%
+            </div>
+            <div class="section">
+              {t('weather.precipitation-amount')}: {num(precipitationAmountDaily)}mm
+            </div>
+            <div class="section">
+              {t('weather.sunshine-duration')}: {num(sunshineDuration)}h
+            </div>
+            {this._renderTimePoint(this.dayForecast[this.dayForecastIndex], sunshineDuration)}
+          </div>
         </div>
-        <div class="section">
-          {t('weather.precipitation-probability')}: {num(precipitationProbabilityDaily)}%
-        </div>
-        <div class="section">
-          {t('weather.precipitation-amount')}: {num(precipitationAmountDaily)}mm
-        </div>
-        <div class="section">
-          {t('weather.sunshine-duration')}: {num(sunshineDuration)}h
-        </div>
-        {this._renderTimePoint(this.dayForecast[this.dayForecastIndex], sunshineDuration)}
       </div>
     );
   }

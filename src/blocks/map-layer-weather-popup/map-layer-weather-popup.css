@@ -71,6 +71,7 @@
   --color-hover: var(--color-primary);
   --color-bg-hover: var(--color-background);
 }
+
 .noi-weather-popup .panel__btn::part(button-native) {
   padding: 2px;
 }
@@ -114,6 +115,30 @@
   border-bottom: none;
 }
 
+/* Loading */
+.day-content {
+  position: relative;
+}
+
+.day-content.loading .day-content__main {
+  opacity: 0.3;
+}
+
+.day-content__loader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.day-content__loader noi-spinner {
+  transform: scale(4);
+}
+
 /* Various */
 .noi-weather-popup .panel-date {
   text-transform: capitalize;
@@ -123,3 +148,4 @@
 .noi-weather-popup .value {
   font-size: 1.2em;
 }
+

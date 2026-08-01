@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { Component, h, Host, Method, State } from "@stencil/core";
+import { Component, h, Method, State } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
 import { MapGeoJSONFeature } from "maplibre-gl";
 import { WeatherForecast } from "../../data/noi/WeatherForecase";
@@ -36,6 +36,9 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
   private dayIso?: string;
   private dayForecast?: DayPointForecast[];
 
+  @State()
+  private dayForecastIndex: number = 0;
+
   /**
    */
   async connectedCallback() {
@@ -51,6 +54,7 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
     this.data = JSON.parse(feature?.properties?.data) as WeatherForecast;
     this.dayIso = feature?.properties?.day as string;
     this.dayForecast = calculateDayPoints(this.data);
+    this.dayForecastIndex = 0;
   }
 
 
@@ -84,15 +88,30 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
           &nbsp;-&nbsp;
           {t('weather.air-temperature-max')}: {num(airTemperatureMax)}℃
         </div>
-        <div
-          class="popup__section popup__section--hero">{formatDateCustom(this.dayIso!, this.languageService.currentLanguage)}</div>
-        <div class="popup__section">{t('weather.precipitation-probability')}: {num(precipitationProbabilityDaily)}%
+        <div class="popup__section popup__section--hero">
+          {formatDateCustom(this.dayIso!, this.languageService.currentLanguage)}
         </div>
-        <div class="popup__section">{t('weather.precipitation-amount')}: {num(precipitationAmountDaily)}mm</div>
-        <div class="popup__section">{t('weather.sunshine-duration')}: {num(sunshineDuration)}h</div>
-        {this._renderTimePoint(this.dayForecast[0], sunshineDuration)}
+        <div class="popup__section">
+          {t('weather.precipitation-probability')}: {num(precipitationProbabilityDaily)}%
+        </div>
+        <div class="popup__section">
+          {t('weather.precipitation-amount')}: {num(precipitationAmountDaily)}mm
+        </div>
+        <div class="popup__section">
+          {t('weather.sunshine-duration')}: {num(sunshineDuration)}h
+        </div>
+        {this._renderTimePoint(this.dayForecast[this.dayForecastIndex], sunshineDuration)}
       </div>
     );
+  }
+
+  canChangeViewTime(increment: number) {
+    const proposal = this.dayForecastIndex + increment;
+    return proposal >= 0 && proposal < (this.dayForecast?.length || 0);
+  }
+
+  changeViewTime(increment: number) {
+    this.dayForecastIndex += increment;
   }
 
   _renderTimePoint(dp: DayPointForecast, sunshineDuration: number) {
@@ -105,68 +124,53 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
 
     return (<div>
 
-      <div class="popup__table-cell">
-
-        <div class="popup__values-group popup__values-group--no-margin">
-          <div>{formatTime(dp.time, this.languageService.currentLanguage)}</div>
-          <div class="noi-weather-icon"
-               title={dp["qualitative-forecast"] as any}>{getIconContent(dp["qualitative-forecast"] as any, skyType)}</div>
-        </div>
-
-        <div class="popup__values-group">
-          <div>{num(dp["air-temperature"])}℃</div>
-        </div>
-
-        <div class="popup__values-group">
-          <div>{dp["wind-direction"]}° ({getWindDirectionLabel(dp["wind-direction"], t('weather.wind-directions'))})
+      <div class="popup__section popup__section--background">
+        <div class="popup__panel">
+          <noi-button class="legend__btn"
+                      title="Previous entry"
+                      disabled={!this.canChangeViewTime(-1)}
+                      onClick={() => this.changeViewTime(-1)}>
+            <noi-icon name="chevron-left"></noi-icon>
+          </noi-button>
+          <div class="popup__panel-body">
+            <span>{formatTime(dp.time, this.languageService.currentLanguage)}</span>
           </div>
-          <div>{num(dp["wind-speed"])}m/s</div>
+          <noi-button class="legend__btn"
+                      title="Next entry"
+                      disabled={!this.canChangeViewTime(1)}
+                      onClick={() => this.changeViewTime(1)}>
+            <noi-icon name="chevron-right"></noi-icon>
+          </noi-button>
         </div>
-        <div class="popup__values-group">
-          <div>{dp["precipitation-probability"]}%</div>
-          <div>{num(dp["precipitation-sum"])}mm</div>
+      </div>
+      <div class="popup__section">
+        <div class="popup__table">
+
+          <div class="popup__values-group">
+            <div class="noi-weather-icon"
+                 title={dp["qualitative-forecast"] as any}>{getIconContent(dp["qualitative-forecast"] as any, skyType)}</div>
+            <div>{formatTime(dp.time, this.languageService.currentLanguage)}</div>
+          </div>
+
+          <div class="popup__values-group">
+            <div>{t('weather.hours.air-temperature')}</div>
+            <div>{num(dp["air-temperature"])}℃</div>
+          </div>
+
+          <div class="popup__values-group">
+            <div>{t('weather.hours.wind')}</div>
+            <div>{dp["wind-direction"]}° ({getWindDirectionLabel(dp["wind-direction"], t('weather.wind-directions'))})
+            </div>
+            <div>{num(dp["wind-speed"])}m/s</div>
+          </div>
+          <div class="popup__values-group">
+            <div>{t('weather.hours.precipitation')}</div>
+            <div>{dp["precipitation-probability"]}%</div>
+            <div>{num(dp["precipitation-sum"])}mm</div>
+          </div>
         </div>
       </div>
     </div>);
-
-    // const dayPoints = calculateDayPoints(data);
-    // let dpHtml = '';
-    //
-    // dpHtml += `
-    //     <div class="popup__table-labels">
-    //     <div class="popup__table-labels-top-1">${t('weather.hours.air-temperature')}</div>
-    //     <div class="popup__table-labels-top-2">${t('weather.hours.wind')}</div>
-    //     <div class="popup__table-labels-top-3">${t('weather.hours.precipitation')}</div>
-    //   </div>`;
-    //
-    // for (const dp of dayPoints) {
-    //
-    //   const skyType = getClearSkyType(new Date(dp.time), sunshineDuration);
-    //
-    //   dpHtml += `<div class="popup__table-cell">
-    //
-    //     <div class="popup__values-group popup__values-group--no-margin">
-    //       <div>${formatTime(dp.time, languageService.currentLanguage)}</div>
-    //       <div class="noi-weather-icon" title="${dp["qualitative-forecast"]}">${getIconContent(dp["qualitative-forecast"] as any, skyType)}</div>
-    //     </div>
-    //
-    //     <div class="popup__values-group">
-    //       <div>${num(dp["air-temperature"])}℃</div>
-    //     </div>
-    //
-    //     <div class="popup__values-group">
-    //       <div>${dp["wind-direction"]}° (${getWindDirectionLabel(dp["wind-direction"], t('weather.wind-directions'))})</div>
-    //       <div>${num(dp["wind-speed"])}m/s</div>
-    //     </div>
-    //     <div class="popup__values-group">
-    //       <div>${dp["precipitation-probability"]}%</div>
-    //       <div>${num(dp["precipitation-sum"])}mm</div>
-    //     </div>
-    //   </div>`;
-    // }
-    // html += `<div class="popup__table">${dpHtml}</div>`;
-    //
-    // return `<div class="noi-weather-popup" part="popup">${html}</div>`;
   }
 }
 

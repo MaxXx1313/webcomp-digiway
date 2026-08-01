@@ -62,8 +62,13 @@
 }
 
 .noi-weather-popup .popup__table {
+
   display: grid;
+  /* Two columns of exactly equal width */
   grid-template-columns: repeat(2, 1fr);
+  /* Two rows of exactly equal height */
+  grid-template-rows: repeat(2, 1fr);
+
   /*overflow-x: auto;*/
   /*white-space: nowrap;*/
   /*scroll-behavior: smooth;*/
@@ -71,9 +76,28 @@
   /*scrollbar-color: var(--scrollbar-color, initial) var(--scrollbar-bg, initial);*/
 }
 
+.noi-weather-popup .popup__value {
+  font-size: 1.2em;
+}
+
 .noi-weather-popup .popup__values-group {
+  padding: 0.25em 0.5em;
+
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+
+  /* 1. Apply a default right and bottom border to every cell */
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+/* 2. Remove right border for cells in the second column (even items) */
+.noi-weather-popup .popup__values-group:nth-child(2n) {
+  border-right: none;
 }
 
+/* 3. Remove bottom border for cells in the second row (last two items) */
+.noi-weather-popup .popup__values-group:nth-child(n+3) {
+  border-bottom: none;
+}

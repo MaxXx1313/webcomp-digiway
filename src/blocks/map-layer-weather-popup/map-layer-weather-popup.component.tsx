@@ -145,28 +145,26 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
       </div>
       <div class="popup__section">
         <div class="popup__table">
-
-          <div class="popup__values-group">
-            <div class="noi-weather-icon"
-                 title={dp["qualitative-forecast"] as any}>{getIconContent(dp["qualitative-forecast"] as any, skyType)}</div>
-            <div>{formatTime(dp.time, this.languageService.currentLanguage)}</div>
-          </div>
-
-          <div class="popup__values-group">
-            <div>{t('weather.hours.air-temperature')}</div>
-            <div>{num(dp["air-temperature"])}℃</div>
-          </div>
-
-          <div class="popup__values-group">
-            <div>{t('weather.hours.wind')}</div>
-            <div>{dp["wind-direction"]}° ({getWindDirectionLabel(dp["wind-direction"], t('weather.wind-directions'))})
-            </div>
-            <div>{num(dp["wind-speed"])}m/s</div>
-          </div>
+              <div class="popup__values-group">
+                <div class="noi-weather-icon"
+                     title={dp["qualitative-forecast"] as any}>{getIconContent(dp["qualitative-forecast"] as any, skyType)}</div>
+                <div>{formatTime(dp.time, this.languageService.currentLanguage)}</div>
+              </div>
+              <div class="popup__values-group">
+                <div>{t('weather.hours.air-temperature')}</div>
+                <div class="popup__value">{num(dp["air-temperature"])}℃</div>
+              </div>
+              <div class="popup__values-group">
+                <div>{t('weather.hours.wind')}</div>
+                <div class="popup__value">{num(dp["wind-speed"])}m/s</div>
+                <div>
+                  {dp["wind-direction"]}° ({getWindDirectionLabel(dp["wind-direction"], t('weather.wind-directions'))})
+                </div>
+              </div>
           <div class="popup__values-group">
             <div>{t('weather.hours.precipitation')}</div>
+            <div class="popup__value">{num(dp["precipitation-sum"])}mm</div>
             <div>{dp["precipitation-probability"]}%</div>
-            <div>{num(dp["precipitation-sum"])}mm</div>
           </div>
         </div>
       </div>

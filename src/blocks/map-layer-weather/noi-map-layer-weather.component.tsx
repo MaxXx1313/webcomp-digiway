@@ -12,7 +12,7 @@ import {
   listenLayerReady,
   loadIconFont
 } from "../../utils/maplibre";
-import { WeatherForecastService } from "../../data/noi/weather-forecast-service";
+import { AbortHandler, MyForecastResponse, WeatherForecastService } from "../../data/noi/weather-forecast-service";
 import { GeoJSON, Point } from "geojson";
 import { WeatherIconFont, WeatherIconName } from "./icon-font";
 import { _getDailyMeasurement, getClearSkyType, getIconName } from "./weather-forecast.util";
@@ -226,21 +226,31 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
   }
 
 
+  private __request?: AbortHandler;
+
   async initLayerData() {
 
-    const viewDate = this.viewDate || new Date();
-    console.debug(`[noi-map-layer-weather] initLayerData`, viewDate);
+    const viewDateTime = this.viewDate || new Date();
+    console.debug(`[noi-map-layer-weather] initLayerData`, viewDateTime);
 
     this.layerLoading.emit(true);
     // fetch weather forecast
-    const forecastData = await this.weatherService.getWeatherForecastForDay(viewDate);
 
+    this.__request?.abort();
+
+    this.__request = this.weatherService.getWeatherForecastForDay(viewDateTime, data => {
+      this.__request = undefined; // avoid cancelling finished request later
+      this._initLayerData(data, viewDateTime);
+    });
+  }
+
+  async _initLayerData(forecastData: MyForecastResponse, viewDateTime: Date) {
     // Convert your 2000 points into a GeoJSON FeatureCollection
     const dataPoints: any = forecastData.values.map(point => {
       const pointDescription = _getDailyMeasurement(point.sdatatypes["qualitative-forecast"]?.tmeasurements || [])?.mvalue;
       const sunshineDuration = _getDailyMeasurement(point.sdatatypes["forecast-sunshine-duration"]?.tmeasurements || [])?.mvalue;
 
-      const skyType = getClearSkyType(viewDate, sunshineDuration);
+      const skyType = getClearSkyType(viewDateTime, sunshineDuration);
       return {
         id: point.scode,
         type: 'Feature',

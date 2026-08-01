@@ -102,9 +102,7 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
     }
 
     this.isLoading = true;
-    if (this.__request) {
-      this.__request.abort();
-    }
+      this.__request?.abort();
     this.__request = this.weatherService.getWeatherForecastDayStation(new Date(this.dayIso), this.stationId, (forecastData) => {
       this.__request = undefined; // avoid cancelling finished request later
       this.isLoading = false;

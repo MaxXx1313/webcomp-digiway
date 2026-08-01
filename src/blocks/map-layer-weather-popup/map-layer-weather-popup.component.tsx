@@ -224,23 +224,23 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
       <div class="section">
         <div class="table">
           <div class="table__cell">
-            <div class="noi-weather-icon"
+            <div class="noi-weather-icon value-icon"
                  title={dp["qualitative-forecast"] as any}>{getIconContent(dp["qualitative-forecast"] as any, skyType)}</div>
-            <div>{formatTime(dp.time, this.languageService.currentLanguage)}</div>
+            <div class="value-description">{dp["qualitative-forecast"]}</div>
           </div>
           <div class="table__cell">
-            <div>{t('weather.hours.air-temperature')}</div>
+            <div class="value-description">{t('weather.hours.air-temperature')}</div>
             <div class="value">{num(dp["air-temperature"])}℃</div>
           </div>
           <div class="table__cell">
-            <div>{t('weather.hours.wind')}</div>
+            <div class="value-description">{t('weather.hours.wind')}</div>
             <div class="value">{num(dp["wind-speed"])}m/s</div>
             <div>
               {dp["wind-direction"]}° ({getWindDirectionLabel(dp["wind-direction"], t('weather.wind-directions'))})
             </div>
           </div>
           <div class="table__cell">
-            <div>{t('weather.hours.precipitation')}</div>
+            <div class="value-description">{t('weather.hours.precipitation')}</div>
             <div class="value">{num(dp["precipitation-sum"])}mm</div>
             <div>{dp["precipitation-probability"]}%</div>
           </div>

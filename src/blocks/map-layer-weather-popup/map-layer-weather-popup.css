@@ -23,7 +23,7 @@
 }
 
 /* HEADER */
-.noi-weather-popup .popup__header {
+.noi-weather-popup .header {
   padding: 0 32px 0 16px;
   display: flex;
   align-items: center;
@@ -32,36 +32,51 @@
   font-weight: bold;
 }
 
-.noi-weather-popup .popup__header-icon {
+.noi-weather-popup .header-icon {
   height: 1.5em;
 }
 
-.noi-weather-popup .popup__section {
+/* SECTION */
+.noi-weather-popup .section {
   padding: 4px 16px;
 }
 
-.noi-weather-popup .popup__section.popup__section--hero {
+.noi-weather-popup .section.section--hero {
   font-weight: bold;
   text-transform: capitalize;
 }
 
-.noi-weather-popup .popup__section.popup__section--background {
+.noi-weather-popup .section.section--background {
   padding: 8px 16px;
   background: var(--color-background-shade, #f0f0f0);
 }
 
-.noi-weather-popup .popup__panel {
+/* PANEL */
+.noi-weather-popup .panel {
   display: flex;
   align-items: center;
   gap: 0.5ch;
+
+  padding: 8px 16px;
+  background: var(--color-background-shade, #f0f0f0);
 }
 
-.noi-weather-popup .popup__panel-body {
+.noi-weather-popup .panel__body {
   flex: 1;
   text-align: center;
 }
 
-.noi-weather-popup .popup__table {
+.noi-weather-popup .panel__btn {
+  --color: var(--color-text);
+  --color-hover: var(--color-primary);
+  --color-bg-hover: var(--color-background);
+}
+.noi-weather-popup .panel__btn::part(button-native) {
+  padding: 2px;
+}
+
+/* TABLE */
+.noi-weather-popup .table {
 
   display: grid;
   /* Two columns of exactly equal width */
@@ -76,11 +91,7 @@
   /*scrollbar-color: var(--scrollbar-color, initial) var(--scrollbar-bg, initial);*/
 }
 
-.noi-weather-popup .popup__value {
-  font-size: 1.2em;
-}
-
-.noi-weather-popup .popup__values-group {
+.noi-weather-popup .table__cell {
   padding: 0.25em 0.5em;
 
   display: flex;
@@ -92,12 +103,23 @@
   border-right: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
 }
+
 /* 2. Remove right border for cells in the second column (even items) */
-.noi-weather-popup .popup__values-group:nth-child(2n) {
+.noi-weather-popup .table__cell:nth-child(2n) {
   border-right: none;
 }
 
 /* 3. Remove bottom border for cells in the second row (last two items) */
-.noi-weather-popup .popup__values-group:nth-child(n+3) {
+.noi-weather-popup .table__cell:nth-child(n+3) {
   border-bottom: none;
+}
+
+/* Various */
+.noi-weather-popup .panel-date {
+  text-transform: capitalize;
+  font-weight: bold;
+}
+
+.noi-weather-popup .value {
+  font-size: 1.2em;
 }

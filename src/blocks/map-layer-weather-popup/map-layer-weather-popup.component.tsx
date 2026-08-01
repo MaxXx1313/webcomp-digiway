@@ -16,7 +16,7 @@ import {
   getWindDirectionLabel
 } from "../map-layer-weather/weather-forecast.util";
 import { formatNumber, formatTime } from "../../utils/intl";
-import { AbortableRequest, WeatherForecastService } from "../../data/noi/weather-forecast-service";
+import { AbortHandler, WeatherForecastService } from "../../data/noi/weather-forecast-service";
 
 
 /**
@@ -43,6 +43,9 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
 
   @State()
   private dayForecastIndex: number = 0;
+
+  @State()
+  private isLoading = false;
 
   private stationId?: string;
   private weatherService = new WeatherForecastService();
@@ -90,8 +93,7 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
     this._loadData();
   }
 
-  private __requestCounter = 0;
-  private __request?: AbortableRequest<any>;
+  private __request?: AbortHandler;
 
   async _loadData() {
     if (!this.dayIso || !this.stationId) {
@@ -101,22 +103,17 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
     if (this.__request) {
       this.__request.abort();
     }
-    const __requestCounter = ++this.__requestCounter;
-    this.__request = this.weatherService.getWeatherForecastDayStation(new Date(this.dayIso), this.stationId);
-    const forecastData = await this.__request.payload$;
+    this.__request = this.weatherService.getWeatherForecastDayStation(new Date(this.dayIso), this.stationId, (forecastData)=>{
+      this.__request = undefined; // avoid cancelling finished request later
 
-    if (__requestCounter !== this.__requestCounter) {
-      // skip cancelled request
-      return;
-    }
-
-    this.data = forecastData.values?.[0];
-    this.dayIso = forecastData.dateFrom.toISOString();
-    this.dayForecast = this.data ? calculateDayPoints(this.data) : [];
-    if (!this.dayForecast[this.dayForecastIndex]) {
-      // reset index if it's out of range
-      this.dayForecastIndex = 0;
-    }
+      this.data = forecastData.values?.[0];
+      this.dayIso = forecastData.dateFrom.toISOString();
+      this.dayForecast = this.data ? calculateDayPoints(this.data) : [];
+      if (!this.dayForecast[this.dayForecastIndex]) {
+        // reset index if it's out of range
+        this.dayForecastIndex = 0;
+      }
+    });
   }
 
   render() {

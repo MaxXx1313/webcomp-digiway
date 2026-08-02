@@ -41,6 +41,23 @@ Type: `Promise<Map$1>`
 
 
 
+### `setUrlTransform(urlPart: string, transformFn: RequestTransformFunction | null) => Promise<void>`
+
+
+
+#### Parameters
+
+| Name          | Type                                                                                            | Description |
+| ------------- | ----------------------------------------------------------------------------------------------- | ----------- |
+| `urlPart`     | `string`                                                                                        |             |
+| `transformFn` | `(url: string, resourceType?: ResourceType) => RequestParameters \| Promise<RequestParameters>` |             |
+
+#### Returns
+
+Type: `Promise<void>`
+
+
+
 
 ## Dependencies
 

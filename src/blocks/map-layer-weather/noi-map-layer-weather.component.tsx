@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { Component, Element, Event, EventEmitter } from "@stencil/core";
+import { Component, Element, Event, EventEmitter, Prop, Watch } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
-import { LngLatLike, Map, MapGeoJSONFeature, Popup, Subscription } from "maplibre-gl";
+import { GeoJSONSource, LngLatLike, Map, MapGeoJSONFeature, Popup, Subscription } from "maplibre-gl";
 import {
   enableHoverEffect,
   FontIconPaintParams,
@@ -12,43 +12,10 @@ import {
   listenLayerReady,
   loadIconFont
 } from "../../utils/maplibre";
-import { WeatherForecastService } from "../../data/noi/weather-forecast-service";
+import { AbortHandler, MyForecastResponse, WeatherForecastService } from "../../data/noi/weather-forecast-service";
 import { GeoJSON, Point } from "geojson";
-import { WeatherForecast, WeatherForecastMeasurementType } from "../../data/noi/WeatherForecase";
-import { Measurement } from "../../data/noi/types-v1-common";
-import { base64String } from "./icon-font";
-import { LanguageDataService } from "../../data/language/language-data-service";
-import { formatNumber, formatTime } from "../../utils/intl";
-
-
-const ICON_FONT_NAME = 'noi-digiway-weather-icons';
-const ICON_FONT_URL = `url(${base64String}) format('woff')`;
-
-// TODO: icons is not finished for this component
-const ICON_FONT_ICONS = {
-  '': '', // no icon
-  'icon-cloudy': '\ue80c',
-  'icon-cloudy-day': '\ue80d',
-  'icon-cloudy-night': '\ue80e',
-  'icon-rain-1': '\ue80f',
-  'icon-rain-2': '\ue810',
-  'icon-rain-3': '\ue811',
-  'icon-rain-bolt-1': '\ue812',
-  'icon-rain-bolt-2': '\ue813',
-  'icon-rain-day': '\ue814',
-  'icon-rain-night': '\ue815',
-  'icon-rain-snow': '\ue816',
-  'icon-snow-1': '\ue817',
-  'icon-snow-2': '\ue818',
-  'icon-snow-3': '\ue819',
-  'icon-snow-day': '\ue81a',
-  'icon-snowflake': '\ue81b',
-  'icon-snow-night': '\ue81c',
-  'icon-sunny': '\ue81d',
-  'icon-moon': '\uf186',
-} as const;
-
-// type IconName = keyof typeof ICON_FONT_NAME;
+import { WeatherIconFont, WeatherIconName } from "./icon-font";
+import { _getDailyMeasurement, getClearSkyType, getIconName } from "./weather-forecast.util";
 
 // Default styles
 const defaultStyles = {
@@ -74,7 +41,7 @@ const defaultStyles = {
 
 // 'iconFontStyles' is not a part of maplibre
 const iconFontStyles: FontIconPaintParams = {
-  "icon-font": ICON_FONT_NAME,
+  "icon-font": WeatherIconFont.fontName,
   'icon-color': '#FFFFFF',
   "icon-size": 18,
   "icon-text": '',
@@ -100,14 +67,18 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
    */
   @Event() layerLoading!: EventEmitter<boolean>;
 
+  /**
+   * View date for weather data
+   */
+  @Prop({mutable: true})
+  viewDate: Date | undefined;
+
   private _subscriptions: Subscription[] = [];
 
   private weatherService = new WeatherForecastService();
 
   private _popup?: Popup;
   private _popupFeatureId?: string | number;
-
-  private languageService = LanguageDataService.getInstance();
 
   private config = {
     center: [11.35, 46.5] as LngLatLike,
@@ -128,12 +99,14 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
     try {
       // 2. Safely wait for the map instance to be initialized by the parent
       this.map = await mapParent.getMapAsync();
-
-      // 3. Add this layer to the map library instance
-      this.initLayer();
     } catch (error) {
       console.error('Failed to get map instance:', error);
+      throw error;
     }
+
+    // 3. Add this layer to the map library instance
+    await this.initLayer();
+    await this.initLayerData();
   }
 
   disconnectedCallback() {
@@ -144,50 +117,42 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
   }
 
 
+  @Watch('viewDate')
+  viewDateChanged() {
+    setTimeout(() => { // timeout is to avoid "The state/prop "layersLoading" changed during rendering"
+      this.initLayerData()
+        .then(() => {
+          const idOpened = this._popupFeatureId;
+          if (!idOpened) {
+            return;
+          }
+          this._popup?.remove();
+
+          // reopen popup of the same point
+          const features = this.map.querySourceFeatures('source-weather-data', {
+            filter: ['==', ['id'], idOpened]
+          });
+
+          const targetFeature = features[0] as MapGeoJSONFeature;
+          if (targetFeature) {
+            this.createFeaturePopup(targetFeature);
+          }
+        });
+    });
+  }
+
   async initLayer() {
     console.log(`[noi-map-layer-weather] Adding layer to map`);
 
-    const now = new Date();
-
     //
-    const _loadEvent = listenLayerReady(this.map, 'source-weather-data', () => {
-      this.layerLoading.emit(false);
-    });
-    this._subscriptions.push(_loadEvent);
-
-    //
-    this.layerLoading.emit(true);
-
-    // fetch weather forecast
-    const forecastData = await this.weatherService.getWeatherForecastForDay(new Date());
-
-    // Convert your 2000 points into a GeoJSON FeatureCollection
     const geojsonPoints: GeoJSON = {
       type: 'FeatureCollection',
-      features: forecastData.values.map(point => {
-        const pointDescription = __getDailyMeasurement(point.sdatatypes["qualitative-forecast"]?.tmeasurements || [])?.mvalue;
-        const sunshineDuration = __getDailyMeasurement(point.sdatatypes["forecast-sunshine-duration"]?.tmeasurements || [])?.mvalue;
-
-        const skyType = getClearSkyType(now, sunshineDuration);
-        return {
-          id: point.scode,
-          type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: [point.scoordinate.x, point.scoordinate.y] // Ensure longitude is FIRST
-          },
-          properties: {
-            data: point,
-            day: forecastData.dateFrom.toISOString(),
-            icon_name: getIconName(pointDescription, skyType),
-          },
-        };
-      }),
+      features: [], // filled later
     };
 
     this.map.addSource('source-weather-data', {
       type: 'geojson',
-      data: geojsonPoints
+      data: geojsonPoints,
     });
 
 
@@ -199,16 +164,16 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
       paint: defaultStyles.unclusteredpoints as any,
     });
 
-    loadIconFont(ICON_FONT_NAME, ICON_FONT_URL).then(() => {
+    loadIconFont(WeatherIconFont.fontName, WeatherIconFont.url).then(() => {
 
-      for (const iconName in ICON_FONT_ICONS) {
+      for (const iconName in WeatherIconFont.icons) {
         if (!iconName) {
           continue;
         }
         const imageData = getFontIconData({
           ...iconFontStyles,
           // "icon-text": 'A',
-          "icon-text": ICON_FONT_ICONS[iconName as keyof typeof ICON_FONT_ICONS],
+          "icon-text": WeatherIconFont.icons[iconName as WeatherIconName],
         });
 
         if (imageData) {
@@ -257,6 +222,63 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
     this.resetPosition();
   }
 
+
+  private __request?: AbortHandler;
+
+  async initLayerData() {
+
+    const viewDateTime = this.viewDate || new Date();
+    console.debug(`[noi-map-layer-weather] initLayerData`, viewDateTime);
+
+    this.layerLoading.emit(true);
+    // fetch weather forecast
+
+    this.__request?.abort();
+
+    this.__request = this.weatherService.getWeatherForecastForDay(viewDateTime, data => {
+      this.__request = undefined; // avoid cancelling finished request later
+      this._initLayerData(data, viewDateTime);
+    });
+  }
+
+  async _initLayerData(forecastData: MyForecastResponse, viewDateTime: Date) {
+    // Convert your 2000 points into a GeoJSON FeatureCollection
+    const dataPoints: any = forecastData.values.map(point => {
+      const pointDescription = _getDailyMeasurement(point.sdatatypes["qualitative-forecast"]?.tmeasurements || [])?.mvalue;
+      const sunshineDuration = _getDailyMeasurement(point.sdatatypes["forecast-sunshine-duration"]?.tmeasurements || [])?.mvalue;
+
+      const skyType = getClearSkyType(viewDateTime, sunshineDuration);
+      return {
+        id: point.scode,
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [point.scoordinate.x, point.scoordinate.y] // Ensure longitude is FIRST
+        },
+        properties: {
+          data: point,
+          day: forecastData.dateFrom.toISOString(),
+          icon_name: getIconName(pointDescription, skyType),
+        },
+      };
+    });
+
+    //
+    const geojsonPoints: GeoJSON = {
+      type: 'FeatureCollection',
+      features: dataPoints,
+    };
+
+    const source = this.map.getSource('source-weather-data') as GeoJSONSource;
+    source.setData(geojsonPoints);
+
+    return new Promise<void>(resolve => {
+      listenLayerReady(this.map, 'source-weather-data', () => resolve());
+    }).then(() => {
+      this.layerLoading.emit(false);
+    });
+  }
+
   /**
    */
   destroyLayer() {
@@ -273,7 +295,7 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
       this.map.removeLayer('layer-weather-data');
       this.map.removeLayer('layer-weather-icon');
 
-      for (const iconName in ICON_FONT_ICONS) {
+      for (const iconName in WeatherIconFont.icons) {
         if (!iconName) {
           continue;
         }
@@ -294,16 +316,31 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
   }
 
   // createFeaturePopup(feature: MapGeoJSONFeature, lngLat: MapMouseEvent['lngLat']) {
-  createFeaturePopup(feature: MapGeoJSONFeature) {
+  async createFeaturePopup(feature: MapGeoJSONFeature) {
     const featureId = feature.id;
     if (this._popupFeatureId === featureId) {
       return; // same popup is already opened by another event
     }
+
+    // create popup element
+    const popupContent = document.createElement('noi-map-layer-weather-popup');
+
+    // CRUCIAL: add to dom, so Stencil can initialize it
+    this.el.appendChild(popupContent);
+
+    // Wait for component hydration & data load
+    // await popupContent.componentOnReady(); // < this breaks bundle, all the component already registered
+    await popupContent.setFeature(feature);
+
+    // Wait for the browser layout engine to paint the content
+    await new Promise(resolve => requestAnimationFrame(resolve));
+
+    // Append 'popupContent' to the DOM (Crucial: Stencil needs connection to initialize)
     this._popupFeatureId = featureId;
     this._popup = new Popup()
       // .setLngLat(lngLat) // < on mouse click point
       .setLngLat((feature.geometry as Point).coordinates as LngLatLike) // < on feature center
-      .setHTML(weatherPopupStructure(feature, this.languageService))
+      .setDOMContent(popupContent)
       .setMaxWidth('380px')
       .addTo(this.map);
     this._popup.on('close', () => {
@@ -314,308 +351,4 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
 }
 
 
-/**
- *
- */
-function weatherPopupStructure(feature: MapGeoJSONFeature, languageService: LanguageDataService) {
-  const data = JSON.parse(feature.properties?.data) as WeatherForecast;
-  let html = '';
 
-  const iconName = feature.properties['icon_name'] as keyof typeof ICON_FONT_ICONS;
-  const pointDescription = __getDailyMeasurement(data.sdatatypes["qualitative-forecast"]?.tmeasurements || [])?.mvalue;
-  const pointName = data.smetadata.nameEn;
-
-  // helpers, to make template more clear
-  const t = languageService.translate.bind(languageService);
-  const num = (_num: | number | undefined) => formatNumber(_num, languageService.currentLanguage);
-
-  html += `<div class="popup__header">
-    <div class="noi-weather-icon" title="${pointDescription}">${ICON_FONT_ICONS[iconName]}</div>
-    <div>${pointName}</div>
-  </div>`;
-
-
-  const airTemperatureMin = __getDailyMeasurement(data.sdatatypes["forecast-air-temperature-min"]?.tmeasurements || [])?.mvalue;
-  const airTemperatureMax = __getDailyMeasurement(data.sdatatypes["forecast-air-temperature-max"]?.tmeasurements || [])?.mvalue;
-  html += `<div class="popup__section popup__section--background">
-        ${t('weather.air-temperature-min')}: ${num(airTemperatureMin)}℃
-        -
-        ${t('weather.air-temperature-max')}: ${num(airTemperatureMax)}℃
-  </div>`;
-
-  html += `<div class="popup__section popup__section--hero">${formatDateCustom(feature.properties?.day, languageService.currentLanguage)}</div>`;
-
-  const precipitationProbabilityDaily = __getDailyMeasurement(data.sdatatypes["forecast-precipitation-probability"]?.tmeasurements || [])?.mvalue;
-  html += `<div class="popup__section">${t('weather.precipitation-probability')}: ${num(precipitationProbabilityDaily)}%</div>`;
-
-  const precipitationAmountDaily = __getDailyMeasurement(data.sdatatypes["forecast-precipitation-sum"]?.tmeasurements || [])?.mvalue;
-  html += `<div class="popup__section">${t('weather.precipitation-amount')}: ${num(precipitationAmountDaily)}mm</div>`;
-
-  // html += `<div class="popup__section">Wind speed: ${props["wind-speed-current"]}m/s</div>`;
-  // html += `<div class="popup__section">Wind direction: ${props["wind-direction-current"]}°</div>`;
-
-  const sunshineDuration = __getDailyMeasurement(data.sdatatypes["forecast-sunshine-duration"]?.tmeasurements || [])?.mvalue;
-  html += `<div class="popup__section">${t('weather.sunshine-duration')}: ${num(sunshineDuration)}h</div>`;
-
-  const dayPoints = _getPointProperties(data);
-  let dpHtml = '';
-
-  dpHtml += `
-      <div class="popup__table-labels">
-      <div class="popup__table-labels-top-1">${t('weather.hours.air-temperature')}</div>
-      <div class="popup__table-labels-top-2">${t('weather.hours.wind')}</div>
-      <div class="popup__table-labels-top-3">${t('weather.hours.precipitation')}</div>
-    </div>`;
-
-  for (const dp of dayPoints) {
-
-    const skyType = getClearSkyType(new Date(dp.time), sunshineDuration);
-
-    dpHtml += `<div class="popup__table-cell">
-
-      <div class="popup__values-group popup__values-group--no-margin">
-        <div>${formatTime(dp.time, languageService.currentLanguage)}</div>
-        <div class="noi-weather-icon" title="${dp["qualitative-forecast"]}">${getIconText(dp["qualitative-forecast"] as any, skyType)}</div>
-      </div>
-
-      <div class="popup__values-group">
-        <div>${num(dp["air-temperature"])}℃</div>
-      </div>
-
-      <div class="popup__values-group">
-        <div>${dp["wind-direction"]}° (${getWindDirectionLabel(dp["wind-direction"], t('weather.wind-directions'))})</div>
-        <div>${num(dp["wind-speed"])}m/s</div>
-      </div>
-      <div class="popup__values-group">
-        <div>${dp["precipitation-probability"]}%</div>
-        <div>${num(dp["precipitation-sum"])}mm</div>
-      </div>
-    </div>`;
-  }
-  html += `<div class="popup__table">${dpHtml}</div>`;
-
-  return `<div class="noi-weather-popup" part="popup">${html}</div>`;
-}
-
-/**
- */
-function formatDateCustom(dateStr: string, locale = 'en-US') {
-  if (!dateStr) {
-    return '';
-  }
-  const date = new Date(dateStr);
-
-  // 1. Extract the day number string
-  const day = date.getDate();
-
-  // 2. Extract the lowercase long weekday name
-  const weekdayFormatter = new Intl.DateTimeFormat(locale, {weekday: 'long'});
-  const weekdayName = weekdayFormatter.format(date).toLowerCase();
-
-  // 3. Extract the lowercase long month name
-  const monthFormatter = new Intl.DateTimeFormat(locale, {month: 'long'});
-  const monthName = monthFormatter.format(date).toLowerCase();
-
-  // 4. Force the precise order: [Weekday] [Day] [Month]
-  return `${weekdayName} ${day} ${monthName}`;
-}
-
-
-interface DayPointForecast {
-  'time': string;
-  'air-temperature'?: number;
-  'wind-direction'?: number;
-  'wind-speed'?: number;
-  'precipitation-probability'?: number;
-  'precipitation-sum'?: number;
-  'qualitative-forecast'?: number;
-}
-
-/**
- */
-function _getPointProperties(point: WeatherForecast) {
-  const _uniqueDayPoints: string[] = [];
-
-  function __collectTime(type: WeatherForecastMeasurementType) {
-    for (const m of point.sdatatypes[type]?.tmeasurements) {
-      if (m.mperiod === 86400) {
-        // skip daily points
-        continue;
-      }
-      if (!_uniqueDayPoints.includes(m.mvalidtime)) {
-        _uniqueDayPoints.push(m.mvalidtime);
-      }
-    }
-  }
-
-  __collectTime('forecast-air-temperature');
-  __collectTime('forecast-wind-direction');
-  __collectTime('forecast-wind-speed');
-  __collectTime('forecast-precipitation-probability');
-  __collectTime('forecast-precipitation-sum');
-  __collectTime('qualitative-forecast');
-
-  // sort by time
-  const _uniqueDayPointsSorted = _uniqueDayPoints.sort((a, b) => a.localeCompare(b));
-
-  function __getPointMeasurement(type: WeatherForecastMeasurementType, dp: string) {
-    return (point.sdatatypes[type]?.tmeasurements || [])?.find(m => m.mvalidtime === dp);
-  }
-
-  const points: DayPointForecast[] = [];
-  for (const dp of _uniqueDayPointsSorted) {
-    const pointData: DayPointForecast = {
-      'time': dp,
-      'air-temperature': __getPointMeasurement('forecast-air-temperature', dp)?.mvalue,
-      'wind-direction': __getPointMeasurement('forecast-wind-direction', dp)?.mvalue,
-      'wind-speed': __getPointMeasurement('forecast-wind-speed', dp)?.mvalue,
-      'precipitation-probability': __getPointMeasurement('forecast-precipitation-probability', dp)?.mvalue,
-      'precipitation-sum': __getPointMeasurement('forecast-precipitation-sum', dp)?.mvalue,
-      'qualitative-forecast': __getPointMeasurement('qualitative-forecast', dp)?.mvalue,
-    };
-    points.push(pointData);
-  }
-  return points;
-}
-
-
-/**
- */
-function __getDailyMeasurement<T>(measurements: Measurement<T>[]) {
-
-  const measurementDaily = measurements
-    .filter(m => m.mperiod === 86400);
-
-  if (measurementDaily.length > 1) {
-    console.warn('Too many daily measurements:', measurements);
-  }
-  return measurementDaily[0];
-}
-
-/**
- * NOTE: this is not a reliable way to calculate sunrise and sundown
- */
-function getClearSkyType(now: Date, sunshineHours: number) {
-  // 1. Establish Solar Noon for Italy based on the season
-  // Summer (CEST) solar noon is around 13.25 (1:15 PM). Winter (CET) is around 12.25 (12:15 PM).
-  // const solarNoon = isSummerTime ? 13.25 : 12.25;
-  const solarNoon = 13.75;
-
-  // 2. Calculate approximate sunrise and sunset using the duration
-  const halfDaylight = sunshineHours / 2;
-  const sunrise = solarNoon - halfDaylight;
-  const sunset = solarNoon + halfDaylight;
-
-  // 3. Get the current local hour in Italy (expressed as a decimal, e.g., 14.5 for 14:30)
-  const currentHour = now.getHours() + (now.getMinutes() / 60);
-
-  // 4. Determine if it is currently day or night
-  if (currentHour >= sunrise && currentHour < sunset) {
-    return 'day';
-  } else {
-    return 'night';
-  }
-}
-
-/**
- *
- */
-function getWindDirectionLabel(degrees: number | null | undefined, intlLabels?: string) {
-  if (degrees === null || degrees === undefined) {
-    return '';
-  }
-  // 1. Normalize the degrees to keep them strictly between 0 and 359
-  const normalizedDegrees = (degrees % 360 + 360) % 360;
-
-  // 2. Define the 8 directions in clockwise order starting from North
-  const directions = intlLabels ? intlLabels.split(',') : ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-
-  // 3. Divide by 45 degrees per segment, and shift by half a segment (22.5°)
-  // so that North centers perfectly around 0° / 360°
-  const index = Math.round(normalizedDegrees / 45) % 8;
-
-  return directions[index];
-}
-
-
-/**
- * examples:
- // overall
- | 'sunny'
- | 'partly cloudy'
- | 'cloudy'
- | 'very cloudy'
-
- // overcast
- | 'overcast'
- | 'overcast with light rain'
- | 'overcast with moderate rain'
- | 'overcast with heavy rain' // never appeared yet
-
- | 'overcast with light snow'
- | 'overcast with moderate snow'
- | 'overcast with heavy snow' // never appeared yet
-
- | 'overcast with rain and snow'
-
- // cloudy
- | 'cloudy with light rain' // never appeared yet
- | 'cloudy with moderate rain'
- | 'cloudy with heavy rain' // never appeared yet
- | 'cloudy with light snow'
- | 'cloudy with moderate snow' // never appeared yet
- | 'cloudy with heavy snow'
-
- | 'cloudy, thunderstorms with moderate showers'
- | 'cloudy with rain and snow'
- */
-function getIconName(description: string, type: 'day' | 'night'): keyof typeof ICON_FONT_ICONS {
-  if (!description) {
-    return '';
-  }
-  const lc = (description + '').toLowerCase();
-
-  if (lc === 'sunny') {
-    return type === 'night' ? 'icon-moon' : 'icon-sunny';
-  }
-  if (lc === 'partly cloudy') {
-    return type === 'night' ? 'icon-cloudy-night' : 'icon-cloudy-day';
-  }
-  if (lc === 'cloudy' || lc === 'very cloudy') {
-    return 'icon-cloudy';
-  }
-  if (lc.includes('rain and snow')) {
-    return 'icon-rain-snow';
-  }
-  if (lc.includes('thunderstorms')) {
-    if (lc.includes('moderate')) {
-      return 'icon-rain-bolt-2';
-    } else {
-      return 'icon-rain-bolt-1';
-    }
-  }
-
-  const isCloudy = lc.includes('cloudy') || lc.includes('overcast');
-  const isSnow = lc.includes('snow');
-  const isRain = lc.includes('rain');
-  let level = 2; // moderate
-  if (lc.includes('light')) {
-    level = 1;
-  }
-  if (lc.includes('heavy')) {
-    level = 3;
-  }
-  if (isCloudy) {
-    if (isRain) {
-      return 'icon-rain-' + level as any;
-    }
-    if (isSnow) {
-      return 'icon-snow-' + level as any;
-    }
-  }
-  return '';
-}
-
-function getIconText(description: string, type: 'day' | 'night'): string {
-  return ICON_FONT_ICONS[getIconName(description, type)];
-}

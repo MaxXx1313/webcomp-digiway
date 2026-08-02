@@ -31,11 +31,13 @@ Icon size can be changed by 'font-size' style
 ### Used by
 
  - [noi-digiway](../../public-components/digiway)
+ - [noi-map-layer-weather-popup](../map-layer-weather-popup)
 
 ### Graph
 ```mermaid
 graph TD;
   noi-digiway --> noi-icon
+  noi-map-layer-weather-popup --> noi-icon
   style noi-icon fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

@@ -87,6 +87,15 @@
         }
       },
       {
+        "key": "view-date",
+        "type": "text",
+        "label": "Initial view date (weather layer only)",
+        "required": false,
+        "options": {
+          "default": ""
+        }
+      },
+      {
         "key": "base-map",
         "type": "select",
         "label": "Initial map base",

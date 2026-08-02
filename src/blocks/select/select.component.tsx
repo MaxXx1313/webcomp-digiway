@@ -25,7 +25,7 @@ export interface SelectOption {
 })
 export class SelectComponent implements StencilComponent {
 
-  @Element() el: HTMLElement;
+  @Element() el!: HTMLElement;
 
   /**
    * button 'disabled' property

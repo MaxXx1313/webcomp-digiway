@@ -7,7 +7,14 @@ import { Map, Subscription } from "maplibre-gl";
 /**
  *
  */
-export function listenLayerReady(map: Map, sourceId: string, cb: () => void): Subscription {
+export function listenLayerReady(
+  map: Map,
+  sourceId: string,
+  cb: () => void,
+  opt?: {
+    continuous?: boolean
+  },
+): Subscription {
   const _loadEvent = map.on('sourcedata', (e) => {
     if (
       e.sourceId === sourceId
@@ -15,7 +22,9 @@ export function listenLayerReady(map: Map, sourceId: string, cb: () => void): Su
       && map.isSourceLoaded(sourceId)
     ) {
       console.log(`🎉 Layer loaded: ${sourceId}`);
-      _loadEvent.unsubscribe();
+      if (!opt?.continuous) {
+        _loadEvent.unsubscribe();
+      }
       cb();
     }
   });

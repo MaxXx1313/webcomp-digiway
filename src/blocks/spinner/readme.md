@@ -23,11 +23,13 @@ Icon size can be changed by 'font-size' style
 ### Used by
 
  - [noi-checkbox](../checkbox)
+ - [noi-map-layer-weather-popup](../map-layer-weather-popup)
 
 ### Graph
 ```mermaid
 graph TD;
   noi-checkbox --> noi-spinner
+  noi-map-layer-weather-popup --> noi-spinner
   style noi-spinner fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

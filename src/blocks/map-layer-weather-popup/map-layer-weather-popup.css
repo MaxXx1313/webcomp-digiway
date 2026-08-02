@@ -1,0 +1,163 @@
+/*
+ * SPDX-FileCopyrightText: 2025 NOI Techpark <digital@noi.bz.it>
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
+.noi-weather-icon {
+  font-family: "noi-digiway-weather-icons";
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  speak: never;
+  user-select: none;
+
+  display: inline-block;
+  margin-top: -2px;
+}
+
+/* POPUP */
+.noi-weather-popup {
+  font-size: initial;
+}
+
+/* HEADER */
+.noi-weather-popup .header {
+  padding: 0 32px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 0.5ch;
+  min-height: 32px;
+  font-weight: bold;
+}
+
+.noi-weather-popup .header-icon {
+  height: 1.5em;
+}
+
+/* SECTION */
+.noi-weather-popup .section {
+  padding: 4px 16px;
+}
+
+.noi-weather-popup .section.section--hero {
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.noi-weather-popup .section.section--background {
+  padding: 8px 16px;
+  background: var(--color-background-shade, #f0f0f0);
+}
+
+/* PANEL */
+.noi-weather-popup .panel {
+  display: flex;
+  align-items: center;
+  gap: 0.5ch;
+
+  padding: 8px 16px;
+  background: var(--color-background-shade, #f0f0f0);
+}
+
+.noi-weather-popup .panel__body {
+  flex: 1;
+  text-align: center;
+}
+
+.noi-weather-popup .panel__btn {
+  --color: var(--color-text);
+  --color-hover: var(--color-primary);
+  --color-bg-hover: var(--color-background);
+}
+
+.noi-weather-popup .panel__btn::part(button-native) {
+  padding: 2px;
+}
+
+/* TABLE */
+.noi-weather-popup .table {
+
+  display: grid;
+  /* Two columns of exactly equal width */
+  grid-template-columns: repeat(2, 1fr);
+  /* Two rows of exactly equal height */
+  grid-template-rows: repeat(2, 1fr);
+
+  /*overflow-x: auto;*/
+  /*white-space: nowrap;*/
+  /*scroll-behavior: smooth;*/
+  /*position: relative;*/
+  /*scrollbar-color: var(--scrollbar-color, initial) var(--scrollbar-bg, initial);*/
+}
+
+.noi-weather-popup .table__cell {
+  padding: 0.25em 0.5em;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2em;
+
+  /* 1. Apply a default right and bottom border to every cell */
+  border-right: 1px solid var(--color-background-shade, #f0f0f0);
+  border-bottom: 1px solid var(--color-background-shade, #f0f0f0);
+}
+
+/* 2. Remove right border for cells in the second column (even items) */
+.noi-weather-popup .table__cell:nth-child(2n) {
+  border-right: none;
+}
+
+/* 3. Remove bottom border for cells in the second row (last two items) */
+.noi-weather-popup .table__cell:nth-child(n+3) {
+  border-bottom: none;
+}
+
+/* Loading */
+.day-content {
+  position: relative;
+}
+
+.day-content.loading .day-content__main {
+  opacity: 0.3;
+}
+
+.day-content__loader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.day-content__loader noi-spinner {
+  transform: scale(4);
+}
+
+/* Various */
+.noi-weather-popup .panel-date {
+  text-transform: capitalize;
+  font-weight: bold;
+}
+
+.noi-weather-popup .value {
+  font-size: 1.2em;
+}
+
+.noi-weather-popup .value-icon {
+  font-size: 2em;
+  line-height: 1em;
+}
+.noi-weather-popup .value-description {
+  text-transform: capitalize;
+  text-align: center;
+  font-size: 0.8em;
+  line-height: 1em;
+}
+

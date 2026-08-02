@@ -8,6 +8,8 @@ import { getLayoutClass, resolveLayoutAuto, ViewLayout } from "../../utils/break
 import { SelectOption } from "../../blocks/select/select.component";
 import { LanguageDataService } from "../../data/language/language-data-service";
 import { getAssetPath } from "../../utils/asset-path";
+import { formatDay } from "../../utils/intl";
+import { WeatherForecastService } from "../../data/noi/weather-forecast-service";
 
 
 interface DataLayerOption extends SelectOption {
@@ -62,6 +64,12 @@ export class NoiDigiwayComponent implements StencilComponent {
   @Prop({mutable: true})
   language = 'en';
 
+  /**
+   * View date for weather data (weather layer only)
+   */
+  @Prop({mutable: true})
+  viewDate: string | undefined;
+
   @State()
   layoutResolved!: ViewLayout;
 
@@ -70,6 +78,9 @@ export class NoiDigiwayComponent implements StencilComponent {
 
   @State()
   isMenuOpened = false;
+
+  @State()
+  viewDateObj!: Date;
 
   private modes: MapSourceOption[] = [
     {value: 'tirol', text: 'map.base.tirol'},
@@ -118,6 +129,8 @@ export class NoiDigiwayComponent implements StencilComponent {
 
   private _isGrayscaleMap = false;
 
+  private now = new Date();
+
   private sizeObserver: ResizeObserver | null = null;
   readonly languageService = LanguageDataService.getInstance();
 
@@ -135,6 +148,30 @@ export class NoiDigiwayComponent implements StencilComponent {
   onLanguageChanged() {
     this.languageService.useLanguage(this.language)
       .then(this._onLanguageChanged.bind(this));
+  }
+
+  @Watch('viewDate')
+  viewDateChanged() {
+    if (!this.viewDate) {
+      this.viewDateObj = new Date();
+      return;
+    }
+    try {
+      this.viewDateObj = new Date(this.viewDate);
+    } catch (e) {
+      console.error(e);
+      this.viewDateObj = new Date();
+    }
+  }
+
+  canChangeViewDate(daysChange: number) {
+    const daysDiff = (this.viewDateObj.getTime() - this.now.getTime()) / (24 * 60 * 60 * 1000);
+    return (daysDiff + daysChange) <= WeatherForecastService.MAX_DAYS_AHEAD;
+  }
+
+  changeViewDate(daysChange: number) {
+    this.viewDateObj = new Date(this.viewDateObj.getTime());
+    this.viewDateObj.setDate(this.viewDateObj.getDate() + daysChange);
   }
 
   _onLanguageChanged() {
@@ -162,6 +199,7 @@ export class NoiDigiwayComponent implements StencilComponent {
 
   connectedCallback() {
     this._layoutChanged();
+    this.viewDateChanged();
     this._baseMapChanged();
     this.onLanguageChanged();
     this._watchSize();
@@ -223,8 +261,10 @@ export class NoiDigiwayComponent implements StencilComponent {
 
   _setLayerLoading(layer: string, isLoading: boolean) {
     if (isLoading) {
-      this.layersLoading.push(layer);
-      this.layersLoading = [...this.layersLoading];
+      if (!this.layersLoading.includes(layer)) {
+        this.layersLoading.push(layer);
+        this.layersLoading = [...this.layersLoading];
+      }
     } else {
       this.layersLoading = this.layersLoading.filter(l => l !== layer);
     }
@@ -334,6 +374,7 @@ export class NoiDigiwayComponent implements StencilComponent {
           {this.layersActive.includes('layer-weather')
             ? <noi-map-layer-weather
               key="layer-weather"
+              viewDate={this.viewDateObj}
               onLayerLoading={(e) => this._setLayerLoading('layer-weather', e.detail)}></noi-map-layer-weather>
             : ''}
 
@@ -509,8 +550,8 @@ export class NoiDigiwayComponent implements StencilComponent {
 
     for (const layer of this.layersActive) {
       switch (layer) {
-        case 'layer-closures':
-          // no legend
+        case 'layer-weather':
+          legendArr.push(this._renderLegend_weatherForecast());
           break;
         case 'layer-exposure':
           legendArr.push(this._renderLegend_riskExposure());
@@ -529,7 +570,7 @@ export class NoiDigiwayComponent implements StencilComponent {
 
   _renderLegend_riskExposure() {
     return (<div class="legend" part="legend">
-      <div class="legend__icon" title={this.languageService.translate('map.risk-exposure')}>
+      <div class="legend__icon" title={this.languageService.translate('map.layer.risk-exposure')}>
         <noi-icon name="context"></noi-icon>
       </div>
       <div class="legend__item risk-level risk-level--low">
@@ -542,6 +583,26 @@ export class NoiDigiwayComponent implements StencilComponent {
         <span>{this.languageService.translate('risk-exposure.veryhigh')}</span></div>
       <div class="legend__item risk-level risk-level--extreme">
         <span>{this.languageService.translate('risk-exposure.extreme')}</span></div>
+    </div>);
+  }
+
+  _renderLegend_weatherForecast() {
+    return (<div class="legend" part="legend">
+      <div class="legend__icon" title={this.languageService.translate('map.layer.weather')}>
+        <noi-icon name="weather-alert"></noi-icon>
+      </div>
+      <noi-button class="legend__btn" title="Previous day" onClick={() => this.changeViewDate(-1)}>
+        <noi-icon name="chevron-left"></noi-icon>
+      </noi-button>
+      <div class="legend__item">
+        <span>{formatDay(this.viewDateObj, this.languageService.currentLanguage)}</span>
+      </div>
+      <noi-button class="legend__btn"
+                  title="Next day"
+                  disabled={!this.canChangeViewDate(1)}
+                  onClick={() => this.changeViewDate(1)}>
+        <noi-icon name="chevron-right"></noi-icon>
+      </noi-button>
     </div>);
   }
 }

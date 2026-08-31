@@ -90,7 +90,7 @@ export namespace Components {
          */
         "layout": ViewLayout;
         /**
-          * View date for weather data
+          * View date for weather data (weather layer only)
          */
         "viewDate": string | undefined;
     }
@@ -584,7 +584,7 @@ declare namespace LocalJSX {
          */
         "layout"?: ViewLayout;
         /**
-          * View date for weather data
+          * View date for weather data (weather layer only)
          */
         "viewDate"?: string | undefined;
     }

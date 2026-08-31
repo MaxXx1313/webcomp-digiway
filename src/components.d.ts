@@ -143,12 +143,6 @@ export namespace Components {
         "popupStructure"?: PopupDefinitionFn;
     }
     /**
-     * (INTERNAL) render map popup
-     */
-    interface NoiMapLayerCyclingRoadsPopup {
-        "setFeature": (feature: MapGeoJSONFeature) => Promise<void>;
-    }
-    /**
      * (INTERNAL) render map layer
      */
     interface NoiMapLayerRiskExposure {
@@ -167,6 +161,13 @@ export namespace Components {
     | 'hiking-trento';
         "titleIcon"?: string;
         "titleText"?: string;
+    }
+    /**
+     * (INTERNAL) render map popup
+     */
+    interface NoiMapLayerRoadsPopup {
+        "setPointId": (roadId: string) => Promise<void>;
+        "setPopupHeader": (headerConfig: HeaderConfig) => Promise<void>;
     }
     /**
      * (INTERNAL) render map layer
@@ -390,15 +391,6 @@ declare global {
         prototype: HTMLNoiMapLayerBaseOdhElement;
         new (): HTMLNoiMapLayerBaseOdhElement;
     };
-    /**
-     * (INTERNAL) render map popup
-     */
-    interface HTMLNoiMapLayerCyclingRoadsPopupElement extends Components.NoiMapLayerCyclingRoadsPopup, HTMLStencilElement {
-    }
-    var HTMLNoiMapLayerCyclingRoadsPopupElement: {
-        prototype: HTMLNoiMapLayerCyclingRoadsPopupElement;
-        new (): HTMLNoiMapLayerCyclingRoadsPopupElement;
-    };
     interface HTMLNoiMapLayerRiskExposureElementEventMap {
         "layerLoading": boolean;
     }
@@ -438,6 +430,15 @@ declare global {
     var HTMLNoiMapLayerRoadsElement: {
         prototype: HTMLNoiMapLayerRoadsElement;
         new (): HTMLNoiMapLayerRoadsElement;
+    };
+    /**
+     * (INTERNAL) render map popup
+     */
+    interface HTMLNoiMapLayerRoadsPopupElement extends Components.NoiMapLayerRoadsPopup, HTMLStencilElement {
+    }
+    var HTMLNoiMapLayerRoadsPopupElement: {
+        prototype: HTMLNoiMapLayerRoadsPopupElement;
+        new (): HTMLNoiMapLayerRoadsPopupElement;
     };
     interface HTMLNoiMapLayerWeatherElementEventMap {
         "layerLoading": boolean;
@@ -510,9 +511,9 @@ declare global {
         "noi-map-base-tirol": HTMLNoiMapBaseTirolElement;
         "noi-map-layer-announcements": HTMLNoiMapLayerAnnouncementsElement;
         "noi-map-layer-base-odh": HTMLNoiMapLayerBaseOdhElement;
-        "noi-map-layer-cycling-roads-popup": HTMLNoiMapLayerCyclingRoadsPopupElement;
         "noi-map-layer-risk-exposure": HTMLNoiMapLayerRiskExposureElement;
         "noi-map-layer-roads": HTMLNoiMapLayerRoadsElement;
+        "noi-map-layer-roads-popup": HTMLNoiMapLayerRoadsPopupElement;
         "noi-map-layer-weather": HTMLNoiMapLayerWeatherElement;
         "noi-map-layer-weather-popup": HTMLNoiMapLayerWeatherPopupElement;
         "noi-select": HTMLNoiSelectElement;
@@ -663,11 +664,6 @@ declare namespace LocalJSX {
         "popupStructure"?: PopupDefinitionFn;
     }
     /**
-     * (INTERNAL) render map popup
-     */
-    interface NoiMapLayerCyclingRoadsPopup {
-    }
-    /**
      * (INTERNAL) render map layer
      */
     interface NoiMapLayerRiskExposure {
@@ -694,6 +690,11 @@ declare namespace LocalJSX {
     | 'hiking-trento';
         "titleIcon"?: string;
         "titleText"?: string;
+    }
+    /**
+     * (INTERNAL) render map popup
+     */
+    interface NoiMapLayerRoadsPopup {
     }
     /**
      * (INTERNAL) render map layer
@@ -799,9 +800,9 @@ declare namespace LocalJSX {
         "noi-map-base-tirol": Omit<NoiMapBaseTirol, keyof NoiMapBaseTirolAttributes> & { [K in keyof NoiMapBaseTirol & keyof NoiMapBaseTirolAttributes]?: NoiMapBaseTirol[K] } & { [K in keyof NoiMapBaseTirol & keyof NoiMapBaseTirolAttributes as `attr:${K}`]?: NoiMapBaseTirolAttributes[K] } & { [K in keyof NoiMapBaseTirol & keyof NoiMapBaseTirolAttributes as `prop:${K}`]?: NoiMapBaseTirol[K] };
         "noi-map-layer-announcements": NoiMapLayerAnnouncements;
         "noi-map-layer-base-odh": NoiMapLayerBaseOdh;
-        "noi-map-layer-cycling-roads-popup": NoiMapLayerCyclingRoadsPopup;
         "noi-map-layer-risk-exposure": NoiMapLayerRiskExposure;
         "noi-map-layer-roads": Omit<NoiMapLayerRoads, keyof NoiMapLayerRoadsAttributes> & { [K in keyof NoiMapLayerRoads & keyof NoiMapLayerRoadsAttributes]?: NoiMapLayerRoads[K] } & { [K in keyof NoiMapLayerRoads & keyof NoiMapLayerRoadsAttributes as `attr:${K}`]?: NoiMapLayerRoadsAttributes[K] } & { [K in keyof NoiMapLayerRoads & keyof NoiMapLayerRoadsAttributes as `prop:${K}`]?: NoiMapLayerRoads[K] } & OneOf<"region", NoiMapLayerRoads["region"], NoiMapLayerRoadsAttributes["region"]>;
+        "noi-map-layer-roads-popup": NoiMapLayerRoadsPopup;
         "noi-map-layer-weather": NoiMapLayerWeather;
         "noi-map-layer-weather-popup": NoiMapLayerWeatherPopup;
         "noi-select": Omit<NoiSelect, keyof NoiSelectAttributes> & { [K in keyof NoiSelect & keyof NoiSelectAttributes]?: NoiSelect[K] } & { [K in keyof NoiSelect & keyof NoiSelectAttributes as `attr:${K}`]?: NoiSelectAttributes[K] } & { [K in keyof NoiSelect & keyof NoiSelectAttributes as `prop:${K}`]?: NoiSelect[K] };
@@ -855,10 +856,6 @@ declare module "@stencil/core" {
              */
             "noi-map-layer-base-odh": LocalJSX.IntrinsicElements["noi-map-layer-base-odh"] & JSXBase.HTMLAttributes<HTMLNoiMapLayerBaseOdhElement>;
             /**
-             * (INTERNAL) render map popup
-             */
-            "noi-map-layer-cycling-roads-popup": LocalJSX.IntrinsicElements["noi-map-layer-cycling-roads-popup"] & JSXBase.HTMLAttributes<HTMLNoiMapLayerCyclingRoadsPopupElement>;
-            /**
              * (INTERNAL) render map layer
              */
             "noi-map-layer-risk-exposure": LocalJSX.IntrinsicElements["noi-map-layer-risk-exposure"] & JSXBase.HTMLAttributes<HTMLNoiMapLayerRiskExposureElement>;
@@ -866,6 +863,10 @@ declare module "@stencil/core" {
              * (INTERNAL) render map layer
              */
             "noi-map-layer-roads": LocalJSX.IntrinsicElements["noi-map-layer-roads"] & JSXBase.HTMLAttributes<HTMLNoiMapLayerRoadsElement>;
+            /**
+             * (INTERNAL) render map popup
+             */
+            "noi-map-layer-roads-popup": LocalJSX.IntrinsicElements["noi-map-layer-roads-popup"] & JSXBase.HTMLAttributes<HTMLNoiMapLayerRoadsPopupElement>;
             /**
              * (INTERNAL) render map layer
              */

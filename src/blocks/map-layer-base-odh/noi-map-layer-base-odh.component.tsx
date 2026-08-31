@@ -13,7 +13,12 @@ import {
   loadIconFont
 } from "../../utils/maplibre";
 import { base64String } from "./icon-font";
-import { createPopupBodyHTML, PopupDefinitionFn } from "../../utils/maplibre-popup";
+import {
+  debugPopupStructure,
+  popupBuilder,
+  PopupDefinitionFn,
+  PopupDefinitionObject
+} from "../../utils/maplibre-popup";
 
 const HOST = 'https://geo.api.opendatahub.testingmachine.eu';
 
@@ -458,18 +463,49 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     }
   }
 
-  createFeaturePopup(feature: MapGeoJSONFeature, lngLat: MapMouseEvent['lngLat']) {
+  async createFeaturePopup(feature: MapGeoJSONFeature, lngLat: MapMouseEvent['lngLat']) {
     const featureId = feature.id;
     if (this._popupFeatureId === featureId) {
       return; // same popup is already opened by another event
     }
     this._popupFeatureId = featureId;
-    this._popup = new Popup()
-      .setLngLat(lngLat)
-      .setHTML(createPopupBodyHTML(this.popupStructure, feature, feature.layer.type))
-      .addTo(this.map);
-    this._popup.on('close', () => {
-      this._popupFeatureId = undefined;
-    });
+
+    const fn = this.popupStructure || debugPopupStructure;
+    const structure = await fn(feature, feature.layer.type);
+
+    // 1. Check for string
+    if (typeof structure === 'string') {
+      this._popup = new Popup()
+        .setLngLat(lngLat)
+        .setHTML(structure)
+        .addTo(this.map);
+
+      // 2. Check for HTMLElement
+    } else if (structure instanceof HTMLElement) {
+      // Wait for the browser layout engine to paint the content
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
+      this._popup = new Popup()
+        .setLngLat(lngLat)
+        .setMaxWidth('380px')
+        .setDOMContent(structure)
+        .addTo(this.map);
+
+      // 3. Check for PopupDefinitionObject object
+    } else if (typeof structure === 'object') {
+      this._popup = new Popup()
+        .setLngLat(lngLat)
+        .setHTML(popupBuilder(structure as PopupDefinitionObject))
+        .addTo(this.map);
+    }
+
+
+    if (this._popup) {
+      this._popup.on('close', () => {
+        this._popupFeatureId = undefined;
+      });
+    } else {
+      console.warn('No valid popup defnition');
+    }
   }
 }

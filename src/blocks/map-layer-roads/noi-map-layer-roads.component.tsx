@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { Component, Event, EventEmitter, h, Prop } from "@stencil/core";
+import { Component, Element, Event, EventEmitter, h, Prop } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
 import { LayerConfig } from "../map-layer-base-odh/noi-map-layer-base-odh.component";
 import { MapGeoJSONFeature } from "maplibre-gl";
@@ -45,7 +45,7 @@ export class NoiMapLayerRoadsComponent implements StencilComponent {
   @Prop({mutable: false})
   titleIcon?: string;
 
-  // private languageService = LanguageDataService.getInstance();
+  @Element() el!: HTMLElement;
 
   private config: { [key: string]: LayerConfig } = {
     'tyrol': {
@@ -142,20 +142,27 @@ export class NoiMapLayerRoadsComponent implements StencilComponent {
 
 
   // Feature popup helper
-  createPopup(feature: MapGeoJSONFeature/*, featureType*/): PopupDefinition | string {
+  async createPopup(feature: MapGeoJSONFeature/*, featureType*/): Promise<PopupDefinition> {
 
-    const description = feature.properties.data;
+    if (!feature.id) {
+      console.error('No feature id', feature)
+      throw new Error('No feature id');
+    }
+    // create popup element
+    const popupContent = document.createElement('noi-map-layer-roads-popup');
 
-    return {
-      title: {
-        icon: this.titleIcon,
-        text: this.titleText,
-      },
-      body: [
-        {type: 'name', text: description},
-      ],
-    };
+    // CRUCIAL: add to dom, so Stencil can initialize it
+    this.el.appendChild(popupContent);
 
+    // Wait for component hydration & data load
+    // await popupContent.componentOnReady(); // < this breaks bundle, all the component already registered
+    await popupContent.setPopupHeader({
+      icon: this.titleIcon,
+      text: this.titleText,
+    });
+    await popupContent.setPointId(feature.id as string);
+
+    return popupContent;
   }
 
 }

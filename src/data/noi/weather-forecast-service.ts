@@ -4,6 +4,7 @@
 
 import { WeatherForecast } from "./WeatherForecase";
 import { buildUrl } from "../../utils/url";
+import { AbortHandler } from "./fetch.util";
 
 
 interface WeatherForecastResponse {
@@ -22,10 +23,6 @@ export interface MyForecastResponse {
   dateFrom: Date;
   dateTo: Date;
   values: WeatherForecast[];
-}
-
-export interface AbortHandler {
-  abort: () => void;
 }
 
 // origin is used to track usage and traffic patterns

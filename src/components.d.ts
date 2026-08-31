@@ -166,6 +166,7 @@ export namespace Components {
      * (INTERNAL) render map popup
      */
     interface NoiMapLayerRoadsPopup {
+        "setName": (geoName: string) => Promise<void>;
         "setPointId": (roadId: string) => Promise<void>;
         "setPopupHeader": (headerConfig: HeaderConfig) => Promise<void>;
     }

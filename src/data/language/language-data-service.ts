@@ -11,28 +11,38 @@ export class LanguageDataService {
   private static instance: LanguageDataService;
 
   readonly onLanguageChange = new MicroSubject<string>();
-  public currentLanguage: string;
+  public currentLanguage?: string;
 
   private languageData: { [lang: string]: { [token: string]: string } } = {};
   private browserLanguage: string;
-  private _languageLoading$: { [lang: string]: Promise<any> } = {};
+  private _languageLoading$: { [lang: string]: Promise<any> | undefined } = {};
 
   /**
    * @private
    */
   constructor() {
     this.browserLanguage = this.detectBrowserLanguage() || DEFAULT_LANGUAGE;
+    console.log('[LanguageDataService] initialized', this);
   }
 
   static getInstance() {
-    if ( !LanguageDataService.instance) {
+    if (!LanguageDataService.instance) {
       LanguageDataService.instance = new LanguageDataService();
     }
     return LanguageDataService.instance;
   }
 
   translate(token: string) {
-    return this.languageData[this.currentLanguage]?.[token] || this.languageData[DEFAULT_LANGUAGE]?.[token] || token;
+    return this.languageData[this.currentLanguage as any]?.[token] || this.languageData[DEFAULT_LANGUAGE]?.[token] || token;
+  }
+
+  translateObject<T>(tObject?: { [lang: string]: T }) {
+    if (!tObject) {
+      return null;
+    }
+    return tObject[this.currentLanguage as any]
+      || tObject[DEFAULT_LANGUAGE]
+      || tObject[Object.keys(tObject)[0]];
   }
 
   useLanguage(lang: string) {
@@ -42,7 +52,7 @@ export class LanguageDataService {
       return Promise.resolve();
     }
 
-    if ( !langNormalized || langNormalized === 'auto') {
+    if (!langNormalized || langNormalized === 'auto') {
       langNormalized = this.browserLanguage;
     }
 
@@ -73,12 +83,12 @@ export class LanguageDataService {
   }
 
 
-  detectBrowserLanguage(): string {
+  detectBrowserLanguage(): string | null {
     return navigator.language ? navigator.language.split('-')[0] : null;
   }
 
   _fetchLanguageData(lang: string) {
-    if ( !this.languageData[lang]) {
+    if (!this.languageData[lang]) {
       const dataPath = getAssetPath('i18n_' + lang + '.json');
       // console.log('[LanguageDataService] dataPath', dataPath);
       return fetch(dataPath)

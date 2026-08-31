@@ -7,6 +7,7 @@ import { StencilComponent } from "../../utils/StencilComponent";
 import { AbortHandler } from "../../data/noi/fetch.util";
 import { RouteDetailsService } from "../../data/noi/route-details-service";
 import { RouteDetails } from "../../data/noi/route-details";
+import { LanguageDataService } from "../../data/language/language-data-service";
 
 interface HeaderConfig {
   icon: string;
@@ -23,6 +24,8 @@ interface HeaderConfig {
 })
 export class MapLayerRoadsPopupComponent implements StencilComponent {
 
+  private languageService = LanguageDataService.getInstance();
+
   @State()
   private isLoading = false;
 
@@ -31,6 +34,9 @@ export class MapLayerRoadsPopupComponent implements StencilComponent {
 
   @State()
   private headerConfig?: HeaderConfig;
+
+  @State()
+  private geoName?: string;
 
   private routeId?: string;
   private detailsService = new RouteDetailsService();
@@ -47,6 +53,11 @@ export class MapLayerRoadsPopupComponent implements StencilComponent {
     this.headerConfig = headerConfig
   }
 
+  @Method()
+  async setName(geoName: string) {
+    this.geoName = geoName
+  }
+
 
   private __request?: AbortHandler;
 
@@ -56,7 +67,7 @@ export class MapLayerRoadsPopupComponent implements StencilComponent {
     }
     this.isLoading = true;
     this.__request?.abort();
-    this.__request = this.detailsService.getDetails(this.routeId, (routeDetails) => {
+    this.__request = this.detailsService.getDetails(this.routeId, (_, routeDetails) => {
       this.__request = undefined; // avoid cancelling finished request later
       this.routeDetails = routeDetails;
       this.isLoading = false;
@@ -64,15 +75,35 @@ export class MapLayerRoadsPopupComponent implements StencilComponent {
   }
 
   render() {
+    const details = this.languageService.translateObject(this.routeDetails?.Detail);
+    const description = details?.BaseText;
+
     return (
       <div class="noi-map-popup" part="popup">
         <div class="popup__header">
           <noi-icon class="popup__header-icon" name={this.headerConfig?.icon}></noi-icon>
-          <div>{this.headerConfig?.text} </div>
+          <div>{this.headerConfig?.text} {this.isLoading}</div>
         </div>
-        <div class="popup__description">
-          hello world
-        </div>
+
+        {this.geoName ? (
+          <div class="popup__name">{this.geoName}</div>
+        ) : ''}
+
+        {this.isLoading ? (
+          <div class="popup__loading">
+            <noi-spinner></noi-spinner>
+          </div>
+        ) : (
+          !description
+            ? (<div class="popup__description">
+              {this.languageService.translate('map.layer.util.no-details')}
+            </div>)
+            : (<div>
+              {/*<div class="popup__name">{details?.Title}</div>*/}
+              <div class="popup__description">{description}</div>
+            </div>)
+        )}
+
       </div>
     );
 

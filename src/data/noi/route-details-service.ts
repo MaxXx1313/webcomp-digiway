@@ -14,7 +14,7 @@ export class RouteDetailsService {
 
   /**
    */
-  getDetails(pointId: string, cb: (data: RouteDetails) => void): AbortHandler {
+  getDetails(pointId: string, cb: (err: Error | null, data?: RouteDetails) => void): AbortHandler {
 
     const controller = new AbortController();
     const signal = controller.signal;
@@ -26,7 +26,11 @@ export class RouteDetailsService {
     }), {signal})
       .then(response => response.json() as Promise<RouteDetails>)
       .then(data => {
-        cb(data);
+        cb(null, data);
+      })
+      .catch(err => {
+        console.error(err);
+        cb(err);
       });
 
     return controller;

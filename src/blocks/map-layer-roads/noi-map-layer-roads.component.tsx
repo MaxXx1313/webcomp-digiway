@@ -148,18 +148,19 @@ export class NoiMapLayerRoadsComponent implements StencilComponent {
       console.error('No feature id', feature)
       throw new Error('No feature id');
     }
+    const geoName = feature.properties.data;
+
     // create popup element
     const popupContent = document.createElement('noi-map-layer-roads-popup');
 
     // CRUCIAL: add to dom, so Stencil can initialize it
     this.el.appendChild(popupContent);
 
-    // Wait for component hydration & data load
-    // await popupContent.componentOnReady(); // < this breaks bundle, all the component already registered
     await popupContent.setPopupHeader({
       icon: this.titleIcon,
       text: this.titleText,
     });
+    await popupContent.setName(geoName);
     await popupContent.setPointId(feature.id as string);
 
     return popupContent;

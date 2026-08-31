@@ -4,5 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-
-
+.popup__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

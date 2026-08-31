@@ -34,7 +34,7 @@ SPDX-License-Identifier: CC0-1.0
 ### Used by
 
  - [noi-map-layer-announcements](../map-layer-announcements)
- - [noi-map-layer-cycling-roads](../map-layer-cycling-roads)
+ - [noi-map-layer-cycling-roads](../map-layer-roads)
 
 ### Graph
 ```mermaid

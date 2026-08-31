@@ -63,7 +63,7 @@ Consolidated web-component to show Open Data Hub data imported within the Digiwa
 - [noi-map-base-tirol](../../blocks/map-base-tyrol)
 - [noi-map-layer-risk-exposure](../../blocks/map-layer-risk-exposure)
 - [noi-map-layer-announcements](../../blocks/map-layer-announcements)
-- [noi-map-layer-cycling-roads](../../blocks/map-layer-cycling-roads)
+- [noi-map-layer-cycling-roads](../../blocks/map-layer-roads)
 - [noi-map-layer-weather](../../blocks/map-layer-weather)
 - [noi-select](../../blocks/select)
 - [noi-checkbox](../../blocks/checkbox)

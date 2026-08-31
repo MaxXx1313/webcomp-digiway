@@ -12,11 +12,11 @@ import { PopupDefinition } from "../../utils/maplibre-popup";
  * (INTERNAL) render map layer
  */
 @Component({
-  tag: 'noi-map-layer-cycling-roads',
-  styleUrl: 'noi-map-layer-cycling-roads.css',
+  tag: 'noi-map-layer-roads',
+  styleUrl: 'noi-map-layer-roads.css',
   shadow: false,
 })
-export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
+export class NoiMapLayerRoadsComponent implements StencilComponent {
 
   /**
    * Emitted when layer data is loading

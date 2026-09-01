@@ -33,7 +33,8 @@ export class NoiMapLayerRoadsComponent implements StencilComponent {
     | 'mountain-bike-bolzano'
     | 'mountain-bike-trento'
     | 'hiking-bolzano'
-    | 'hiking-trento';
+    | 'hiking-trento'
+    | 'hiking-e5';
 
 
   /**
@@ -127,6 +128,16 @@ export class NoiMapLayerRoadsComponent implements StencilComponent {
       sourceLayer: "spatialdata",
       additional: '?source=siat.provincia.tn.it&tagfilter=sentieri_della_sat&operationmode=pointsandtracks&displaytracksonzoomlevel=10',
       center: [11.0900, 46.2300],
+      zoom: 10
+    },
+    'hiking-e5': {
+      markerIcon: 'trekking',
+      isLineInteractive: true,
+
+      sourceLayer: "spatialdata",
+      additional: '?source=dservices3.arcgis.com&tagfilter=hikingtrail_e5&operationmode=pointsandtracks&displaytracksonzoomlevel=8',
+      // center: [11.06, 47.27], // original
+      center: [10.7114, 47.1026], // custom
       zoom: 10
     },
   }

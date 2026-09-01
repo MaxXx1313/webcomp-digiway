@@ -113,6 +113,7 @@ export class NoiDigiwayComponent implements StencilComponent {
   private hikingDataLayers: DataLayerOption[] = [
     {value: 'layer-hiking-bolzano', text: 'map.layer.hiking-bolzano', forceGrayscale: false},
     {value: 'layer-hiking-trento', text: 'map.layer.hiking-trento', forceGrayscale: false},
+    {value: 'layer-hiking-e5', text: 'map.layer.hiking-e5', forceGrayscale: false},
   ];
 
 
@@ -381,6 +382,14 @@ export class NoiDigiwayComponent implements StencilComponent {
               onLayerLoading={(e) => this._setLayerLoading('layer-hiking-trento', e.detail)}></noi-map-layer-roads>
             : ''}
 
+          {this.layersActive.includes('layer-hiking-e5')
+            ? <noi-map-layer-roads
+              key="layer-hiking-e5"
+              region="hiking-e5"
+              titleIcon="trekking"
+              titleText={this.languageService.translate('map.layer.hiking')}
+              onLayerLoading={(e) => this._setLayerLoading('layer-hiking-e5', e.detail)}></noi-map-layer-roads>
+            : ''}
 
           {this.layersActive.includes('layer-weather')
             ? <noi-map-layer-weather

@@ -162,7 +162,8 @@ export namespace Components {
     | 'mountain-bike-bolzano'
     | 'mountain-bike-trento'
     | 'hiking-bolzano'
-    | 'hiking-trento';
+    | 'hiking-trento'
+    | 'hiking-e5';
         "titleIcon"?: string;
         "titleText"?: string;
     }
@@ -692,7 +693,8 @@ declare namespace LocalJSX {
     | 'mountain-bike-bolzano'
     | 'mountain-bike-trento'
     | 'hiking-bolzano'
-    | 'hiking-trento';
+    | 'hiking-trento'
+    | 'hiking-e5';
         "titleIcon"?: string;
         "titleText"?: string;
     }
@@ -785,7 +787,8 @@ declare namespace LocalJSX {
     | 'mountain-bike-bolzano'
     | 'mountain-bike-trento'
     | 'hiking-bolzano'
-    | 'hiking-trento';
+    | 'hiking-trento'
+    | 'hiking-e5';
         "titleText": string;
         "titleIcon": string;
     }

@@ -16,10 +16,10 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Properties
 
-| Property              | Attribute | Description | Type                                                                             | Default     |
-| --------------------- | --------- | ----------- | -------------------------------------------------------------------------------- | ----------- |
-| `config` _(required)_ | --        |             | `LayerConfig`                                                                    | `undefined` |
-| `popupStructure`      | --        |             | `(feature: MapGeoJSONFeature, featureType: string) => string \| PopupDefinition` | `undefined` |
+| Property              | Attribute | Description | Type                                                                            | Default     |
+| --------------------- | --------- | ----------- | ------------------------------------------------------------------------------- | ----------- |
+| `config` _(required)_ | --        |             | `LayerConfig`                                                                   | `undefined` |
+| `popupStructure`      | --        |             | `(feature: MapGeoJSONFeature, featureType: string) => Promise<PopupDefinition>` | `undefined` |
 
 
 ## Events
@@ -34,13 +34,13 @@ SPDX-License-Identifier: CC0-1.0
 ### Used by
 
  - [noi-map-layer-announcements](../map-layer-announcements)
- - [noi-map-layer-cycling-roads](../map-layer-roads)
+ - [noi-map-layer-roads](../map-layer-roads)
 
 ### Graph
 ```mermaid
 graph TD;
   noi-map-layer-announcements --> noi-map-layer-base-odh
-  noi-map-layer-cycling-roads --> noi-map-layer-base-odh
+  noi-map-layer-roads --> noi-map-layer-base-odh
   style noi-map-layer-base-odh fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

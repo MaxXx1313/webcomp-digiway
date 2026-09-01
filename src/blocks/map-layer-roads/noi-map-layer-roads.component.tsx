@@ -34,7 +34,8 @@ export class NoiMapLayerRoadsComponent implements StencilComponent {
     | 'mountain-bike-trento'
     | 'hiking-bolzano'
     | 'hiking-trento'
-    | 'hiking-e5';
+    | 'hiking-e5'
+    | 'hiking-accessible';
 
 
   /**
@@ -138,6 +139,16 @@ export class NoiMapLayerRoadsComponent implements StencilComponent {
       additional: '?source=dservices3.arcgis.com&tagfilter=hikingtrail_e5&operationmode=pointsandtracks&displaytracksonzoomlevel=8',
       // center: [11.06, 47.27], // original
       center: [10.7114, 47.1026], // custom
+      zoom: 10
+    },
+    'hiking-accessible': {
+      markerIcon: 'trekking',
+      isLineInteractive: true,
+
+      sourceLayer: "spatialdata",
+      additional: '?source=dservices3.arcgis.com&tagfilter=accessibletrails_austria&operationmode=pointsandtracks&displaytracksonzoomlevel=8',
+      // center: [11.06, 47.27], // original
+      center: [10.6463, 47.4750], // custom
       zoom: 10
     },
   }

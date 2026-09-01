@@ -18,6 +18,7 @@ import {
 import { formatNumber, formatTime } from "../../utils/intl";
 import { WeatherForecastService } from "../../data/noi/weather-forecast-service";
 import { AbortHandler } from "../../data/noi/fetch.util";
+import { diffInDays } from "../../utils/date";
 
 
 /**
@@ -82,8 +83,10 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
 
   canChangeViewDay(daysChange: number) {
     const viewDate = new Date(this.dayIso || Date.now());
-    const daysDiff = (viewDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000);
-    return (daysDiff + daysChange) <= WeatherForecastService.MAX_DAYS_AHEAD;
+    const daysDiff = diffInDays(viewDate, new Date());
+    const daysShift = (daysDiff + daysChange);
+    return (daysShift >= WeatherForecastService.MIN_DAYS_BEHIND)
+      && (daysShift <= WeatherForecastService.MAX_DAYS_AHEAD);
   }
 
   changeViewDay(increment: number) {
@@ -125,7 +128,7 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
 
     // helpers, to make template more clear
     const t = this.languageService.translate.bind(this.languageService);
-    const num = (_num: | number | undefined) => formatNumber(_num, this.languageService.currentLanguage);
+    const num = (_num: | number | undefined) => formatNumber(_num, this.languageService.currentLanguage!);
 
     // const iconName = this.feature.properties['icon_name'];
     // const pointDescription = _getDailyMeasurement(data.sdatatypes["qualitative-forecast"]?.tmeasurements || [])?.mvalue;
@@ -197,7 +200,7 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
 
     // helpers, to make template more clear
     const t = this.languageService.translate.bind(this.languageService);
-    const num = (_num: | number | undefined) => formatNumber(_num, this.languageService.currentLanguage);
+    const num = (_num: | number | undefined) => formatNumber(_num, this.languageService.currentLanguage!);
 
     const skyType = getClearSkyType(new Date(dp.time), sunshineDuration);
 
@@ -211,7 +214,7 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
           <noi-icon name="chevron-left"></noi-icon>
         </noi-button>
         <div class="panel__body">
-          <span>{formatTime(dp.time, this.languageService.currentLanguage)}</span>
+          <span>{formatTime(dp.time, this.languageService.currentLanguage!)}</span>
         </div>
         <noi-button class="panel__btn"
                     title="Next entry"

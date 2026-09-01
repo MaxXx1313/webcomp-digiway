@@ -159,8 +159,8 @@ export namespace Components {
     | 'tyrol-north'
     | 'bolzano-int'
     | 'trento'
-    | 'mountainbikeroutes'
-    | 'mtb_percorsi_v'
+    | 'mountain-bike-bolzano'
+    | 'mountain-bike-trento'
     | 'hiking-bolzano'
     | 'hiking-trento';
         "titleIcon"?: string;
@@ -689,8 +689,8 @@ declare namespace LocalJSX {
     | 'tyrol-north'
     | 'bolzano-int'
     | 'trento'
-    | 'mountainbikeroutes'
-    | 'mtb_percorsi_v'
+    | 'mountain-bike-bolzano'
+    | 'mountain-bike-trento'
     | 'hiking-bolzano'
     | 'hiking-trento';
         "titleIcon"?: string;
@@ -782,8 +782,8 @@ declare namespace LocalJSX {
     | 'tyrol-north'
     | 'bolzano-int'
     | 'trento'
-    | 'mountainbikeroutes'
-    | 'mtb_percorsi_v'
+    | 'mountain-bike-bolzano'
+    | 'mountain-bike-trento'
     | 'hiking-bolzano'
     | 'hiking-trento';
         "titleText": string;

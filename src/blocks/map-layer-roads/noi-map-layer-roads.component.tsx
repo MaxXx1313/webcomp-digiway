@@ -30,8 +30,8 @@ export class NoiMapLayerRoadsComponent implements StencilComponent {
     | 'tyrol-north'
     | 'bolzano-int'
     | 'trento'
-    | 'mountainbikeroutes'
-    | 'mtb_percorsi_v'
+    | 'mountain-bike-bolzano'
+    | 'mountain-bike-trento'
     | 'hiking-bolzano'
     | 'hiking-trento';
 
@@ -88,8 +88,9 @@ export class NoiMapLayerRoadsComponent implements StencilComponent {
     },
 
 
-    'mountainbikeroutes': {
-      markerIcon: 'mountain-trails',
+    'mountain-bike-bolzano': {
+      // markerIcon: 'mountain-trails',
+      markerIcon: 'bicycle',
       isLineInteractive: true,
 
       sourceLayer: "spatialdata",
@@ -97,8 +98,9 @@ export class NoiMapLayerRoadsComponent implements StencilComponent {
       center: [11.35, 46.5],
       zoom: 10
     },
-    'mtb_percorsi_v': {
-      markerIcon: 'mountain-trails',
+    'mountain-bike-trento': {
+      // markerIcon: 'mountain-trails',
+      markerIcon: 'bicycle',
       isLineInteractive: true,
 
       sourceLayer: "spatialdata",

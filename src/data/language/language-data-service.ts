@@ -59,7 +59,7 @@ export class LanguageDataService {
 
     // prevent multiple requests
     if (this._languageLoading$[langNormalized]) {
-      return this._languageLoading$[langNormalized];
+      return this._languageLoading$[langNormalized]!;
     }
 
     // load language data
@@ -79,7 +79,7 @@ export class LanguageDataService {
         delete this._languageLoading$[langNormalized];
       });
 
-    return this._languageLoading$[langNormalized];
+    return this._languageLoading$[langNormalized]!;
   }
 
 

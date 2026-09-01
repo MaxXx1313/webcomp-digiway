@@ -595,7 +595,7 @@ export class NoiDigiwayComponent implements StencilComponent {
         <noi-icon name="chevron-left"></noi-icon>
       </noi-button>
       <div class="legend__item">
-        <span>{formatDay(this.viewDateObj, this.languageService.currentLanguage)}</span>
+        <span>{formatDay(this.viewDateObj, this.languageService.currentLanguage!)}</span>
       </div>
       <noi-button class="legend__btn"
                   title="Next day"

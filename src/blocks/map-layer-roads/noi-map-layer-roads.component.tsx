@@ -27,7 +27,7 @@ export class NoiMapLayerRoadsComponent implements StencilComponent {
    */
   @Prop({mutable: false})
   region!: 'tyrol'
-    | 'bolzano-prov'
+    | 'tyrol-north'
     | 'bolzano-int'
     | 'trento'
     | 'mountainbikeroutes'
@@ -57,13 +57,15 @@ export class NoiMapLayerRoadsComponent implements StencilComponent {
       center: [11.06, 47.27],
       zoom: 10
     },
-    'bolzano-prov': {
+    'tyrol-north': {
       markerIcon: 'bicycle',
       isLineInteractive: true,
 
       sourceLayer: "spatialdata",
-      additional: '?source=civis.geoserver&tagfilter=cyclewaystyrol&operationmode=pointsandtracks&displaytracksonzoomlevel=10',
-      center: [10.98, 46.88],
+      additional: '?source=dservices3.arcgis.com&tagfilter=radrouten_tirol&operationmode=pointsandtracks&displaytracksonzoomlevel=10',
+      // additional: '?source=civis.geoserver&tagfilter=cyclewaystyrol&operationmode=pointsandtracks&displaytracksonzoomlevel=10',
+      // center: [10.98, 46.88],
+      center: [11.06, 47.27],
       zoom: 10
     },
     'bolzano-int': {

@@ -156,7 +156,7 @@ export namespace Components {
      */
     interface NoiMapLayerRoads {
         "region": 'tyrol'
-    | 'bolzano-prov'
+    | 'tyrol-north'
     | 'bolzano-int'
     | 'trento'
     | 'mountainbikeroutes'
@@ -686,7 +686,7 @@ declare namespace LocalJSX {
          */
         "onLayerLoading"?: (event: NoiMapLayerRoadsCustomEvent<boolean>) => void;
         "region": 'tyrol'
-    | 'bolzano-prov'
+    | 'tyrol-north'
     | 'bolzano-int'
     | 'trento'
     | 'mountainbikeroutes'
@@ -779,7 +779,7 @@ declare namespace LocalJSX {
     }
     interface NoiMapLayerRoadsAttributes {
         "region": 'tyrol'
-    | 'bolzano-prov'
+    | 'tyrol-north'
     | 'bolzano-int'
     | 'trento'
     | 'mountainbikeroutes'

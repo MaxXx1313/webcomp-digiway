@@ -102,7 +102,7 @@ export class NoiDigiwayComponent implements StencilComponent {
 
   private cyclingDataLayers: DataLayerOption[] = [
     // {value: 'layer-cycling-tyrol', text: 'map.layer.cycling-tyrol', forceGrayscale: false},
-    {value: 'layer-cycling-bolzano-prov', text: 'map.layer.cycling-bolzano-prov', forceGrayscale: false},
+    {value: 'layer-cycling-tyrol-north', text: 'map.layer.cycling-tyrol-north', forceGrayscale: false},
     {value: 'layer-cycling-bolzano-int', text: 'map.layer.cycling-bolzano-int', forceGrayscale: false},
     {value: 'layer-cycling-trento', text: 'map.layer.cycling-trento', forceGrayscale: false},
   ];
@@ -307,13 +307,13 @@ export class NoiDigiwayComponent implements StencilComponent {
               onLayerLoading={(e) => this._setLayerLoading('layer-cycling-tyrol', e.detail)}></noi-map-layer-roads>
             : ''}
 
-          {this.layersActive.includes('layer-cycling-bolzano-prov')
+          {this.layersActive.includes('layer-cycling-tyrol-north')
             ? <noi-map-layer-roads
-              key="layer-cycling-bolzano-prov"
-              region="bolzano-prov"
+              key="layer-cycling-tyrol-north"
+              region="tyrol-north"
               titleIcon="bicycle"
               titleText={this.languageService.translate('map.layer.cycling')}
-              onLayerLoading={(e) => this._setLayerLoading('layer-cycling-bolzano-prov', e.detail)}></noi-map-layer-roads>
+              onLayerLoading={(e) => this._setLayerLoading('layer-cycling-tyrol-north', e.detail)}></noi-map-layer-roads>
             : ''}
 
           {this.layersActive.includes('layer-cycling-bolzano-int')

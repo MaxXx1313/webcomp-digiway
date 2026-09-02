@@ -156,11 +156,11 @@ export namespace Components {
      */
     interface NoiMapLayerRoads {
         "region": 'tyrol'
-    | 'bolzano-prov'
+    | 'tyrol-north'
     | 'bolzano-int'
     | 'trento'
-    | 'mountainbikeroutes'
-    | 'mtb_percorsi_v'
+    | 'mountain-bike-bolzano'
+    | 'mountain-bike-trento'
     | 'hiking-bolzano'
     | 'hiking-trento';
         "titleIcon"?: string;
@@ -686,11 +686,11 @@ declare namespace LocalJSX {
          */
         "onLayerLoading"?: (event: NoiMapLayerRoadsCustomEvent<boolean>) => void;
         "region": 'tyrol'
-    | 'bolzano-prov'
+    | 'tyrol-north'
     | 'bolzano-int'
     | 'trento'
-    | 'mountainbikeroutes'
-    | 'mtb_percorsi_v'
+    | 'mountain-bike-bolzano'
+    | 'mountain-bike-trento'
     | 'hiking-bolzano'
     | 'hiking-trento';
         "titleIcon"?: string;
@@ -779,11 +779,11 @@ declare namespace LocalJSX {
     }
     interface NoiMapLayerRoadsAttributes {
         "region": 'tyrol'
-    | 'bolzano-prov'
+    | 'tyrol-north'
     | 'bolzano-int'
     | 'trento'
-    | 'mountainbikeroutes'
-    | 'mtb_percorsi_v'
+    | 'mountain-bike-bolzano'
+    | 'mountain-bike-trento'
     | 'hiking-bolzano'
     | 'hiking-trento';
         "titleText": string;

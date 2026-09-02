@@ -33,7 +33,9 @@ export class NoiMapLayerRoadsComponent implements StencilComponent {
     | 'mountain-bike-bolzano'
     | 'mountain-bike-trento'
     | 'hiking-bolzano'
-    | 'hiking-trento';
+    | 'hiking-trento'
+    | 'hiking-e5'
+    | 'hiking-accessible';
 
 
   /**
@@ -127,6 +129,42 @@ export class NoiMapLayerRoadsComponent implements StencilComponent {
       sourceLayer: "spatialdata",
       additional: '?source=siat.provincia.tn.it&tagfilter=sentieri_della_sat&operationmode=pointsandtracks&displaytracksonzoomlevel=10',
       center: [11.0900, 46.2300],
+      zoom: 10
+    },
+    'hiking-e5': {
+      markerIcon: 'trekking',
+      isLineInteractive: true,
+
+      sourceLayer: "spatialdata",
+      additional: '?source=dservices3.arcgis.com&tagfilter=hikingtrail_e5&operationmode=pointsandtracks&displaytracksonzoomlevel=8',
+      // center: [11.06, 47.27], // original
+      center: [10.7114, 47.1026], // custom
+      zoom: 10,
+
+      style: {
+        lines: {
+          "line-color": '#9d4edd',
+          "line-width": 2,
+        },
+        unclusteredpoints: {
+          "circle-color": '#7500cc',
+        },
+        cluster: {
+          'color-2': '#d4b3ff',   // Darker, more noticeable light violet
+          'color-10': '#b366ff',  // Medium vibrant violet
+          'color-50': '#8000ff',  // Deep rich violet
+          'color-200': '#330066', // Very dark/navy violet
+        }
+      }
+    },
+    'hiking-accessible': {
+      markerIcon: 'trekking',
+      isLineInteractive: true,
+
+      sourceLayer: "spatialdata",
+      additional: '?source=dservices3.arcgis.com&tagfilter=accessibletrails_austria&operationmode=pointsandtracks&displaytracksonzoomlevel=8',
+      // center: [11.06, 47.27], // original
+      center: [10.6463, 47.4750], // custom
       zoom: 10
     },
   }

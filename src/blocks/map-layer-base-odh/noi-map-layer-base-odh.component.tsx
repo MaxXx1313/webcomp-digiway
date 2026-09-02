@@ -42,53 +42,85 @@ const ICON_FONT_ICONS = {
 } as const;
 
 // Default styles
-const defaultStyles = {
-  polygons: {
-    'fill-color': [
-      'case', ['boolean', ['feature-state', 'hover'], false],
-      '#0055CC',   // hovered - darker blue
-      '#0080FF'    // normal
-    ],
-    'fill-opacity': [
-      'case', ['boolean', ['feature-state', 'hover'], false],
-      0.7,   // hovered
-      0.4    // normal
-    ],
-    'fill-outline-color': [
-      'case', ['boolean', ['feature-state', 'hover'], false],
-      '#FFFFFF',   // hovered - white outline to pop
-      '#004080'    // normal
-    ]
-  },
-  lines: {
-    'line-color': '#404040',
-    'line-width': [
-      'interpolate', ['linear'], ['zoom'],
-      8, ['case', ['boolean', ['feature-state', 'hover'], false], 5, 1],
-      12, ['case', ['boolean', ['feature-state', 'hover'], false], 5, 2],
-      16, ['case', ['boolean', ['feature-state', 'hover'], false], 5, 4],
-      20, ['case', ['boolean', ['feature-state', 'hover'], false], 5, 6]
-    ],
-    'line-opacity': ['case', ['boolean', ['feature-state', 'hover'], false], 1.0, 0.8]
-  },
-  unclusteredpoints: {
-    'circle-radius': [
-      'interpolate', ['linear'], ['zoom'],
-      0, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 9],
-      10, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 10],
-      14, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 12],
-      18, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 14]
-    ],
-    'circle-color': [
-      'case', ['boolean', ['feature-state', 'hover'], false],
-      '#FF6600',   // hovered
-      '#004D71'    // normal
-    ],
-    'circle-stroke-width': 2,
-    'circle-stroke-color': '#FFFFFF',
-    'circle-opacity': 0.8
-  },
-};
+
+function _getStyles(style: LayerConfig['style']) {
+  const lineColor = style?.lines?.["line-color"];
+  const lineWidth = style?.lines?.["line-width"] ?? 1;
+  const pointColorNormal = style?.unclusteredpoints?.["circle-color"];
+  const pointColorHovered = style?.unclusteredpoints?.["circle-color-hovered"];
+
+  const clusterColors = style?.cluster;
+
+
+  return {
+    polygons: {
+      'fill-color': [
+        'case', ['boolean', ['feature-state', 'hover'], false],
+        '#0055CC',   // hovered - darker blue
+        '#0080FF'    // normal
+      ],
+      'fill-opacity': [
+        'case', ['boolean', ['feature-state', 'hover'], false],
+        0.7,   // hovered
+        0.4    // normal
+      ],
+      'fill-outline-color': [
+        'case', ['boolean', ['feature-state', 'hover'], false],
+        '#FFFFFF',   // hovered - white outline to pop
+        '#004080'    // normal
+      ]
+    },
+    lines: {
+      'line-color': lineColor || '#404040',
+      'line-width': [
+        'interpolate', ['linear'], ['zoom'],
+        8, ['case', ['boolean', ['feature-state', 'hover'], false], 5, lineWidth],
+        12, ['case', ['boolean', ['feature-state', 'hover'], false], 5, lineWidth + 1],
+        16, ['case', ['boolean', ['feature-state', 'hover'], false], 5, lineWidth + 3],
+        20, ['case', ['boolean', ['feature-state', 'hover'], false], 5, lineWidth + 5]
+      ],
+      'line-opacity': ['case', ['boolean', ['feature-state', 'hover'], false], 1.0, 0.8]
+    },
+    unclusteredpoints: {
+      'circle-radius': [
+        'interpolate', ['linear'], ['zoom'],
+        0, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 9],
+        10, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 10],
+        14, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 12],
+        18, ['case', ['boolean', ['feature-state', 'hover'], false], 14, 14]
+      ],
+      'circle-color': [
+        'case', ['boolean', ['feature-state', 'hover'], false],
+        pointColorHovered || '#FF6600',   // hovered
+        pointColorNormal || '#004D71'     // normal
+      ],
+      'circle-stroke-width': 2,
+      'circle-stroke-color': '#FFFFFF',
+      'circle-opacity': 0.8
+    },
+    cluster: {
+      'circle-radius': [
+        'interpolate',
+        ['linear'],
+        ['get', 'count'],
+        2, 12,
+        10, 18,
+        50, 28,
+        200, 40
+      ],
+      'circle-color': [
+        'interpolate',
+        ['linear'],
+        ['get', 'count'],
+        2, clusterColors?.["color-2"] || '#66c2ff',
+        10, clusterColors?.["color-10"] || '#3399ff',
+        50, clusterColors?.["color-50"] || '#0066cc',
+        200, clusterColors?.["color-200"] || '#003366'
+      ],
+      'circle-opacity': 0.85
+    }
+  };
+}
 
 
 // 'iconFontStyles' is not a part of maplibre
@@ -108,6 +140,24 @@ export interface LayerConfig {
   zoom?: number;
 
   requestTransform?: RequestTransformFunction;
+
+  // custom style extension
+  style?: {
+    lines?: {
+      'line-color'?: string;
+      'line-width'?: number;
+    };
+    unclusteredpoints?: {
+      'circle-color'?: string;
+      'circle-color-hovered'?: string;
+    };
+    cluster?: {
+      'color-2'?: string;
+      'color-10'?: string;
+      'color-50'?: string;
+      'color-200'?: string;
+    };
+  };
 }
 
 let _uid_seed = 0;
@@ -256,6 +306,8 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
     });
     this._subscriptions.push(_loadEvent);
 
+    const styles = _getStyles(this.config.style);
+
     // Register your vector tile configuration
     this.map.addSource(this.uid('vector-tiles'), {
       type: 'vector',
@@ -275,7 +327,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
         ['==', ['geometry-type'], 'Polygon'],
         ['==', ['geometry-type'], 'MultiPolygon']
       ],
-      paint: defaultStyles.polygons as any,
+      paint: styles.polygons as any,
     });
 
     this.map.addLayer({
@@ -287,7 +339,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
         ['==', ['geometry-type'], 'LineString'],
         ['==', ['geometry-type'], 'MultiLineString']
       ],
-      paint: defaultStyles.lines as any,
+      paint: styles.lines as any,
       layout: {
         'line-cap': 'round',
         'line-join': 'round'
@@ -304,27 +356,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
         ['==', ['geometry-type'], 'Point'],
         ['==', ['get', 'cluster'], true]
       ],
-      paint: {
-        'circle-radius': [
-          'interpolate',
-          ['linear'],
-          ['get', 'count'],
-          2, 12,
-          10, 18,
-          50, 28,
-          200, 40
-        ],
-        'circle-color': [
-          'interpolate',
-          ['linear'],
-          ['get', 'count'],
-          2, '#66c2ff',
-          10, '#3399ff',
-          50, '#0066cc',
-          200, '#003366'
-        ],
-        'circle-opacity': 0.85
-      }
+      paint: styles.cluster as any,
     });
 
     // CLUSTER COUNT LABEL
@@ -356,7 +388,7 @@ export class NoiMapLayerBaseOdhComponent implements StencilComponent {
         ['==', ['geometry-type'], 'Point'],
         ['!=', ['get', 'cluster'], true]
       ],
-      paint: defaultStyles.unclusteredpoints as any,
+      paint: styles.unclusteredpoints as any,
     });
 
 

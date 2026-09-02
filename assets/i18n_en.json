@@ -16,6 +16,8 @@
   "map.layer.hiking": "Hiking trails",
   "map.layer.hiking-bolzano": "Province of Bolzano",
   "map.layer.hiking-trento": "Province of Trento",
+  "map.layer.hiking-e5": "E5 international",
+  "map.layer.hiking-accessible": "Accessible hiking trails",
   "map.layer.weather": "Weather forecast",
   "route-closures.start-time": "Start Time",
   "route-closures.end-time": "End Time",

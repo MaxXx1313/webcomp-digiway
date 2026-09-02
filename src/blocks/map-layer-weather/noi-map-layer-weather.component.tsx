@@ -121,24 +121,7 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
   @Watch('viewDate')
   viewDateChanged() {
     setTimeout(() => { // timeout is to avoid "The state/prop "layersLoading" changed during rendering"
-      this.initLayerData()
-        .then(() => {
-          const idOpened = this._popupFeatureId;
-          if (!idOpened) {
-            return;
-          }
-          this._popup?.remove();
-
-          // reopen popup of the same point
-          const features = this.map.querySourceFeatures('source-weather-data', {
-            filter: ['==', ['id'], idOpened]
-          });
-
-          const targetFeature = features[0] as MapGeoJSONFeature;
-          if (targetFeature) {
-            this.createFeaturePopup(targetFeature);
-          }
-        });
+      this.initLayerData();
     });
   }
 
@@ -277,7 +260,26 @@ export class NoiMapLayerWeatherComponent implements StencilComponent {
       listenLayerReady(this.map, 'source-weather-data', () => resolve());
     }).then(() => {
       this.layerLoading.emit(false);
+      this._reopenPopup();
     });
+  }
+
+  async _reopenPopup(){
+    const idOpened = this._popupFeatureId;
+    if (!idOpened) {
+      return;
+    }
+    this._popup?.remove();
+
+    // reopen popup of the same point
+    const features = this.map.querySourceFeatures('source-weather-data', {
+      filter: ['==', ['id'], idOpened]
+    });
+
+    const targetFeature = features[0] as MapGeoJSONFeature;
+    if (targetFeature) {
+      this.createFeaturePopup(targetFeature);
+    }
   }
 
   /**

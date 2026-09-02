@@ -31,6 +31,7 @@ const ORIGIN = 'webcomp-brennerlec';
 export class WeatherForecastService {
 
   static MAX_DAYS_AHEAD = 5;
+  static MIN_DAYS_BEHIND = 0;
   private __getWeatherForecastForDay = 0;
   private __getWeatherForecastDayStation = 0;
 

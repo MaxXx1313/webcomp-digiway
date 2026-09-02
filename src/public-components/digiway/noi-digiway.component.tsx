@@ -10,6 +10,7 @@ import { LanguageDataService } from "../../data/language/language-data-service";
 import { getAssetPath } from "../../utils/asset-path";
 import { formatDay } from "../../utils/intl";
 import { WeatherForecastService } from "../../data/noi/weather-forecast-service";
+import { diffInDays } from "../../utils/date";
 
 
 interface DataLayerOption extends SelectOption {
@@ -155,6 +156,17 @@ export class NoiDigiwayComponent implements StencilComponent {
     }
     try {
       this.viewDateObj = new Date(this.viewDate);
+
+      const daysDiff = diffInDays(this.viewDateObj, this.now);
+      if (daysDiff < WeatherForecastService.MIN_DAYS_BEHIND) {
+        console.warn('"viewDate" cannot be referenced to the past');
+        this.viewDateObj = new Date();
+      }
+      if (daysDiff > WeatherForecastService.MAX_DAYS_AHEAD) {
+        console.warn('"viewDate" cannot be referenced to the far future');
+        this.viewDateObj = new Date();
+      }
+
     } catch (e) {
       console.error(e);
       this.viewDateObj = new Date();
@@ -162,8 +174,10 @@ export class NoiDigiwayComponent implements StencilComponent {
   }
 
   canChangeViewDate(daysChange: number) {
-    const daysDiff = (this.viewDateObj.getTime() - this.now.getTime()) / (24 * 60 * 60 * 1000);
-    return (daysDiff + daysChange) <= WeatherForecastService.MAX_DAYS_AHEAD;
+    const daysDiff = diffInDays(this.viewDateObj, this.now);
+    const daysShift = (daysDiff + daysChange);
+    return (daysShift >= WeatherForecastService.MIN_DAYS_BEHIND)
+      && (daysShift <= WeatherForecastService.MAX_DAYS_AHEAD);
   }
 
   changeViewDate(daysChange: number) {
@@ -590,7 +604,10 @@ export class NoiDigiwayComponent implements StencilComponent {
       <div class="legend__icon" title={this.languageService.translate('map.layer.weather')}>
         <noi-icon name="weather-alert"></noi-icon>
       </div>
-      <noi-button class="legend__btn" title="Previous day" onClick={() => this.changeViewDate(-1)}>
+      <noi-button class="legend__btn"
+                  title="Previous day"
+                  disabled={!this.canChangeViewDate(-1)}
+                  onClick={() => this.changeViewDate(-1)}>
         <noi-icon name="chevron-left"></noi-icon>
       </noi-button>
       <div class="legend__item">

@@ -6,9 +6,10 @@
 import { MapGeoJSONFeature } from "maplibre-gl";
 import { sanitizeText } from "./html";
 
-export type PopupDefinitionFn = ((feature: MapGeoJSONFeature, featureType: string) => PopupDefinition | string);
+export type PopupDefinitionFn = ((feature: MapGeoJSONFeature, featureType: string) => Promise<PopupDefinition>);
+export type PopupDefinition = PopupDefinitionObject | string | HTMLElement;
 
-export interface PopupDefinition {
+export interface PopupDefinitionObject {
   title?: {
     icon?: string;
     text?: string;
@@ -26,24 +27,14 @@ export interface PopupDefinition {
 }
 
 
-// Feature popup helper
-export function createPopupBodyHTML(popupStructure: PopupDefinitionFn | null | undefined, feature: MapGeoJSONFeature, featureType: string) {
-  const fn = popupStructure || debugPopupStructure;
-  const structure = fn(feature, featureType);
-  if (typeof structure === 'string') {
-    return structure;
-  } else {
-    return _popupBuilder(structure);
-  }
-}
-
 /**
  */
-function _popupBuilder(def: PopupDefinition): string {
+export function popupBuilder(def: PopupDefinitionObject): string {
 
   let popupContent = '';
-  if (def.title) {
 
+  // header
+  if (def.title) {
     let popupTitleContent = '';
     if (def.title?.icon) {
       popupTitleContent += `<noi-icon class="popup__header-icon" name="${def.title.icon}" alt="icon"></noi-icon>`;
@@ -51,12 +42,11 @@ function _popupBuilder(def: PopupDefinition): string {
     if (def.title?.text) {
       popupTitleContent += `<div>${def.title.text}</div>`;
     }
-
     popupContent += `<div class="popup__header">${popupTitleContent}</div>`;
   }
 
+  // body
   for (const bDef of def.body) {
-
     if (bDef.type === 'name') {
       popupContent += `<div class="popup__name">${bDef.text}</div>`;
     }
@@ -76,11 +66,13 @@ function _popupBuilder(def: PopupDefinition): string {
         </div>`;
     }
   }
+
+  //
   return `<div class="noi-map-popup" part="popup">${popupContent}</div>`;
 }
 
 // Feature popup helper
-function debugPopupStructure(feature: MapGeoJSONFeature, featureType: string) {
+export function debugPopupStructure(feature: MapGeoJSONFeature, featureType: string) {
   const props = feature.properties;
   let html = `<strong>${featureType} Feature</strong><br>`;
   html += `<strong>ID:</strong> ${props.id}<br>`;

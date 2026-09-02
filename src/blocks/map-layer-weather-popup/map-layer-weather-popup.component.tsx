@@ -16,7 +16,8 @@ import {
   getWindDirectionLabel
 } from "../map-layer-weather/weather-forecast.util";
 import { formatNumber, formatTime } from "../../utils/intl";
-import { AbortHandler, WeatherForecastService } from "../../data/noi/weather-forecast-service";
+import { WeatherForecastService } from "../../data/noi/weather-forecast-service";
+import { AbortHandler } from "../../data/noi/fetch.util";
 
 
 /**
@@ -102,7 +103,7 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
     }
 
     this.isLoading = true;
-      this.__request?.abort();
+    this.__request?.abort();
     this.__request = this.weatherService.getWeatherForecastDayStation(new Date(this.dayIso), this.stationId, (forecastData) => {
       this.__request = undefined; // avoid cancelling finished request later
       this.isLoading = false;
@@ -162,7 +163,7 @@ export class MapLayerWeatherPopupComponent implements StencilComponent {
         </div>
 
         <div class={'day-content' + (this.isLoading ? ' loading' : '')}>
-          {this.isLoading? (
+          {this.isLoading ? (
             <div class="day-content__loader">
               <noi-spinner></noi-spinner>
             </div>

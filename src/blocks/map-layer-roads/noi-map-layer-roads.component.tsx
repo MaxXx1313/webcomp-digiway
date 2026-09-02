@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { Component, Event, EventEmitter, h, Prop } from "@stencil/core";
+import { Component, Element, Event, EventEmitter, h, Prop } from "@stencil/core";
 import { StencilComponent } from "../../utils/StencilComponent";
 import { LayerConfig } from "../map-layer-base-odh/noi-map-layer-base-odh.component";
 import { MapGeoJSONFeature } from "maplibre-gl";
@@ -12,11 +12,11 @@ import { PopupDefinition } from "../../utils/maplibre-popup";
  * (INTERNAL) render map layer
  */
 @Component({
-  tag: 'noi-map-layer-cycling-roads',
-  styleUrl: 'noi-map-layer-cycling-roads.css',
+  tag: 'noi-map-layer-roads',
+  styleUrl: 'noi-map-layer-roads.css',
   shadow: false,
 })
-export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
+export class NoiMapLayerRoadsComponent implements StencilComponent {
 
   /**
    * Emitted when layer data is loading
@@ -45,7 +45,7 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
   @Prop({mutable: false})
   titleIcon?: string;
 
-  // private languageService = LanguageDataService.getInstance();
+  @Element() el!: HTMLElement;
 
   private config: { [key: string]: LayerConfig } = {
     'tyrol': {
@@ -142,20 +142,28 @@ export class NoiMapLayerCyclingRoadsComponent implements StencilComponent {
 
 
   // Feature popup helper
-  createPopup(feature: MapGeoJSONFeature/*, featureType*/): PopupDefinition | string {
+  async createPopup(feature: MapGeoJSONFeature/*, featureType*/): Promise<PopupDefinition> {
 
-    const description = feature.properties.data;
+    if (!feature.id) {
+      console.error('No feature id', feature)
+      throw new Error('No feature id');
+    }
+    const geoName = feature.properties.data;
 
-    return {
-      title: {
-        icon: this.titleIcon,
-        text: this.titleText,
-      },
-      body: [
-        {type: 'name', text: description},
-      ],
-    };
+    // create popup element
+    const popupContent = document.createElement('noi-map-layer-roads-popup');
 
+    // CRUCIAL: add to dom, so Stencil can initialize it
+    this.el.appendChild(popupContent);
+
+    await popupContent.setPopupHeader({
+      icon: this.titleIcon,
+      text: this.titleText,
+    });
+    await popupContent.setName(geoName);
+    await popupContent.setPointId(feature.id as string);
+
+    return popupContent;
   }
 
 }

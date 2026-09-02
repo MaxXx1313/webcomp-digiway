@@ -12,10 +12,11 @@ import {
   listenLayerReady,
   loadIconFont
 } from "../../utils/maplibre";
-import { AbortHandler, MyForecastResponse, WeatherForecastService } from "../../data/noi/weather-forecast-service";
+import { MyForecastResponse, WeatherForecastService } from "../../data/noi/weather-forecast-service";
 import { GeoJSON, Point } from "geojson";
 import { WeatherIconFont, WeatherIconName } from "./icon-font";
 import { _getDailyMeasurement, getClearSkyType, getIconName } from "./weather-forecast.util";
+import { AbortHandler } from "../../data/noi/fetch.util";
 
 // Default styles
 const defaultStyles = {

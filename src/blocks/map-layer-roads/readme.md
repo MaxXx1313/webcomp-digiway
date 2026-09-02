@@ -39,13 +39,17 @@ SPDX-License-Identifier: CC0-1.0
 ### Depends on
 
 - [noi-map-layer-base-odh](../map-layer-base-odh)
+- [noi-map-layer-roads-popup](../map-layer-roads-popup)
 
 ### Graph
 ```mermaid
 graph TD;
-  noi-map-layer-cycling-roads --> noi-map-layer-base-odh
-  noi-digiway --> noi-map-layer-cycling-roads
-  style noi-map-layer-cycling-roads fill:#f9f,stroke:#333,stroke-width:4px
+  noi-map-layer-roads --> noi-map-layer-base-odh
+  noi-map-layer-roads --> noi-map-layer-roads-popup
+  noi-map-layer-roads-popup --> noi-icon
+  noi-map-layer-roads-popup --> noi-spinner
+  noi-digiway --> noi-map-layer-roads
+  style noi-map-layer-roads fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
 ----------------------------------------------
